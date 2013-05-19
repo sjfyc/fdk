@@ -16,6 +16,7 @@
     <ClInclude Include="include\fdkwin\FindFile.h" />
   </ItemGroup>
   <ItemGroup>
+    <ClCompile Include="src\Base.cpp" />
     <ClCompile Include="src\Encode.cpp" />
     <ClCompile Include="src\FindFile.cpp" />
   </ItemGroup>
@@ -54,7 +55,7 @@
       <WarningLevel>Level3</WarningLevel>
       <Optimization>Disabled</Optimization>
       <PreprocessorDefinitions>WIN32;_DEBUG;_LIB;%(PreprocessorDefinitions)</PreprocessorDefinitions>
-      <AdditionalIncludeDirectories>include</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>../fdk/include;include</AdditionalIncludeDirectories>
     </ClCompile>
     <Link>
       <SubSystem>Windows</SubSystem>

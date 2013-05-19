@@ -21,8 +21,25 @@ Build/Use StaticLib: Nothing need to be defined
 #endif
 
 #include <afx.h>
+#include <fdk/Base.h>
 
 namespace fdk { namespace win {} }
 namespace fdkwin=fdk::win;
+
+namespace fdk { namespace win
+{
+	/*
+	High precision timing£º 1~100 microsecond
+	*/
+	FDKWIN_API double getSecondsPerCycle();
+	inline double getSeconds()
+	{
+		static double secondsPerCycle = getSecondsPerCycle();
+		LARGE_INTEGER cycles;
+		QueryPerformanceCounter(&cycles);
+		// Add big number to make bugs apparent where return value is being passed to FLOAT
+		return cycles.QuadPart * secondsPerCycle + 16777216.0;
+	}
+}}
 
 #endif
