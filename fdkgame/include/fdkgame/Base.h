@@ -22,7 +22,8 @@ Build/Use StaticLib: Nothing need to be defined
 namespace fdk { namespace game {} }
 namespace fdkgame=fdk::game;
 
-namespace fdk { namespace game {
+namespace fdk { namespace game 
+{
 	template <class T>
 	class Size
 	{
@@ -333,6 +334,6 @@ namespace fdk { namespace game {
 			static_cast<Location::ValueType>(cellCoord.y) * cellSize.cy
 			);
 	}
-} }
+}}
 
 #endif
