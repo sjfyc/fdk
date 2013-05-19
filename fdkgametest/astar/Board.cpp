@@ -3,7 +3,7 @@
 #pragma warning(disable:4244)
 Board::Board()
 {
-	fdk::zeroMemory(m_block);
+	fdk::zeroArray(m_block);
 }
 
 Board::~Board()

@@ -4,7 +4,7 @@
 MyHGE::MyHGE()
 {
 	m_hge = hgeCreate(HGE_VERSION);
-	fdk::zeroMemory(m_bLastKeyDown);
+	fdk::zeroArray(m_bLastKeyDown);
 }
 
 MyHGE::~MyHGE()
