@@ -151,10 +151,16 @@ namespace fdk
 		}
 	};
 
-	template <class T>
-	inline void zeroMemory(T& o)
+	template <class T, int N>
+	inline void zeroArray(T (&o)[N])
 	{
-		memset(&o, 0, sizeof(T));
+		memset(&o, 0, sizeof(o));
+	}
+
+	template <class T>
+	inline void zeroObject(T& o)
+	{
+		memset(&o, 0, sizeof(o));
 	}
 
 	template <class T>
