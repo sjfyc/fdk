@@ -1,0 +1,20 @@
+﻿
+Microsoft Visual Studio Solution File, Format Version 11.00
+# Visual Studio 2010
+Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "fdktest", "fdktest.vcxproj", "{FC9F7F7E-F03C-4F80-BB99-ABCB99075537}"
+EndProject
+Global
+	GlobalSection(SolutionConfigurationPlatforms) = preSolution
+		Debug|Win32 = Debug|Win32
+		Release|Win32 = Release|Win32
+	EndGlobalSection
+	GlobalSection(ProjectConfigurationPlatforms) = postSolution
+		{FC9F7F7E-F03C-4F80-BB99-ABCB99075537}.Debug|Win32.ActiveCfg = Debug|Win32
+		{FC9F7F7E-F03C-4F80-BB99-ABCB99075537}.Debug|Win32.Build.0 = Debug|Win32
+		{FC9F7F7E-F03C-4F80-BB99-ABCB99075537}.Release|Win32.ActiveCfg = Release|Win32
+		{FC9F7F7E-F03C-4F80-BB99-ABCB99075537}.Release|Win32.Build.0 = Release|Win32
+	EndGlobalSection
+	GlobalSection(SolutionProperties) = preSolution
+		HideSolutionNode = FALSE
+	EndGlobalSection
+EndGlobal
