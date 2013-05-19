@@ -6,7 +6,7 @@ namespace fdk { namespace win
 	{
 		LARGE_INTEGER frequency;
 		BOOL result = QueryPerformanceFrequency(&frequency);
-		assert(result);
+		FDK_ASSERT(result);
 		return 1.0 / frequency.QuadPart;
 	}
 }}
