@@ -1,0 +1,26 @@
+<?xml version="1.0"?>
+<xs:schema xmlns:xs="http://www.w3.org/2001/XMLSchema" xmlns:types="__urn_types" targetNamespace="__urn_types">
+	<xs:simpleType name="Null">
+		<xs:restriction base="xs:string">
+			<xs:pattern value="\s*"/>
+		</xs:restriction>
+	</xs:simpleType>
+	<xs:simpleType name="IP">
+		<xs:restriction base="xs:string">
+			<xs:pattern value="((25[0-5]|2[0-4]\d|1\d{2}|[1-9]\d|\d)\.){3}(25[0-5]|2[0-4]\d|1\d{2}|[1-9]\d|\d)"/>
+		</xs:restriction>
+	</xs:simpleType>
+	<xs:simpleType name="Port">
+		<xs:restriction base="xs:unsignedShort"/>
+	</xs:simpleType>
+	<xs:simpleType name="FileName">
+		<xs:restriction base="xs:string">
+			<xs:pattern value="[^/\\:\*\?&quot;&lt;&gt;\|]+"/>
+		</xs:restriction>
+	</xs:simpleType>
+	<xs:simpleType name="FilePath">
+		<xs:restriction base="xs:string">
+			<xs:pattern value="[^:\*\?&quot;&lt;&gt;\|]+"/>
+		</xs:restriction>
+	</xs:simpleType>
+</xs:schema>
