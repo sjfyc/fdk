@@ -3,12 +3,12 @@
 #include <lualib.h>
 #include <stdio.h>
 
-int func_c(lua_State *L);
+int func(lua_State *L);
 
 int main(int argc, char *argv[])
 {
-	lua_State *L;  
-
+	lua_State *L;
+	
 	if ((L = lua_open()) == NULL) 
 	{
 		printf("lua_open() failed!\n");
@@ -16,7 +16,7 @@ int main(int argc, char *argv[])
 	}
 	luaL_openlibs(L);
 
-	lua_register(L, "func_c", func_c);
+	lua_register(L, "func", func);
 
 	if (luaL_dofile(L, "main.lua")) 
 	{
@@ -30,8 +30,17 @@ int main(int argc, char *argv[])
 	return 0;
 }
 
-int func_c(lua_State *L)
+int func(lua_State *L)
 {
-
-	return 2;
+	lua_Debug ar;
+	int i;
+	for (i = 0; i < 3; ++i)
+	{
+		if (lua_getstack(L, i, &ar)) 
+		{
+			lua_getinfo(L, "nSl", &ar);
+			printf("[%d]%s %s:%d\n", i, ar.name, ar.short_src, ar.currentline);
+		}
+	}
+	return 0;
 }
