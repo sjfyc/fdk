@@ -31,6 +31,8 @@ Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "class", "class\class.vcxpro
 EndProject
 Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "coroutinenpc", "coroutinenpc\coroutinenpc.vcxproj", "{B95513EB-1F45-4153-A083-76FCEAD6F4E4}"
 EndProject
+Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "debughook", "debughook\debughook.vcxproj", "{D6E195C4-8695-4595-8A81-FCE1A7BBA65C}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Win32 = Debug|Win32
@@ -97,6 +99,10 @@ Global
 		{B95513EB-1F45-4153-A083-76FCEAD6F4E4}.Debug|Win32.Build.0 = Debug|Win32
 		{B95513EB-1F45-4153-A083-76FCEAD6F4E4}.Release|Win32.ActiveCfg = Release|Win32
 		{B95513EB-1F45-4153-A083-76FCEAD6F4E4}.Release|Win32.Build.0 = Release|Win32
+		{D6E195C4-8695-4595-8A81-FCE1A7BBA65C}.Debug|Win32.ActiveCfg = Debug|Win32
+		{D6E195C4-8695-4595-8A81-FCE1A7BBA65C}.Debug|Win32.Build.0 = Debug|Win32
+		{D6E195C4-8695-4595-8A81-FCE1A7BBA65C}.Release|Win32.ActiveCfg = Release|Win32
+		{D6E195C4-8695-4595-8A81-FCE1A7BBA65C}.Release|Win32.Build.0 = Release|Win32
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
