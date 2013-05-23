@@ -1,0 +1,5 @@
+print("102: say 1")
+waittime(1)
+print("102: say 2")
+waittime(2)
+print("102: say 3")

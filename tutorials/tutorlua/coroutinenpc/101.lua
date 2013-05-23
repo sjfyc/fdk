@@ -1,0 +1,5 @@
+print("101: say 1")
+waitkey()
+print("101: say 2")
+waitkey()
+print("101: say 3")
