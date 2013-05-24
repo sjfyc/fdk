@@ -1,0 +1,32 @@
+﻿
+Microsoft Visual Studio Solution File, Format Version 10.00
+# Visual Studio 2008
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Fdk", "Fdk\Fdk.csproj", "{1C8A9713-9210-495A-9680-4CF0F0519A0E}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Fdk.Collections", "Fdk.Collections\Fdk.Collections.csproj", "{6FFCAF0A-264F-4670-96BD-08861ABD0A0C}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Fdk.Network", "Fdk.Network\Fdk.Network.csproj", "{87C0BF60-CBFC-4043-993D-0B142906DDC4}"
+EndProject
+Global
+	GlobalSection(SolutionConfigurationPlatforms) = preSolution
+		Debug|Any CPU = Debug|Any CPU
+		Release|Any CPU = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(ProjectConfigurationPlatforms) = postSolution
+		{1C8A9713-9210-495A-9680-4CF0F0519A0E}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{1C8A9713-9210-495A-9680-4CF0F0519A0E}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{1C8A9713-9210-495A-9680-4CF0F0519A0E}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{1C8A9713-9210-495A-9680-4CF0F0519A0E}.Release|Any CPU.Build.0 = Release|Any CPU
+		{6FFCAF0A-264F-4670-96BD-08861ABD0A0C}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{6FFCAF0A-264F-4670-96BD-08861ABD0A0C}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{6FFCAF0A-264F-4670-96BD-08861ABD0A0C}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{6FFCAF0A-264F-4670-96BD-08861ABD0A0C}.Release|Any CPU.Build.0 = Release|Any CPU
+		{87C0BF60-CBFC-4043-993D-0B142906DDC4}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{87C0BF60-CBFC-4043-993D-0B142906DDC4}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{87C0BF60-CBFC-4043-993D-0B142906DDC4}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{87C0BF60-CBFC-4043-993D-0B142906DDC4}.Release|Any CPU.Build.0 = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(SolutionProperties) = preSolution
+		HideSolutionNode = FALSE
+	EndGlobalSection
+EndGlobal
