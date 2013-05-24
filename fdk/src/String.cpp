@@ -37,7 +37,7 @@ namespace fdk
 		}
 		const char* begin = s.c_str();
 		const char* end = begin+s.length()-1;
-		while (end > begin && isSpace(*end))
+		while (end >= begin && isSpace(*end))
 		{
 			--end;
 		}

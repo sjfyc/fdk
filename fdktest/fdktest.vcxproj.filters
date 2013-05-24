@@ -3,5 +3,6 @@
   <ItemGroup>
     <ClCompile Include="main.cpp" />
     <ClCompile Include="testMisc.cpp" />
+    <ClCompile Include="testString.cpp" />
   </ItemGroup>
 </Project>

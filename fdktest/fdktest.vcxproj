@@ -13,6 +13,7 @@
   <ItemGroup>
     <ClCompile Include="main.cpp" />
     <ClCompile Include="testMisc.cpp" />
+    <ClCompile Include="testString.cpp" />
   </ItemGroup>
   <PropertyGroup Label="Globals">
     <ProjectGuid>{FC9F7F7E-F03C-4F80-BB99-ABCB99075537}</ProjectGuid>

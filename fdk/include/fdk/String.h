@@ -1,6 +1,7 @@
 #ifndef __FDK_STRING_H_INCLUDE__
 #define __FDK_STRING_H_INCLUDE__
 #include "Base.h"
+#include <sstream>
 
 namespace fdk
 {
