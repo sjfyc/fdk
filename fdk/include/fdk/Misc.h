@@ -6,6 +6,12 @@ namespace fdk
 {
 	FDK_API const char* getFileName(const char* path);
 
+	inline bool isBigEndian()
+	{
+		int n = 1;
+		return *(char*)&n == 0;
+	}
+
 	inline const char* lowerHexOf(byte_t value)
 	{
 		static const char* const hexTable[256] =
@@ -53,6 +59,8 @@ namespace fdk
 		};
 		return hexTable[value];
 	}
+
+	FDK_API std::string toHexString(const void* buffer, size_t size, bool bLower=true);
 }
 
 #endif

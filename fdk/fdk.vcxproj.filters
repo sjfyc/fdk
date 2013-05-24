@@ -24,6 +24,9 @@
     <ClInclude Include="include\fdk\EventHook.h">
       <Filter>include</Filter>
     </ClInclude>
+    <ClInclude Include="include\fdk\String.h">
+      <Filter>include</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="src\Misc.cpp">
@@ -33,6 +36,9 @@
       <Filter>src</Filter>
     </ClCompile>
     <ClCompile Include="src\EventHook.cpp">
+      <Filter>src</Filter>
+    </ClCompile>
+    <ClCompile Include="src\String.cpp">
       <Filter>src</Filter>
     </ClCompile>
   </ItemGroup>
