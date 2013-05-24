@@ -10,7 +10,7 @@ namespace fdk
 	FDK_API size_t replace(std::string& s, const std::string& from, const std::string& to);
 
 	template <class T>
-	bool toType(T& output, const std::string & s)
+	bool toType(T& output, const std::string& s)
 	{
 		std::stringstream ss;
 		ss << s;
@@ -23,7 +23,7 @@ namespace fdk
 	};
 
 	template <class T>
-	inline bool isType(const std::string & s)
+	inline bool isType(const std::string& s)
 	{
 		return toType(T(), s);
 	};
