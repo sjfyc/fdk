@@ -37,8 +37,8 @@ namespace fdk
 		}
 		FDK_ASSERT(m_sizeY > 0 && m_sizeY > 0);
 		for (size_type i = 0; i < m_sizeX*m_sizeY; ++i)
-		{
-			new(&m_data[i]) T();
+		{	
+			rawConstruct(&m_data[i]);
 		}
 	}
 
@@ -55,7 +55,7 @@ namespace fdk
 		FDK_ASSERT(m_sizeY > 0 && m_sizeY > 0);
 		for (size_type i = 0; i < m_sizeX*m_sizeY; ++i)
 		{
-			new(&m_data[i]) T(value);
+			rawConstruct(&m_data[i], value);
 		}
 	}
 
@@ -71,17 +71,14 @@ namespace fdk
 		}
 		for (size_type i = 0; i < m_sizeX*m_sizeY; ++i)
 		{
-			new(&m_data[i]) T(other.m_data[i]);
+			rawConstruct(&m_data[i], other.m_data[i]);
 		}		
 	}
 
 	template <class T>
 	Array2D<T>::~Array2D()
-	{
-		for (size_type i = 0; i < m_sizeX*m_sizeY; ++i)
-		{
-			m_data[i].~T();
-		}
+	{	
+		rawDestroy(m_data, m_data+m_sizeX*m_sizeY);
 		free(m_data);
 	}
 	
