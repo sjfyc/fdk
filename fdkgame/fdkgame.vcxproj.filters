@@ -12,6 +12,9 @@
     <ClInclude Include="include\fdkgame\Base.h">
       <Filter>include</Filter>
     </ClInclude>
+    <ClInclude Include="include\fdkgame\Math.h">
+      <Filter>include</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="src\Base.cpp">
