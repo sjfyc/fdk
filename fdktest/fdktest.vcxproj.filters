@@ -4,5 +4,6 @@
     <ClCompile Include="main.cpp" />
     <ClCompile Include="testMisc.cpp" />
     <ClCompile Include="testString.cpp" />
+    <ClCompile Include="testArray2D.cpp" />
   </ItemGroup>
 </Project>

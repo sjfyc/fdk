@@ -12,6 +12,7 @@
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="main.cpp" />
+    <ClCompile Include="testArray2D.cpp" />
     <ClCompile Include="testMisc.cpp" />
     <ClCompile Include="testString.cpp" />
   </ItemGroup>

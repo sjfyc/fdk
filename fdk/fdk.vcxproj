@@ -73,6 +73,7 @@
     <None Include="ReadMe.txt" />
   </ItemGroup>
   <ItemGroup>
+    <ClInclude Include="include\fdk\Array2D.h" />
     <ClInclude Include="include\fdk\Base.h" />
     <ClInclude Include="include\fdk\EventHook.h" />
     <ClInclude Include="include\fdk\Misc.h" />
