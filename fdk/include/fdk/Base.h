@@ -122,13 +122,6 @@ namespace fdk
 	typedef unsigned long dword_t;
 	typedef unsigned long long qword_t;
 
-	const size_t STATIC_BUFFER_SIZE = 4096;
-	inline char* getStaticBuffer()
-	{
-		static char buffer[STATIC_BUFFER_SIZE+1] = { '\0' };
-		return buffer;
-	}
-
 	class Uncopyable
 	{
 	public:
@@ -151,6 +144,25 @@ namespace fdk
 		}
 	};
 	
+	template <class T>
+	T& constCast(const T& value)
+	{
+		return const_cast<T&>(value);
+	}
+
+	template <class T>
+	T* constCast(const T* value)
+	{
+		return const_cast<T*>(value);
+	}
+
+	const size_t STATIC_BUFFER_SIZE = 4096;
+	inline char* getStaticBuffer()
+	{
+		static char buffer[STATIC_BUFFER_SIZE+1] = { '\0' };
+		return buffer;
+	}
+
 	template <class T, int N>
 	inline void zeroArray(T (&o)[N])
 	{
