@@ -14,9 +14,12 @@ namespace fdk { namespace game
 		Vector2D(const Vector2D& other);
 		Vector2D(T x, T y);
 		void reset(T x, T y);
-		Vector2D operator+(const Vector2D& other) const;
-		Vector2D operator-(const Vector2D& other) const;
+		bool operator==(const Vector2D& other) const;
+		bool operator<(const Vector2D& other) const;
+		FDK_AUTO_COMPARE_MEMBER(Vector2D)
 		Vector2D operator-() const;
+		Vector2D operator+(const Vector2D& other) const;
+		Vector2D operator-(const Vector2D& other) const;		
 		Vector2D& operator+=(const Vector2D& other);
 		Vector2D& operator-=(const Vector2D& other);
 		T x;
@@ -49,6 +52,28 @@ namespace fdk { namespace game
 	}
 	
 	template <class T>
+	inline bool Vector2D<T>::operator==(const Vector2D& other) const
+	{
+		return x == other.x && y == other.y;
+	}
+
+	template <class T>
+	inline bool Vector2D<T>::operator<(const Vector2D& other) const
+	{
+		if (x != other.x)
+		{
+			return x < other.x;
+		}
+		return y < other.y;
+	}
+
+	template <class T>
+	inline Vector2D<T> Vector2D<T>::operator-() const
+	{
+		return Vector2D(-x, -y);
+	}
+
+	template <class T>
 	inline Vector2D<T> Vector2D<T>::operator+(const Vector2D& other) const
 	{
 		return Vector2D(x+other.x, y+other.y);
@@ -59,15 +84,9 @@ namespace fdk { namespace game
 	{
 		return Vector2D(x-other.x, y-other.y);
 	}
-
+	
 	template <class T>
-	inline Vector2D<T> Vector2D<T>::operator-() const
-	{
-		return Vector2D(-x, -y);
-	}
-
-	template <class T>
-	Vector2D<T>& Vector2D<T>::operator+=(const Vector2D& other)
+	inline Vector2D<T>& Vector2D<T>::operator+=(const Vector2D& other)
 	{
 		x += other.x;
 		y += other.y;
@@ -75,7 +94,7 @@ namespace fdk { namespace game
 	}
 	
 	template <class T>
-	Vector2D<T>& Vector2D<T>::operator-=(const Vector2D& other)
+	inline Vector2D<T>& Vector2D<T>::operator-=(const Vector2D& other)
 	{
 		x -= other.x;
 		y -= other.y;
