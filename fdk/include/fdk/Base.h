@@ -164,17 +164,17 @@ namespace fdk
 	}
 	
 	template <class T>
-	inline void rawDestroy(T* p)
+	inline void rawDestruct(T* p)
 	{
 		p->~T();
 	}
 
 	template <class ForwardIterator>
-	inline void rawDestroy(ForwardIterator first, ForwardIterator last)
+	inline void rawDestruct(ForwardIterator first, ForwardIterator last)
 	{
 		while (first != last)
 		{
-			rawDestroy(&*first);
+			rawDestruct(&*first);
 			++first;
 		}
 	}

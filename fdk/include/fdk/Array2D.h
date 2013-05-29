@@ -78,7 +78,7 @@ namespace fdk
 	template <class T>
 	Array2D<T>::~Array2D()
 	{	
-		rawDestroy(m_data, m_data+m_sizeX*m_sizeY);
+		rawDestruct(m_data, m_data+m_sizeX*m_sizeY);
 		free(m_data);
 	}
 	
