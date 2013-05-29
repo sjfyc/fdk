@@ -150,35 +150,7 @@ namespace fdk
 			return inst;
 		}
 	};
-
-	template <class T>
-	inline void rawConstruct(T* p)
-	{
-		new(p) T();
-	}
-
-	template <class T, class U>
-	inline void rawConstruct(T* p, const U& value)
-	{
-		new(p) T(value);
-	}
 	
-	template <class T>
-	inline void rawDestruct(T* p)
-	{
-		p->~T();
-	}
-
-	template <class ForwardIterator>
-	inline void rawDestruct(ForwardIterator first, ForwardIterator last)
-	{
-		while (first != last)
-		{
-			rawDestruct(&*first);
-			++first;
-		}
-	}
-
 	template <class T, int N>
 	inline void zeroArray(T (&o)[N])
 	{

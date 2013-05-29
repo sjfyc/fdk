@@ -21,9 +21,9 @@ void testArray2D()
 	FDK_ASSERT(ia1(1, 1) == 3);
 
 	fdk::Array2D<int> ia2(ia);
-	for (size_t y = 0; y < ia2.sizeY(); ++y)
+	for (size_t y = 0; y < ia2.size_y(); ++y)
 	{
-		for (size_t x = 0; x < ia2.sizeX(); ++x)
+		for (size_t x = 0; x < ia2.size_x(); ++x)
 		{
 			FDK_ASSERT(ia2(x, y) == x+y);
 		}

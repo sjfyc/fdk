@@ -1,15 +1,17 @@
 #ifndef __FDK_ARRAY2D_H_INCLUDE__
 #define __FDK_ARRAY2D_H_INCLUDE__
 #include "Base.h"
-#include <stdexcept>
+#include <memory>
+#include "Memory.h"
 
 namespace fdk
 {
-	template <class T>
+	template <class T, class AllocatorT=std::allocator<T> >
 	class Array2D
 	{
 	public:
-		typedef size_t size_type;
+		typedef AllocatorT allocator_type;
+		typedef typename AllocatorT::size_type size_type;
 		typedef T value_type;
 		Array2D(size_type sizeX, size_type sizeY);
 		Array2D(size_type sizeX, size_type sizeY, const T& value);
@@ -17,95 +19,74 @@ namespace fdk
 		~Array2D();		
 		T& operator()(size_type x, size_type y);
 		const T& operator()(size_type x, size_type y) const;
-		size_type sizeX() const;
-		size_type sizeY() const;
+		size_type size_x() const;
+		size_type size_y() const;
 	private:
+		AllocatorT m_allocator;
 		size_type m_sizeX;
 		size_type m_sizeY;
 		T* m_data;
 	};
 
-	template <class T>
-	Array2D<T>::Array2D(size_type sizeX, size_type sizeY)
-		: m_sizeX(sizeX)
+	template <class T, class AllocatorT>
+	Array2D<T, AllocatorT>::Array2D(size_type sizeX, size_type sizeY)
+		: m_allocator()
+		, m_sizeX(sizeX)
 		, m_sizeY(sizeY)
-		, m_data((T*)malloc(sizeof(T)*sizeX*sizeY))
+		, m_data(newDefaultByAllocator(sizeX*sizeY, m_allocator))
 	{
-		if (!m_data)
-		{
-			throw std::runtime_error("Array2D(sizeX, sizeY) out of memory");
-		}
 		FDK_ASSERT(m_sizeY > 0 && m_sizeY > 0);
-		for (size_type i = 0; i < m_sizeX*m_sizeY; ++i)
-		{	
-			rawConstruct(&m_data[i]);
-		}
 	}
 
-	template <class T>
-	Array2D<T>::Array2D(size_type sizeX, size_type sizeY, const T& value)
-		: m_sizeX(sizeX)
+	template <class T, class AllocatorT>
+	Array2D<T, AllocatorT>::Array2D(size_type sizeX, size_type sizeY, const T& value)
+		: m_allocator()
+		, m_sizeX(sizeX)
 		, m_sizeY(sizeY)
-		, m_data((T*)malloc(sizeof(T)*sizeX*sizeY))
+		, m_data(newFillByAllocator(sizeX*sizeY, value, m_allocator))
 	{
-		if (!m_data)
-		{
-			throw std::runtime_error("Array2D(sizeX, sizeY, value)  out of memory");
-		}
 		FDK_ASSERT(m_sizeY > 0 && m_sizeY > 0);
-		for (size_type i = 0; i < m_sizeX*m_sizeY; ++i)
-		{
-			rawConstruct(&m_data[i], value);
-		}
 	}
 
-	template <class T>
-	Array2D<T>::Array2D(const Array2D& other)
-		: m_sizeX(other.m_sizeX)
+	template <class T, class AllocatorT>
+	Array2D<T, AllocatorT>::Array2D(const Array2D& other)
+		: m_allocator()
+		, m_sizeX(other.m_sizeX)
 		, m_sizeY(other.m_sizeY)
-		, m_data((T*)malloc(sizeof(T)*other.m_sizeX*other.m_sizeY))
+		, m_data(newCopyNByAllocator(other.m_data, m_sizeX*m_sizeY, m_allocator))
 	{
-		if (!m_data)
-		{
-			throw std::runtime_error("Array2D copy constructor out of memory");
-		}
-		for (size_type i = 0; i < m_sizeX*m_sizeY; ++i)
-		{
-			rawConstruct(&m_data[i], other.m_data[i]);
-		}		
 	}
 
-	template <class T>
-	Array2D<T>::~Array2D()
+	template <class T, class AllocatorT>
+	Array2D<T, AllocatorT>::~Array2D()
 	{	
-		rawDestruct(m_data, m_data+m_sizeX*m_sizeY);
-		free(m_data);
+		deleteNByAllocator(m_data, m_sizeX*m_sizeY, m_allocator);
 	}
 	
-	template <class T>
-	inline T& Array2D<T>::operator()(size_type x, size_type y)
+	template <class T, class AllocatorT>
+	inline T& Array2D<T, AllocatorT>::operator()(size_type x, size_type y)
 	{
 		return const_cast<T&>(
 			static_cast<const Array2D<T>&>(*this)(x, y)
 			);
 	}
 
-	template <class T>
-	inline const T& Array2D<T>::operator()(size_type x, size_type y) const
+	template <class T, class AllocatorT>
+	inline const T& Array2D<T, AllocatorT>::operator()(size_type x, size_type y) const
 	{
 		FDK_ASSERT(x >= 0 && x < m_sizeX);
 		FDK_ASSERT(y >= 0 && y < m_sizeY);
 		return m_data[y*m_sizeX+x];
 	}
 
-	template <class T>
-	inline typename Array2D<T>::size_type Array2D<T>::sizeX() const
+	template <class T, class AllocatorT>
+	inline typename Array2D<T, AllocatorT>::size_type Array2D<T, AllocatorT>::size_x() const
 	{
 		return m_sizeX;
 	}
 
-	template <class T>
-	inline typename Array2D<T>::size_type Array2D<T>::sizeY() const
+	template <class T, class AllocatorT>
+	inline typename Array2D<T, AllocatorT>::size_type Array2D<T, AllocatorT>::size_y() const
 	{
 		return m_sizeY;
 	}
