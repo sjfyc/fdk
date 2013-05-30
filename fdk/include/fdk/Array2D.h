@@ -21,6 +21,7 @@ namespace fdk
 		const T& operator()(size_type x, size_type y) const;
 		size_type size_x() const;
 		size_type size_y() const;
+		T* raw_data() const;
 	private:
 		AllocatorT m_allocator;
 		size_type m_sizeX;
@@ -89,6 +90,12 @@ namespace fdk
 	inline typename Array2D<T, AllocatorT>::size_type Array2D<T, AllocatorT>::size_y() const
 	{
 		return m_sizeY;
+	}
+
+	template <class T, class AllocatorT>
+	inline T* Array2D<T, AllocatorT>::raw_data() const
+	{
+		return m_data;
 	}
 }
 
