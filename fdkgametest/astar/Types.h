@@ -1,9 +1,9 @@
 #ifndef __GAMETYPES_H_INCLUDE__
 #define __GAMETYPES_H_INCLUDE__
-#include <fdkgame/Base.h>
+#include <fdkgame/Math.h>
 #include <common/hgeall.h>
 
-typedef fdkgame::Coord<short> CellCoord;
+typedef fdkgame::Vector2D<short> CellCoord;
 
 enum 
 {
