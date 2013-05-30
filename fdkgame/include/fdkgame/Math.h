@@ -12,7 +12,6 @@ namespace fdk { namespace game
 		typedef T ValueType;
 		static const Vector2D ZERO;
 		Vector2D();
-		Vector2D(const Vector2D& other);
 		Vector2D(T x, T y);
 		void reset();
 		void reset(T x, T y);
@@ -40,7 +39,6 @@ namespace fdk { namespace game
 		typedef Vector2D<T> VectorType;
 		static Rect makeRectFromCenter(const VectorType& center, const VectorType& extent);
 		Rect();
-		Rect(const Rect& other);
 		Rect(const VectorType& topLeft, const VectorType& bottomRight);
 		Rect(T x0, T y0, T x1, T y1);
 		void reset();
@@ -70,11 +68,6 @@ namespace fdk { namespace game
 		: x(), y()
 	{}
 	
-	template <class T>
-	inline Vector2D<T>::Vector2D(const Vector2D& other)
-		: x(other.x), y(other.y)
-	{}
-
 	template <class T>
 	inline Vector2D<T>::Vector2D(T _x, T _y)
 		: x(_x), y(_y)
@@ -190,12 +183,6 @@ namespace fdk { namespace game
 	inline Rect<T>::Rect()
 		: topLeft()
 		, bottomRight()
-	{}
-
-	template <class T>
-	inline Rect<T>::Rect(const Rect& other)
-		: topLeft(other.topLeft)
-		, bottomRight(other.bottomRight)
 	{}
 
 	template <class T>
