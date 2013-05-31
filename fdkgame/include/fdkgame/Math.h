@@ -15,8 +15,6 @@ namespace fdk { namespace game
 		typedef T ValueType;
 		static const Vector2D ZERO;
 		Vector2D();
-		template <class U> 
-		Vector2D(const Vector2D<U>& other);
 		Vector2D(T x, T y);
 		void reset();
 		void reset(T x, T y);
@@ -78,13 +76,6 @@ namespace fdk { namespace game
 		: x(), y()
 	{}
 	
-	template <class T>
-	template <class U> 
-	Vector2D<T>::Vector2D(const Vector2D<U>& other)
-		: x(other.x)
-		, y(other.y)
-	{}
-
 	template <class T>
 	inline Vector2D<T>::Vector2D(T _x, T _y)
 		: x(_x), y(_y)
