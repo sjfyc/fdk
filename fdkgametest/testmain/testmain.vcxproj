@@ -55,8 +55,8 @@
     <Link>
       <SubSystem>Console</SubSystem>
       <GenerateDebugInformation>true</GenerateDebugInformation>
-      <AdditionalLibraryDirectories>../../fdk/Debug;../Debug</AdditionalLibraryDirectories>
-      <AdditionalDependencies>fdk.lib;common.lib;%(AdditionalDependencies)</AdditionalDependencies>
+      <AdditionalLibraryDirectories>../../fdk/Debug;../../fdkgame/Debug;../Debug</AdditionalLibraryDirectories>
+      <AdditionalDependencies>fdk.lib;fdkgame.lib;%(AdditionalDependencies)</AdditionalDependencies>
     </Link>
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">

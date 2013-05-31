@@ -2,7 +2,7 @@
 
 namespace fdk { namespace game 
 {
-	float invSqrt(float x)
+	FDKGAME_API float invSqrt(float x)
 	{// from hge
 		union
 		{
