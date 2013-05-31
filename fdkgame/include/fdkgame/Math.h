@@ -2,9 +2,12 @@
 #define __FDKGAME_MATH_H_INCLUDE__
 #include "Base.h"
 #include <utility>
+#include <math.h>
 
 namespace fdk { namespace game 
 {
+	float invSqrt(float x);
+
 	template <class T>
 	class Vector2D
 	{
@@ -27,6 +30,11 @@ namespace fdk { namespace game
 		Vector2D& operator-=(const Vector2D& other);
 		Vector2D& operator*=(float scale);
 		Vector2D& operator/=(float scale);
+		void normalize(float scale=1.f);
+		T length() const;
+		T lengthSquared() const;
+		T dot(const Vector2D& other) const;
+		Vector2D cross(const Vector2D& other) const;
 		T x;
 		T y;
 	};
@@ -171,6 +179,39 @@ namespace fdk { namespace game
 		x = static_cast<T>(x / scale);
 		y = static_cast<T>(y / scale);
 		return *this;
+	}
+
+	template <class T>
+	inline void Vector2D<T>::normalize(float scale)
+	{
+		(*this)*=(scale*invSqrt(static_cast<float>(x)*x + static_cast<float>(y)*y) );
+	}
+
+	template <class T>
+	inline T Vector2D<T>::dot(const Vector2D& other) const
+	{
+		return x*other.x + y*other.y;
+	}
+
+	template <class T>
+	Vector2D<T> Vector2D<T>::cross(const Vector2D& other) const
+	{
+		FDK_ASSERT(0);
+		// toimplement
+	}
+
+	template <class T>
+	inline T Vector2D<T>::length() const
+	{
+		return static_cast<T>( 
+			sqrt(static_cast<double>(x)*x + static_cast<double>(y)*y) 
+			);
+	}
+
+	template <class T>
+	inline T Vector2D<T>::lengthSquared() const
+	{
+		return x*x + y*y;
 	}
 
 	template <class T>

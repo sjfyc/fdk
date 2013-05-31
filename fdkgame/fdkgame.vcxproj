@@ -16,6 +16,7 @@
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="src\Base.cpp" />
+    <ClCompile Include="src\Math.cpp" />
   </ItemGroup>
   <PropertyGroup Label="Globals">
     <ProjectGuid>{70F93995-2B78-4819-8B5F-4C9C902D5392}</ProjectGuid>
