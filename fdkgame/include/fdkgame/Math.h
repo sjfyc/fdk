@@ -34,7 +34,7 @@ namespace fdk { namespace game
 		T length() const;
 		T lengthSquared() const;
 		T dot(const Vector2D& other) const;
-		Vector2D cross(const Vector2D& other) const;
+		T cross(const Vector2D& other) const;
 		T x;
 		T y;
 	};
@@ -194,10 +194,9 @@ namespace fdk { namespace game
 	}
 
 	template <class T>
-	Vector2D<T> Vector2D<T>::cross(const Vector2D& other) const
+	inline T Vector2D<T>::cross(const Vector2D& other) const
 	{
-		FDK_ASSERT(0);
-		// toimplement
+		return x*other.y - y*other.x;
 	}
 
 	template <class T>
