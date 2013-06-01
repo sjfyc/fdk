@@ -38,6 +38,8 @@ namespace fdk { namespace game
 		T x;
 		T y;
 	};
+	typedef Vector2D<float> VectorF;
+	typedef Vector2D<int> VectorI;
 
 	template <class T>
 	class Rect
