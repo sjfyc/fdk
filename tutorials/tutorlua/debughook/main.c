@@ -26,6 +26,12 @@ int main(int argc, char *argv[])
 		return -1;
 	}
 
+	lua_getglobal(L, "test"); /* push function test in lua*/
+	if (lua_pcall(L, 0, 0, 0) != 0) { /* pop arguments and function, push all result or error string */
+		printf("%s!\n", lua_tostring(L, -1));
+		lua_pop(L, 1);
+	}
+
 	lua_close(L);
 	return 0;
 }
