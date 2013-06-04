@@ -1,6 +1,7 @@
 #include <iostream>
+#include "profSqrt.h"
 
 void main()
 {
-	std::cout << "Hello" << std::endl;
+	profSqrt();
 }
