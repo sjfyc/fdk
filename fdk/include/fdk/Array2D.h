@@ -100,20 +100,36 @@ namespace fdk
 	void Array2D<T, AllocatorT>::reset(size_type sizeX, size_type sizeY)
 	{
 		FDK_ASSERT(sizeX > 0 && sizeY > 0);
-		clear();
-		m_sizeX = sizeX;
-		m_sizeY = sizeY;
-		m_data = newDefaultByAllocator(sizeX*sizeY, m_allocator);
+		try
+		{
+			T* data = newDefaultByAllocator(sizeX*sizeY, m_allocator);
+			clear();
+			m_sizeX = sizeX;
+			m_sizeY = sizeY;
+			m_data = data;
+		}		
+		catch (...)
+		{
+			throw;
+		}
 	}
 
 	template <class T, class AllocatorT>
 	void Array2D<T, AllocatorT>::reset(size_type sizeX, size_type sizeY, const T& value)
 	{
 		FDK_ASSERT(sizeX > 0 && sizeY > 0);
-		clear();
-		m_sizeX = sizeX;
-		m_sizeY = sizeY;
-		m_data = newFillByAllocator(sizeX*sizeY, value, m_allocator);
+		try
+		{
+			T* data = newFillByAllocator(sizeX*sizeY, value, m_allocator);
+			clear();
+			m_sizeX = sizeX;
+			m_sizeY = sizeY;
+			m_data = data;
+		}		
+		catch (...)
+		{
+			throw;
+		}
 	}
 
 	template <class T, class AllocatorT>
@@ -123,10 +139,18 @@ namespace fdk
 		{
 			return *this;
 		}
-		clear();
-		m_sizeX = other.m_sizeX;
-		m_sizeY = other.m_sizeY;
-		m_data = newCopyNByAllocator(other.m_data, m_sizeX*m_sizeY, m_allocator);
+		try
+		{
+			T* data = newCopyNByAllocator(other.m_data, other.m_sizeX*other.m_sizeY, m_allocator);
+			clear();
+			m_sizeX = other.m_sizeX;
+			m_sizeY = other.m_sizeY;
+			m_data = data;
+		}		
+		catch (...)
+		{
+			throw;
+		}
 		return *this;
 	}
 
