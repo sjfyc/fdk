@@ -49,15 +49,15 @@ float invSqrt_unreal3( float F )
 		movss	xmm1,[F]
 		rsqrtss	xmm0,xmm1			// 1/sqrt estimate (12 bits)
 
-			// Newton-Raphson iteration (X1 = 0.5*X0*(3-(Y*X0)*X0))
-			movss	xmm3,[fThree]
+		// Newton-Raphson iteration (X1 = 0.5*X0*(3-(Y*X0)*X0))
+		movss	xmm3,[fThree]
 		movss	xmm2,xmm0
-			mulss	xmm0,xmm1			// Y*X0
-			mulss	xmm0,xmm2			// Y*X0*X0
-			mulss	xmm2,[fOneHalf]		// 0.5*X0
+		mulss	xmm0,xmm1			// Y*X0
+		mulss	xmm0,xmm2			// Y*X0*X0
+		mulss	xmm2,[fOneHalf]		// 0.5*X0
 		subss	xmm3,xmm0			// 3-Y*X0*X0
-			mulss	xmm3,xmm2			// 0.5*X0*(3-Y*X0*X0)
-			movss	[temp],xmm3
+		mulss	xmm3,xmm2			// 0.5*X0*(3-Y*X0*X0)
+		movss	[temp],xmm3
 	}
 	return temp;
 #endif
@@ -66,7 +66,7 @@ float invSqrt_unreal3( float F )
 void profSqrt()
 {
 	const size_t nSamples = 10000000;
-	float addon = 37.33f;
+	float addon = 37.33f;	
 	{UTIL_SCOPE_PROF
 		for (size_t i = 0; i < nSamples; ++i)
 		{
@@ -90,4 +90,9 @@ void profSqrt()
 		}
 		std::cout << "invSqrt_unreal3 ";
 	}
+
+	float fixValue = 32385.337f;
+	std::cout << "1.f/::sqrtf(" << fixValue << ")=" << 1.f/::sqrtf(fixValue) << std::endl;
+	std::cout << "invSqrt_hge(" << fixValue << ")=" << invSqrt_hge(fixValue) << std::endl;
+	std::cout << "invSqrt_unreal3(" << fixValue << ")=" << invSqrt_unreal3(fixValue) << std::endl;
 }
