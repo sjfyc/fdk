@@ -1,4 +1,5 @@
 #include "lib2.h"
+Lib2 lib2;
 
 int* Lib2::newptr()
 {

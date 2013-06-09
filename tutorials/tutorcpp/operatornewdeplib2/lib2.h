@@ -9,11 +9,11 @@ public:
 	void create()
 	{
 		std::cout << "Lib2::create" << std::endl;
-		m_value = new int(10);
+		m_value = new int[10];
 	}
 	void destroy()
 	{		
-		delete m_value;
+		delete[] m_value;
 		m_value = 0;
 		std::cout << "Lib2::destroy" << std::endl;
 	}
