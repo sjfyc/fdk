@@ -12,10 +12,10 @@ public:
 		m_value = new int(10);
 	}
 	void destroy()
-	{
-		std::cout << "Lib::destroy" << std::endl;
+	{		
 		delete m_value;
 		m_value = 0;
+		std::cout << "Lib::destroy" << std::endl;
 	}
 	int* newptr();
 private:

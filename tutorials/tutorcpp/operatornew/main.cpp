@@ -146,13 +146,13 @@ namespace testCustomPlacementNew
 	}
 }
 
-void* operator new(std::size_t size) throw(std::bad_alloc)
+inline void* operator new(std::size_t size) throw(std::bad_alloc)
 {
 	std::cout << "my global operator new" << std::endl;
 	return ::malloc(size);
 }
 
-void operator delete(void* p) throw()
+inline void operator delete(void* p) throw()
 {
 	std::cout << "my global operator delete" << std::endl;
 	return ::free(p);
