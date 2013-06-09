@@ -16,7 +16,7 @@ public:
 private:
 	virtual void onEvent(int eventType, void* params);
 	CellCoord m_coordFrom;
-	CellCoord m_coordTo;	
+	CellCoord m_coordTo;
 };
 
 #define g_Game (Game::instance())

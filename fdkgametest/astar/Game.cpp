@@ -1,6 +1,7 @@
 #include "Game.h"
 #include "Util.h"
 #include "Board.h"
+#include "ActorBank.h"
 
 bool Game::start()
 {
@@ -19,6 +20,7 @@ void Game::stop()
 
 void Game::update(float delta)
 {
+	g_ActorBank.update(delta);
 }
 
 void Game::render()
@@ -26,6 +28,7 @@ void Game::render()
 	g_Board.draw();
 	util::fillCell(m_coordFrom, COLOR_CELL_FROM);
 	util::fillCell(m_coordTo, COLOR_CELL_TO);
+	g_ActorBank.draw();
 	g_HGE.DrawMouse();
 }
 #include <iostream>
@@ -39,6 +42,6 @@ void Game::onEvent(int eventType, void* params)
 	else if (eventType == GAME_SYSTEM_EVENT_KEYUP)
 	{
 		int key = (int)params;
-		std::cout << key << " up" << std::endl;
+		std::cout << key << " up" << std::endl;		
 	}
 }
