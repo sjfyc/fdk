@@ -3,10 +3,13 @@ Microsoft Visual Studio Solution File, Format Version 11.00
 # Visual Studio 2010
 Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "operatornew", "operatornew\operatornew.vcxproj", "{FEE0FE16-2929-467B-967F-F95E23283773}"
 	ProjectSection(ProjectDependencies) = postProject
+		{3B61B59D-1A38-410F-849F-C50C0D4AE0DF} = {3B61B59D-1A38-410F-849F-C50C0D4AE0DF}
 		{B844A4CC-66B8-48B6-995C-B20A9362D7A6} = {B844A4CC-66B8-48B6-995C-B20A9362D7A6}
 	EndProjectSection
 EndProject
 Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "operatornewdeplib", "operatornewdeplib\operatornewdeplib.vcxproj", "{B844A4CC-66B8-48B6-995C-B20A9362D7A6}"
+EndProject
+Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "operatornewdeplib2", "operatornewdeplib2\operatornewdeplib2.vcxproj", "{3B61B59D-1A38-410F-849F-C50C0D4AE0DF}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -22,6 +25,10 @@ Global
 		{B844A4CC-66B8-48B6-995C-B20A9362D7A6}.Debug|Win32.Build.0 = Debug|Win32
 		{B844A4CC-66B8-48B6-995C-B20A9362D7A6}.Release|Win32.ActiveCfg = Release|Win32
 		{B844A4CC-66B8-48B6-995C-B20A9362D7A6}.Release|Win32.Build.0 = Release|Win32
+		{3B61B59D-1A38-410F-849F-C50C0D4AE0DF}.Debug|Win32.ActiveCfg = Debug|Win32
+		{3B61B59D-1A38-410F-849F-C50C0D4AE0DF}.Debug|Win32.Build.0 = Debug|Win32
+		{3B61B59D-1A38-410F-849F-C50C0D4AE0DF}.Release|Win32.ActiveCfg = Release|Win32
+		{3B61B59D-1A38-410F-849F-C50C0D4AE0DF}.Release|Win32.Build.0 = Release|Win32
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

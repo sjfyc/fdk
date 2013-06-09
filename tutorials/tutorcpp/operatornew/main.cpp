@@ -1,6 +1,8 @@
 #include <iostream>
 #include <stdexcept>
+#include <operatornewdeplib2/lib2.h>
 #include <operatornewdeplib/lib.h>
+
 #pragma warning(disable:4290) // C++ exception specification ignored except to indicate a function is not __declspec(nothrow)
 
 // 1. 不管何种形式的new调用，最终都由编译器分解为两个动作：
@@ -146,18 +148,6 @@ namespace testCustomPlacementNew
 	}
 }
 
-inline void* operator new(std::size_t size) throw(std::bad_alloc)
-{
-	std::cout << "my global operator new" << std::endl;
-	return ::malloc(size);
-}
-
-inline void operator delete(void* p) throw()
-{
-	std::cout << "my global operator delete" << std::endl;
-	return ::free(p);
-}
-
 int main(int argc, char *argv[])
 {	
 	printDelimLine("testClassedNew");
@@ -173,5 +163,9 @@ int main(int argc, char *argv[])
 	testLib.create();
 	testLib.destroy();
 	delete testLib.newptr();
+	Lib2 testLib2;
+	testLib2.create();
+	testLib2.destroy();
+	delete testLib2.newptr();
 	return 0;
 }
