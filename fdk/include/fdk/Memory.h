@@ -328,6 +328,7 @@ namespace fdk
 		catch (...)
 		{
 			allocator.deallocate(ptr, n);
+			throw;
 		}		
 		return ptr;
 	}
@@ -347,6 +348,7 @@ namespace fdk
 		catch (...)
 		{
 			allocator.deallocate(ptr, n);
+			throw;
 		}		
 		return ptr;
 	}
@@ -366,6 +368,7 @@ namespace fdk
 		catch (...)
 		{
 			allocator.deallocate(ptr, n);
+			throw;
 		}		
 		return ptr;
 	}
@@ -385,6 +388,7 @@ namespace fdk
 		catch (...)
 		{
 			allocator.deallocate(ptr, n);
+			throw;
 		}		
 		return ptr;
 	}

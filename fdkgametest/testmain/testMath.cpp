@@ -30,6 +30,8 @@ void testMath()
 	FDK_ASSERT(v-IVector2D(1,2)==IVector2D(23,40));
 	FDK_ASSERT(v*0.5==IVector2D(12,21));
 	FDK_ASSERT(v/3==IVector2D(8,14));
+	v = IVector2D(3, 4);
+	v.normalize(1000);
 
 	IRect rect;
 	FDK_ASSERT(rect.topLeft == IVector2D::ZERO);

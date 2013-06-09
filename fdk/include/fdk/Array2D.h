@@ -13,15 +13,23 @@ namespace fdk
 		typedef AllocatorT allocator_type;
 		typedef typename AllocatorT::size_type size_type;
 		typedef T value_type;
+		Array2D();
 		Array2D(size_type sizeX, size_type sizeY);
 		Array2D(size_type sizeX, size_type sizeY, const T& value);
 		Array2D(const Array2D& other);
-		~Array2D();		
+		~Array2D();
+		void clear();
+		void reset(size_type sizeX, size_type sizeY);
+		void reset(size_type sizeX, size_type sizeY, const T& value);
+		Array2D& operator=(const Array2D& other);
 		T& operator()(size_type x, size_type y);
 		const T& operator()(size_type x, size_type y) const;
+		bool empty() const;
+		size_type count() const;
 		size_type size_x() const;
 		size_type size_y() const;
 		T* raw_data() const;
+		bool is_valid_index(size_type x, size_type y) const;
 	private:
 		AllocatorT m_allocator;
 		size_type m_sizeX;
@@ -30,13 +38,22 @@ namespace fdk
 	};
 
 	template <class T, class AllocatorT>
+	Array2D<T, AllocatorT>::Array2D()
+		: m_allocator()
+		, m_sizeX(0)
+		, m_sizeY(0)
+		, m_data(0)
+	{
+	}
+
+	template <class T, class AllocatorT>
 	Array2D<T, AllocatorT>::Array2D(size_type sizeX, size_type sizeY)
 		: m_allocator()
 		, m_sizeX(sizeX)
 		, m_sizeY(sizeY)
 		, m_data(newDefaultByAllocator(sizeX*sizeY, m_allocator))
 	{
-		FDK_ASSERT(m_sizeY > 0 && m_sizeY > 0);
+		FDK_ASSERT(m_sizeX > 0 && m_sizeY > 0);
 	}
 
 	template <class T, class AllocatorT>
@@ -46,7 +63,7 @@ namespace fdk
 		, m_sizeY(sizeY)
 		, m_data(newFillByAllocator(sizeX*sizeY, value, m_allocator))
 	{
-		FDK_ASSERT(m_sizeY > 0 && m_sizeY > 0);
+		FDK_ASSERT(m_sizeX > 0 && m_sizeY > 0);
 	}
 
 	template <class T, class AllocatorT>
@@ -60,10 +77,83 @@ namespace fdk
 
 	template <class T, class AllocatorT>
 	Array2D<T, AllocatorT>::~Array2D()
-	{	
-		deleteNByAllocator(m_data, m_sizeX*m_sizeY, m_allocator);
+	{
+		clear();
 	}
 	
+	template <class T, class AllocatorT>
+	void Array2D<T, AllocatorT>::clear()
+	{
+		if (m_data)
+		{
+			deleteNByAllocator(m_data, m_sizeX*m_sizeY, m_allocator);
+			m_sizeX = 0;
+			m_sizeY = 0;
+			m_data = 0;
+		}
+		FDK_ASSERT(m_sizeX == 0);
+		FDK_ASSERT(m_sizeY == 0);
+		FDK_ASSERT(!m_data);
+	}
+
+	template <class T, class AllocatorT>
+	void Array2D<T, AllocatorT>::reset(size_type sizeX, size_type sizeY)
+	{
+		FDK_ASSERT(sizeX > 0 && sizeY > 0);
+		try
+		{
+			T* data = newDefaultByAllocator(sizeX*sizeY, m_allocator);
+			clear();
+			m_sizeX = sizeX;
+			m_sizeY = sizeY;
+			m_data = data;
+		}		
+		catch (...)
+		{
+			throw;
+		}
+	}
+
+	template <class T, class AllocatorT>
+	void Array2D<T, AllocatorT>::reset(size_type sizeX, size_type sizeY, const T& value)
+	{
+		FDK_ASSERT(sizeX > 0 && sizeY > 0);
+		try
+		{
+			T* data = newFillByAllocator(sizeX*sizeY, value, m_allocator);
+			clear();
+			m_sizeX = sizeX;
+			m_sizeY = sizeY;
+			m_data = data;
+		}		
+		catch (...)
+		{
+			throw;
+		}
+	}
+
+	template <class T, class AllocatorT>
+	Array2D<T, AllocatorT>& Array2D<T, AllocatorT>::operator=(const Array2D& other)
+	{
+		if (this == &other)
+		{
+			return *this;
+		}
+		try
+		{
+			T* data = newCopyNByAllocator(other.m_data, other.m_sizeX*other.m_sizeY, m_allocator);
+			clear();
+			m_sizeX = other.m_sizeX;
+			m_sizeY = other.m_sizeY;
+			m_data = data;
+		}		
+		catch (...)
+		{
+			throw;
+		}
+		return *this;
+	}
+
 	template <class T, class AllocatorT>
 	inline T& Array2D<T, AllocatorT>::operator()(size_type x, size_type y)
 	{
@@ -75,9 +165,20 @@ namespace fdk
 	template <class T, class AllocatorT>
 	inline const T& Array2D<T, AllocatorT>::operator()(size_type x, size_type y) const
 	{
-		FDK_ASSERT(x >= 0 && x < m_sizeX);
-		FDK_ASSERT(y >= 0 && y < m_sizeY);
+		FDK_ASSERT(is_valid_index(x, y));
 		return m_data[y*m_sizeX+x];
+	}
+
+	template <class T, class AllocatorT>
+	inline bool Array2D<T, AllocatorT>::empty() const
+	{
+		return !m_data;
+	}
+
+	template <class T, class AllocatorT>
+	inline typename Array2D<T, AllocatorT>::size_type Array2D<T, AllocatorT>::count() const
+	{
+		return m_sizeX * m_sizeY;
 	}
 
 	template <class T, class AllocatorT>
@@ -96,6 +197,12 @@ namespace fdk
 	inline T* Array2D<T, AllocatorT>::raw_data() const
 	{
 		return m_data;
+	}
+
+	template <class T, class AllocatorT>
+	inline bool Array2D<T, AllocatorT>::is_valid_index(size_type x, size_type y) const
+	{
+		return x >= 0 && x < m_sizeX && y >= 0 && y < m_sizeY;
 	}
 }
 
