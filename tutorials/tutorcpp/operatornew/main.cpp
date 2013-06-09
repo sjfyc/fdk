@@ -1,5 +1,6 @@
 #include <iostream>
 #include <stdexcept>
+#include <operatornewdeplib/lib.h>
 #pragma warning(disable:4290) // C++ exception specification ignored except to indicate a function is not __declspec(nothrow)
 
 // 1. 不管何种形式的new调用，最终都由编译器分解为两个动作：
@@ -120,20 +121,20 @@ namespace testCustomPlacementNew
 
 		static void* operator new(std::size_t size, const char* file, long line) throw(std::bad_alloc)
 		{
-			std::cout << "new at " << file << ":" << line << std::endl;
+			std::cout << "Widget::new at " << file << ":" << line << std::endl;
 			return malloc(size);
 		}
 
 		static void operator delete(void* p) throw()
 		{
-			std::cout << "delete" << std::endl;
+			std::cout << "Widget::delete" << std::endl;
 			free(p);
 		}
 
 		// 该函数只在对应opeartor new成功，但目标构造函数抛出异常时调用
 		static void operator delete(void* p, const char* file, long line) throw()
 		{
-			std::cout << "rollback delete at " << file << ":" << line << std::endl;
+			std::cout << "Widget::rollback delete at " << file << ":" << line << std::endl;
 			free(p);
 		}
 	};
@@ -145,9 +146,21 @@ namespace testCustomPlacementNew
 	}
 }
 
+void* operator new(std::size_t size) throw(std::bad_alloc)
+{
+	std::cout << "my global operator new" << std::endl;
+	return ::malloc(size);
+}
+
+void operator delete(void* p) throw()
+{
+	std::cout << "my global operator delete" << std::endl;
+	return ::free(p);
+}
+
 int main(int argc, char *argv[])
 {	
-	printDelimLine("testClassedOperatorNew");
+	printDelimLine("testClassedNew");
 	testClassedNew::test();
 	printDelimLine("testPlacementNew");
 	testPlacementNew::test();
@@ -155,5 +168,10 @@ int main(int argc, char *argv[])
 	testNothrowNew::test();
 	printDelimLine("testCustomPlacementNew");
 	testCustomPlacementNew::test();
+	printDelimLine("Lib test");
+	Lib testLib;
+	testLib.create();
+	testLib.destroy();
+	delete testLib.newptr();
 	return 0;
 }
