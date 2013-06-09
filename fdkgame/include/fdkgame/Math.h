@@ -30,7 +30,7 @@ namespace fdk { namespace game
 		Vector2D& operator-=(const Vector2D& other);
 		Vector2D& operator*=(float scale);
 		Vector2D& operator/=(float scale);
-		void normalize(float scale=1.f);
+		Vector2D& normalize(float scale=1.f);
 		T length() const;
 		T lengthSquared() const;
 		T dot(const Vector2D& other) const;
@@ -184,9 +184,10 @@ namespace fdk { namespace game
 	}
 
 	template <class T>
-	inline void Vector2D<T>::normalize(float scale)
+	inline Vector2D<T>& Vector2D<T>::normalize(float scale)
 	{
-		(*this)*=(scale*invSqrt(static_cast<float>(x)*x + static_cast<float>(y)*y) );		
+		(*this)*=(scale*invSqrt(static_cast<float>(x)*x + static_cast<float>(y)*y) );
+		return *this;
 	}
 
 	template <class T>
