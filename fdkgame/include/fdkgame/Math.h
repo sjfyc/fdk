@@ -55,10 +55,10 @@ namespace fdk { namespace game
 		void reset(const VectorType& topLeft, const VectorType& bottomRight);
 		void reset(T x0, T y0, T x1, T y1);
 		void resetFromCenter(const VectorType& center, const VectorType& extent);
-		void normalize();
+		Rect& normalize();
 		bool isNormal() const;		
 		bool contain(const VectorType& in) const;
-		void clip(const Rect& other);
+		Rect& clip(const Rect& other);
 		bool intersect(const Rect& other) const;
 		bool intersect(const Rect& other, Rect& output) const;
 		VectorType size() const;
@@ -269,7 +269,7 @@ namespace fdk { namespace game
 	}
 
 	template <class T>
-	inline void Rect<T>::normalize()
+	inline Rect<T>& Rect<T>::normalize()
 	{
 		if (topLeft.x > bottomRight.x)
 		{
@@ -296,7 +296,7 @@ namespace fdk { namespace game
 	}
 
 	template <class T>
-	inline void Rect<T>::clip(const Rect& other)
+	inline Rect<T>& Rect<T>::clip(const Rect& other)
 	{
 		FDK_ASSERT(isNormal());
 		FDK_ASSERT(other.isNormal());
@@ -306,6 +306,7 @@ namespace fdk { namespace game
 		bottomRight.y = minOf(bottomRight.y, other.bottomRight.y);
 		bottomRight.x = maxOf(topLeft.x, bottomRight.x);
 		bottomRight.y = maxOf(topLeft.y, bottomRight.y);
+		return *this;
 	}
 
 	template <class T>
