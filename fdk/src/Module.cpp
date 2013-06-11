@@ -36,10 +36,12 @@ namespace fdk
 				if (moduleInfo.checkStartFunc && !(*moduleInfo.checkStartFunc)(module))
 				{
 					pending.push_back(&moduleInfo);
+					continue;
 				}
 				if (moduleInfo.startFunc && !(*moduleInfo.startFunc)(module))
 				{
 					stopStartedModules();
+					m_tickModules.clear();
 					m_errorMessage = "failed to start module '";
 					m_errorMessage += module.getName();
 					m_errorMessage += "'";
@@ -58,7 +60,7 @@ namespace fdk
 			}
 			if (pending.size() == left.size())
 			{
-				m_errorMessage = "circular dependencies of modules { ";
+				m_errorMessage = "circular dependencies of modules[ ";
 				for (size_t i = 0; i < left.size(); ++i)
 				{
 					ModuleInfo& moduleInfo = *left[i];
@@ -70,7 +72,7 @@ namespace fdk
 						m_errorMessage += ", ";
 					}
 				}
-				m_errorMessage += " }";
+				m_errorMessage += " ]";
 				return false;
 			}
 			left.swap(pending);
@@ -101,14 +103,16 @@ namespace fdk
 
 	void ModuleManager::stopStartedModules()
 	{		
-		for (size_t i = m_startedModules.size(); i > 0; ++i)
+		for (size_t i = m_startedModules.size(); i > 0; --i)
 		{
 			ModuleInfo& moduleInfo = *m_startedModules[i-1];
+			_Module& module = *moduleInfo.module;
 			if (moduleInfo.stopFunc)
 			{
-				(*moduleInfo.stopFunc)(*moduleInfo.module);
+				(*moduleInfo.stopFunc)(module);
 			}
+			module.m_bStarted = false;
 		}
+		m_startedModules.clear();
 	}
-
 }

@@ -10,7 +10,7 @@ namespace fdk
 	struct _ModuleTraits
 	{
 	private:
-		template<typename U, bool (U::*)()> struct has_checkStart;
+		template<typename U, bool (U::*)() const> struct has_checkStart;
 		template<typename U> static char test_checkStart(has_checkStart<U, &U::checkStart>*);
 		template<typename U> static int test_checkStart(...);
 
@@ -53,23 +53,24 @@ namespace fdk
 		: public _Module
 		, public Singleton<T>
 	{	
-	protected:		
+	public:
+		static Module& _s_instance;
+	protected:
 		Module();
 		~Module();
 	private:		
-		static bool s_checkStart(_Module& module);
+		static bool s_checkStart(const _Module& module);
 		static bool s_start(_Module& module);
 		static void s_stop(_Module& module);
 		static bool s_tick(_Module& module, float deltaSeconds);
-		static bool _checkStart(T& module, TrueType);
-		static bool _checkStart(T& module, FalseType);
+		static bool _checkStart(const T& module, TrueType);
+		static bool _checkStart(const T& module, FalseType);
 		static bool _start(T& module, TrueType);
 		static bool _start(T& module, FalseType);
 		static void _stop(T& module, TrueType);
 		static void _stop(T& module, FalseType);
 		static bool _tick(T& module, float deltaSeconds, TrueType);
-		static bool _tick(T& module, float deltaSeconds, FalseType);
-		static Module& s_instance;
+		static bool _tick(T& module, float deltaSeconds, FalseType);		
 	};
 
 	class FDK_API ModuleManager
@@ -83,7 +84,7 @@ namespace fdk
 		bool tick(float deltaSeconds);
 		const std::string& getErrorMessage() const;
 	private:
-		typedef bool (*ModuleCheckStartFunc)(_Module& module);
+		typedef bool (*ModuleCheckStartFunc)(const _Module& module);
 		typedef bool (*ModuleStartFunc)(_Module& module);
 		typedef void (*ModuleStopFunc)(_Module& module);
 		typedef bool (*ModuleTickFunc)(_Module& module, float deltaSeconds);
@@ -121,9 +122,6 @@ namespace fdk
 	{
 		return m_bStarted;
 	}
-	
-	template <class T>
-	Module<T>& Module<T>::s_instance = Module<T>::instance();
 
 	template <class T>
 	inline Module<T>::Module()
@@ -141,9 +139,9 @@ namespace fdk
 	{}
 
 	template <class T>
-	inline bool Module<T>::s_checkStart(_Module& module)
+	inline bool Module<T>::s_checkStart(const _Module& module)
 	{
-		T& self = static_cast<T&>(module);
+		const T& self = static_cast<const T&>(module);
 		return _checkStart(self, typename BoolToTrueFalseType<_ModuleTraits<T>::HAS_CHECKSTART_METHOD>::Type());
 	}
 
@@ -169,13 +167,13 @@ namespace fdk
 	}
 
 	template <class T>
-	inline bool Module<T>::_checkStart(T& module, TrueType)
+	inline bool Module<T>::_checkStart(const T& module, TrueType)
 	{
 		return module.checkStart();
 	}
 
 	template <class T>
-	inline bool Module<T>::_checkStart(T& module, FalseType)
+	inline bool Module<T>::_checkStart(const T& module, FalseType)
 	{
 		FDK_ASSERT(0); // NEVER REACH HERE
 		return false;
@@ -217,10 +215,23 @@ namespace fdk
 		return false;
 	}
 
+	template <class T>
+	Module<T>& Module<T>::_s_instance = T::instance();
+
 	inline const std::string& ModuleManager::getErrorMessage() const
 	{
 		return m_errorMessage;
 	}
 }
+
+#define FDK_MODULE_IMPL(T) \
+	class _REG_MODULE_##T \
+	{ \
+	public:	\
+		~_REG_MODULE_##T() \
+		{ \
+			T::_s_instance; \
+		} \
+	} _reg_module_##T;
 
 #endif
