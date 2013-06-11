@@ -11,31 +11,31 @@ namespace fdk
 	{
 	private:
 		template<typename U, bool (U::*)()> struct has_checkStart;
-		template<typename U> static TrueType& test_checkStart(has_checkStart<U, &U::start>*);
-		template<typename U> static FalseType& test_checkStart(...);
+		template<typename U> static char test_checkStart(has_checkStart<U, &U::checkStart>*);
+		template<typename U> static int test_checkStart(...);
 
 		template<typename U, bool (U::*)()> struct has_start;
-		template<typename U> static TrueType& test_start(has_start<U, &U::start>*);
-		template<typename U> static FalseType& test_start(...);
+		template<typename U> static char test_start(has_start<U, &U::start>*);
+		template<typename U> static int test_start(...);
 
 		template<typename U, void (U::*)()> struct has_stop;
-		template<typename U> static TrueType& test_stop(has_stop<U, &U::stop>*);
-		template<typename U> static FalseType& test_stop(...);
+		template<typename U> static char test_stop(has_stop<U, &U::stop>*);
+		template<typename U> static int test_stop(...);
 
 		template<typename U, bool (U::*)(float)> struct has_tick;		
-		template<typename U> static TrueType& test_tick(has_tick<U, &U::tick>*);
-		template<typename U> static FalseType& test_tick(...);
+		template<typename U> static char test_tick(has_tick<U, &U::tick>*);
+		template<typename U> static int test_tick(...);
 	public:
 		enum
 		{
-			HAS_CHECKSTART_METHOD = (sizeof(test_checkStart<T>(0)) == sizeof(TrueType)),
-			HAS_START_METHOD = (sizeof(test_start<T>(0)) == sizeof(TrueType)),
-			HAS_STOP_METHOD = (sizeof(test_stop<T>(0)) == sizeof(TrueType)),
-			HAS_TICK_METHOD = (sizeof(test_tick<T>(0)) == sizeof(TrueType)),
+			HAS_CHECKSTART_METHOD = (sizeof(test_checkStart<T>(0)) == sizeof(char)),
+			HAS_START_METHOD = (sizeof(test_start<T>(0)) == sizeof(char)),
+			HAS_STOP_METHOD = (sizeof(test_stop<T>(0)) == sizeof(char)),
+			HAS_TICK_METHOD = (sizeof(test_tick<T>(0)) == sizeof(char)),
 		};
 	};
 
-	class _Module
+	class FDK_API _Module
 	{
 		friend class ModuleManager;
 	public:
@@ -50,24 +50,33 @@ namespace fdk
 
 	template <class T>
 	class Module 
-		: _Module
+		: public _Module
 		, public Singleton<T>
 	{	
 	protected:		
 		Module();
 		~Module();
 	private:		
-		static bool checkStart(_Module& module);
-		static bool start(_Module& module);
-		static void stop(_Module& module);
-		static bool tick(_Module& module, float deltaSeconds);
+		static bool s_checkStart(_Module& module);
+		static bool s_start(_Module& module);
+		static void s_stop(_Module& module);
+		static bool s_tick(_Module& module, float deltaSeconds);
+		static bool _checkStart(T& module, TrueType);
+		static bool _checkStart(T& module, FalseType);
+		static bool _start(T& module, TrueType);
+		static bool _start(T& module, FalseType);
+		static void _stop(T& module, TrueType);
+		static void _stop(T& module, FalseType);
+		static bool _tick(T& module, float deltaSeconds, TrueType);
+		static bool _tick(T& module, float deltaSeconds, FalseType);
 		static Module& s_instance;
 	};
 
-	class ModuleManager
+	class FDK_API ModuleManager
 		: public Singleton<ModuleManager>
 	{
 		friend class Singleton<ModuleManager>;
+		template <class T> friend class Module;		
 	public:		
 		bool start();
 		void stop();
@@ -119,11 +128,11 @@ namespace fdk
 	template <class T>
 	inline Module<T>::Module()
 	{
-		ModuleManager::regist(*this, 
-			_ModuleTraits<T>::HAS_CHECKSTART_METHOD ? checkStart : 0,
-			_ModuleTraits<T>::HAS_START_METHOD ? start : 0,
-			_ModuleTraits<T>::HAS_STOP_METHOD ? stop : 0,
-			_ModuleTraits<T>::HAS_TICK_METHOD ? tick : 0
+		ModuleManager::instance().regist(*this, 
+			_ModuleTraits<T>::HAS_CHECKSTART_METHOD ? s_checkStart : 0,
+			_ModuleTraits<T>::HAS_START_METHOD ? s_start : 0,
+			_ModuleTraits<T>::HAS_STOP_METHOD ? s_stop : 0,
+			_ModuleTraits<T>::HAS_TICK_METHOD ? s_tick : 0
 			);
 	}
 
@@ -132,31 +141,80 @@ namespace fdk
 	{}
 
 	template <class T>
-	inline bool Module<T>::checkStart(_Module& module)
+	inline bool Module<T>::s_checkStart(_Module& module)
 	{
 		T& self = static_cast<T&>(module);
-		return self.checkStart();
+		return _checkStart(self, typename BoolToTrueFalseType<_ModuleTraits<T>::HAS_CHECKSTART_METHOD>::Type());
 	}
 
 	template <class T>
-	inline bool Module<T>::start(_Module& module)
+	inline bool Module<T>::s_start(_Module& module)
 	{
 		T& self = static_cast<T&>(module);
-		return self.start();
+		return _start(self, typename BoolToTrueFalseType<_ModuleTraits<T>::HAS_START_METHOD>::Type());	
 	}
 
 	template <class T>
-	inline void Module<T>::stop(_Module& module)
+	inline void Module<T>::s_stop(_Module& module)
 	{
 		T& self = static_cast<T&>(module);
-		self.stop();
+		_stop(self, typename BoolToTrueFalseType<_ModuleTraits<T>::HAS_STOP_METHOD>::Type());
 	}
 
 	template <class T>
-	inline bool Module<T>::tick(_Module& module, float deltaSeconds)
+	inline bool Module<T>::s_tick(_Module& module, float deltaSeconds)
 	{
 		T& self = static_cast<T&>(module);
-		return self.tick(deltaSeconds);
+		return _tick(self, deltaSeconds, typename BoolToTrueFalseType<_ModuleTraits<T>::HAS_TICK_METHOD>::Type());
+	}
+
+	template <class T>
+	inline bool Module<T>::_checkStart(T& module, TrueType)
+	{
+		return module.checkStart();
+	}
+
+	template <class T>
+	inline bool Module<T>::_checkStart(T& module, FalseType)
+	{
+		FDK_ASSERT(0); // NEVER REACH HERE
+		return false;
+	}
+	
+	template <class T>
+	inline bool Module<T>::_start(T& module, TrueType)
+	{
+		return module.start();
+	}
+
+	template <class T>
+	inline bool Module<T>::_start(T& module, FalseType)
+	{
+		FDK_ASSERT(0); // NEVER REACH HERE
+		return false;
+	}
+
+	template <class T>
+	inline void Module<T>::_stop(T& module, TrueType)
+	{
+		module.stop();
+	}
+
+	template <class T>
+	inline void Module<T>::_stop(T& module, FalseType)
+	{}
+
+	template <class T>
+	inline bool Module<T>::_tick(T& module, float deltaSeconds, TrueType)
+	{
+		return module.tick(deltaSeconds);
+	}
+	
+	template <class T>
+	inline bool Module<T>::_tick(T& module, float deltaSeconds, FalseType)
+	{
+		FDK_ASSERT(0); // NEVER REACH HERE
+		return false;
 	}
 
 	inline const std::string& ModuleManager::getErrorMessage() const

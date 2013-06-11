@@ -14,6 +14,7 @@
     <ClCompile Include="main.cpp" />
     <ClCompile Include="testArray2D.cpp" />
     <ClCompile Include="testMisc.cpp" />
+    <ClCompile Include="testModule.cpp" />
     <ClCompile Include="testString.cpp" />
   </ItemGroup>
   <PropertyGroup Label="Globals">

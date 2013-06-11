@@ -121,9 +121,37 @@ namespace fdk
 	typedef unsigned short word_t;
 	typedef unsigned long dword_t;
 	typedef unsigned long long qword_t;
+	
+	template<class T, T value>
+	struct IntegralConstant
+	{
+		static const T VALUE = value;
+		typedef T ValueType;
+		typedef IntegralConstant<T, value> Type;
+	};
+	typedef IntegralConstant<bool, true> TrueType;
+	typedef IntegralConstant<bool, false> FalseType;
+	
+	template <bool, typename, typename>
+	struct IfThenElse;
 
-	typedef char TrueType[1];
-	typedef char FalseType[2];
+	template <typename A, typename B>
+	struct IfThenElse<true, A, B>
+	{
+		typedef A Type;
+	};
+
+	template <typename A, typename B>
+	struct IfThenElse<false, A, B>
+	{
+		typedef B Type;
+	}; 
+
+	template <bool b>
+	struct BoolToTrueFalseType
+	{
+		typedef typename IfThenElse<b, TrueType, FalseType>::Type Type;
+	};
 
 	class Uncopyable
 	{
