@@ -13,13 +13,14 @@ ActorBank::~ActorBank()
 	fdk::EventHook::unregist();
 }
 
-void ActorBank::update(float delta)
+bool ActorBank::tick(float delta)
 {
 	for (Actors::const_iterator it = m_actors.begin(); it != m_actors.end(); ++it)
 	{
 		Actor* actor = *it;
-		actor->update(delta);
+		actor->tick(delta);
 	}
+	return true;
 }
 
 void ActorBank::draw()

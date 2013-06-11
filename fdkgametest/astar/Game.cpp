@@ -1,10 +1,17 @@
 #include "Game.h"
+#include <iostream>
+#include <fdk/Module.h>
 #include "Util.h"
 #include "Board.h"
 #include "ActorBank.h"
 
 bool Game::start()
 {
+	if (!fdk::ModuleManager::instance().start())
+	{
+		std::cout << fdk::ModuleManager::instance().getErrorMessage() << std::endl;
+		return false;
+	}
 	fdk::EventHook::regist(GAME_SYSTEM_EVENT_KEYDOWN);
 	fdk::EventHook::regist(GAME_SYSTEM_EVENT_KEYUP);
 
@@ -16,11 +23,16 @@ bool Game::start()
 void Game::stop()
 {
 	fdk::EventHook::unregist();
+
+	fdk::ModuleManager::instance().stop();
 }
 
 void Game::update(float delta)
 {
-	g_ActorBank.update(delta);
+	if (!fdk::ModuleManager::instance().tick(delta))
+	{
+		std::cout << fdk::ModuleManager::instance().getErrorMessage() << std::endl;		
+	}
 }
 
 void Game::render()
@@ -34,14 +46,12 @@ void Game::render()
 #include <iostream>
 void Game::onEvent(int eventType, void* params)
 {
-	if (eventType == GAME_SYSTEM_EVENT_KEYDOWN)
+	if (eventType == GAME_SYSTEM_EVENT_KEYUP)
 	{
 		int key = (int)params;
-		std::cout << key << " down" << std::endl;
-	}
-	else if (eventType == GAME_SYSTEM_EVENT_KEYUP)
-	{
-		int key = (int)params;
-		std::cout << key << " up" << std::endl;		
+		if (key == HGEK_ESCAPE)
+		{
+			IsRunning = false;
+		}		
 	}
 }

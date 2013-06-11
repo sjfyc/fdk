@@ -12,9 +12,9 @@ Actor::~Actor()
 {
 }
 
-void Actor::update(float delta)
+void Actor::tick(float delta)
 {	
-	updateMove(delta);
+	tickMove(delta);
 }
 
 void Actor::draw()
@@ -28,7 +28,7 @@ void Actor::move(Location& location, float speed)
 	m_moveLocation = location;
 }
 
-void Actor::updateMove(float delta)
+void Actor::tickMove(float delta)
 {
 	if (m_velocity == Velocity::ZERO)
 	{

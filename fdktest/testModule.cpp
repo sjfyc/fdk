@@ -7,7 +7,7 @@ namespace TestModule
 		: public fdk::Module<Module1>
 	{
 	public:
-		virtual const char* getName() const { return "Module1"; }
+		static const char* NAME() { return "Module1";  }
 		bool start() { std::cout << "Module1::start" << std::endl; return true; }
 		bool tick(float) { std::cout << "Module1::tick" << std::endl; return true; }
 		void stop() { std::cout << "Module1::stop" << std::endl; }
@@ -19,7 +19,7 @@ namespace TestModule
 		: public fdk::Module<Module2>
 	{
 	public:
-		virtual const char* getName() const { return "Module2";  }
+		static const char* NAME() { return "Module2";  }
 		bool start() { std::cout << "Module2::start" << std::endl; return true; }
 		bool tick(float) { std::cout << "Module2::tick" << std::endl; return false; }
 		void stop() { std::cout << "Module2::stop" << std::endl; }

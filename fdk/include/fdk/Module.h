@@ -32,7 +32,7 @@ namespace fdk
 			HAS_START_METHOD = (sizeof(test_start<T>(0)) == sizeof(char)),
 			HAS_STOP_METHOD = (sizeof(test_stop<T>(0)) == sizeof(char)),
 			HAS_TICK_METHOD = (sizeof(test_tick<T>(0)) == sizeof(char)),
-		};
+		};		
 	};
 
 	class FDK_API _Module
@@ -51,9 +51,11 @@ namespace fdk
 	template <class T>
 	class Module 
 		: public _Module
-		, public Singleton<T>
+		, private Uncopyable
 	{	
 	public:
+		static T& instance();
+		virtual const char* getName() const;
 		static Module& _s_instance;
 	protected:
 		Module();
@@ -121,6 +123,23 @@ namespace fdk
 	inline bool _Module::isStarted() const
 	{
 		return m_bStarted;
+	}
+
+	template <class T>
+	inline T& Module<T>::instance() 
+	{
+		_s_instance;
+		static T inst;
+		return inst;
+	}
+
+	template <class T>
+	Module<T>& Module<T>::_s_instance = T::instance();
+
+	template <class T>
+	const char* Module<T>::getName() const 
+	{ 
+		return T::NAME(); 
 	}
 
 	template <class T>
@@ -214,10 +233,7 @@ namespace fdk
 		FDK_ASSERT(0); // NEVER REACH HERE
 		return false;
 	}
-
-	template <class T>
-	Module<T>& Module<T>::_s_instance = T::instance();
-
+	
 	inline const std::string& ModuleManager::getErrorMessage() const
 	{
 		return m_errorMessage;
@@ -225,13 +241,13 @@ namespace fdk
 }
 
 #define FDK_MODULE_IMPL(T) \
-	class _REG_MODULE_##T \
+	class _RegModule##T \
 	{ \
 	public:	\
-		~_REG_MODULE_##T() \
+		~_RegModule##T() \
 		{ \
 			T::_s_instance; \
 		} \
-	} _reg_module_##T;
+	} _regModule##T;
 
 #endif

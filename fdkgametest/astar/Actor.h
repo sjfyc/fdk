@@ -6,7 +6,7 @@ class Actor
 {
 	friend class ActorBank;
 public:	
-	void update(float delta);
+	void tick(float delta);
 	void draw();
 	void move(Location& location, float speed);
 	const Location& getLocation() const;
@@ -15,7 +15,7 @@ public:
 private:
 	Actor(const Location& location, float radius);
 	~Actor();
-	void updateMove(float delta);
+	void tickMove(float delta);
 	Location m_location;	
 	Velocity m_velocity;
 	float m_radius;
