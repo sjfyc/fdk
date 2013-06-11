@@ -78,6 +78,7 @@
     <ClInclude Include="include\fdk\EventHook.h" />
     <ClInclude Include="include\fdk\Memory.h" />
     <ClInclude Include="include\fdk\Misc.h" />
+    <ClInclude Include="include\fdk\Module.h" />
     <ClInclude Include="include\fdk\Rand.h" />
     <ClInclude Include="include\fdk\String.h" />
   </ItemGroup>
@@ -85,6 +86,7 @@
     <ClCompile Include="src\Base.cpp" />
     <ClCompile Include="src\EventHook.cpp" />
     <ClCompile Include="src\Misc.cpp" />
+    <ClCompile Include="src\Module.cpp" />
     <ClCompile Include="src\String.cpp" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />

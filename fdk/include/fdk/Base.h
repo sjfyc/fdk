@@ -122,6 +122,9 @@ namespace fdk
 	typedef unsigned long dword_t;
 	typedef unsigned long long qword_t;
 
+	typedef char TrueType[1];
+	typedef char FalseType[2];
+
 	class Uncopyable
 	{
 	public:

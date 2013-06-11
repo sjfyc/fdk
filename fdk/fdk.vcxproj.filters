@@ -33,6 +33,9 @@
     <ClInclude Include="include\fdk\Memory.h">
       <Filter>include</Filter>
     </ClInclude>
+    <ClInclude Include="include\fdk\Module.h">
+      <Filter>include</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="src\Misc.cpp">
@@ -45,6 +48,9 @@
       <Filter>src</Filter>
     </ClCompile>
     <ClCompile Include="src\String.cpp">
+      <Filter>src</Filter>
+    </ClCompile>
+    <ClCompile Include="src\Module.cpp">
       <Filter>src</Filter>
     </ClCompile>
   </ItemGroup>
