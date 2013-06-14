@@ -12,12 +12,13 @@
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="include\fdkgame\Base.h" />
-    <ClInclude Include="include\fdkgame\findpath\FindPathAlgo.h" />
-    <ClInclude Include="include\fdkgame\findpath\FindPathEnv.h" />
+    <ClInclude Include="include\fdkgame\FindPathAStar.h" />
+    <ClInclude Include="include\fdkgame\FindPathBase.h" />
     <ClInclude Include="include\fdkgame\Math.h" />
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="src\Base.cpp" />
+    <ClCompile Include="src\FindPathAStar.cpp" />
     <ClCompile Include="src\Math.cpp" />
   </ItemGroup>
   <PropertyGroup Label="Globals">
