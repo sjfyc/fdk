@@ -7,6 +7,9 @@
     <Filter Include="src">
       <UniqueIdentifier>{4a9ffe39-0b97-4575-a57b-09bca0b44277}</UniqueIdentifier>
     </Filter>
+    <Filter Include="include\findpath">
+      <UniqueIdentifier>{5d9b5902-450d-488d-addf-9105d17fc9f9}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="include\fdkgame\Base.h">
@@ -14,6 +17,12 @@
     </ClInclude>
     <ClInclude Include="include\fdkgame\Math.h">
       <Filter>include</Filter>
+    </ClInclude>
+    <ClInclude Include="include\fdkgame\findpath\FindPathEnv.h">
+      <Filter>include\findpath</Filter>
+    </ClInclude>
+    <ClInclude Include="include\fdkgame\findpath\FindPathAlgo.h">
+      <Filter>include\findpath</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>

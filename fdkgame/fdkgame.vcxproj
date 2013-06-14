@@ -12,6 +12,8 @@
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="include\fdkgame\Base.h" />
+    <ClInclude Include="include\fdkgame\findpath\FindPathAlgo.h" />
+    <ClInclude Include="include\fdkgame\findpath\FindPathEnv.h" />
     <ClInclude Include="include\fdkgame\Math.h" />
   </ItemGroup>
   <ItemGroup>
