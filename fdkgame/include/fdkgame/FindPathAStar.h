@@ -25,7 +25,6 @@ namespace fdk { namespace game { namespace findpath
 		AStar(const Environment& env, int startNodeID, int targetNodeID, AStarRecorder* recorder=0);
 		~AStar();
 		SearchResult search(int step=-1);
-		bool isCompleted() const;
 		const std::vector<int>& getPath() const;
 	private:
 		enum NodeStateEnum
@@ -70,11 +69,6 @@ namespace fdk { namespace game { namespace findpath
 	inline bool AStar::OpenListItem::operator<(const OpenListItem& other) const
 	{
 		return fValue > other.fValue;
-	}
-
-	inline bool AStar::isCompleted() const
-	{
-		return m_bCompleted;
 	}
 
 	inline const std::vector<int>& AStar::getPath() const

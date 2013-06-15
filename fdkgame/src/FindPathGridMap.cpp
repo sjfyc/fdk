@@ -3,6 +3,9 @@
 
 namespace fdk { namespace game { namespace findpath
 {
+	const int COST_ONE = 100;
+	const int COST_SQRT2 = 142;
+
 	int GridMap::getNodeCount() const
 	{
 		return m_nodes.count();
@@ -11,7 +14,7 @@ namespace fdk { namespace game { namespace findpath
 	int GridMap::getHeuristic(int startNodeID, int targetNodeID) const
 	{
 		VectorI startToTarget = getNodeCoord(targetNodeID) - getNodeCoord(startNodeID);
-		return abs(startToTarget.x) + abs(startToTarget.y);
+		return (abs(startToTarget.x) + abs(startToTarget.y)) * COST_ONE;
 	}
 
 	void GridMap::getSuccessorNodes(int nodeID, std::vector<SuccessorNodeInfo>& result) const
@@ -32,11 +35,11 @@ namespace fdk { namespace game { namespace findpath
 				{
 					continue;
 				}
-				if (isObstacle(nodeID))
+				if (isObstacle(info.nodeID))
 				{
 					continue;
 				}
-				info.cost = (x == 0 || y == 0) ? 100 : 142;
+				info.cost = (x == 0 || y == 0) ? COST_ONE : COST_SQRT2;
 				result.push_back(info);
 			}
 		}
