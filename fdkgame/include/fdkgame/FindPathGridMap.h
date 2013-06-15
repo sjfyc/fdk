@@ -19,14 +19,15 @@ namespace fdk { namespace game { namespace findpath
 		void resetMap(size_t sizeX, size_t sizeY);
 		const MapData& getMapData() const;
 		void setObstacle(int nodeID, bool bSet=true);
+		VectorI getNodeCoord(int nodeID) const;
+		bool isValidNodeCoord(const VectorI& coord) const;
+		int getNodeID(const VectorI& coord) const;
+		// Environment interfaces
 		virtual int getNodeCount() const;
 		virtual int getHeuristic(int startNodeID, int targetNodeID) const;
 		virtual void getSuccessorNodes(int nodeID, std::vector<SuccessorNodeInfo>& result) const;
 		virtual bool isObstacle(int nodeID) const;
 	private:		
-		VectorI getNodeCoord(int nodeID) const;
-		bool isValidCoord(const VectorI& coord) const;
-		int getNodeID(const VectorI& coord) const;
 		MapData m_nodes;
 	};
 

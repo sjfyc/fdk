@@ -2,6 +2,7 @@
 #define __GAME_H_INCLUDE__
 #include "Types.h"
 #include <fdk/EventHook.h>
+#include <fdkgame/FindPathAStar.h>
 class GameMode;
 
 class Game 
@@ -26,6 +27,7 @@ private:
 	GameMode* m_mode;
 	CellCoord m_startCoord;
 	CellCoord m_targetCoord;
+	fdkgame::findpath::AStar* m_astar;
 };
 
 class GameMode

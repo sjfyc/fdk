@@ -1,9 +1,10 @@
 #include "Board.h"
 #include "Util.h"
 #pragma warning(disable:4244)
+
 Board::Board()
 {
-	fdk::zeroArray(m_block);
+	_Base::resetMap(CELL_COUNT_X, CELL_COUNT_Y);
 }
 
 Board::~Board()
@@ -12,23 +13,17 @@ Board::~Board()
 
 bool Board::isValidCoord(const CellCoord& coord) const
 {
-	return coord.x >= 0 && coord.x < CELL_COUNT_X
-		&& coord.y >= 0 && coord.y < CELL_COUNT_Y;
+	return _Base::isValidNodeCoord(fdkgame::VectorI(coord.x, coord.y));
 }
 
 void Board::setBlock(const CellCoord& coord, bool bBlock)
 {
-	FDK_ASSERT(isValidCoord(coord));
-	m_block[coord.x][coord.y] = bBlock;
+	_Base::setObstacle(getNodeID(fdkgame::VectorI(coord.x, coord.y)), bBlock);
 }
 
 bool Board::isBlock(const CellCoord& coord) const
 {
-	if (!isValidCoord(coord))
-	{
-		return false;
-	}
-	return m_block[coord.x][coord.y];
+	return _Base::isObstacle(getNodeID(fdkgame::VectorI(coord.x, coord.y)));
 }
 
 void Board::draw()
@@ -45,7 +40,7 @@ void Board::draw()
 	{
 		for (short y = 0; y < CELL_COUNT_Y; ++y)
 		{
-			if (m_block[x][y])
+			if (isBlock(CellCoord(x, y)) )
 			{
 				util::fillCell(CellCoord(x, y), COLOR_CELL_BLOCK);
 			}

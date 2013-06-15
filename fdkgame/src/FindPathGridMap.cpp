@@ -25,13 +25,13 @@ namespace fdk { namespace game { namespace findpath
 				{
 					continue;
 				}
-				VectorI aroundCoord(coord.x+x, coord.y+y);
-				if (!isValidCoord(aroundCoord))
+				VectorI aroundCoord(coord.x+x, coord.y+y);				
+				SuccessorNodeInfo info;
+				info.nodeID = getNodeID(aroundCoord);
+				if (info.nodeID == INVALID_NODEID)
 				{
 					continue;
 				}
-				SuccessorNodeInfo info;
-				info.nodeID = getNodeID(aroundCoord);
 				info.cost = (x == 0 || y == 0) ? 100 : 142;
 				result.push_back(info);
 			}
@@ -40,6 +40,10 @@ namespace fdk { namespace game { namespace findpath
 
 	bool GridMap::isObstacle(int nodeID) const
 	{
+		if (!isValidNodeID(nodeID))
+		{
+			return false;
+		}
 		return m_nodes.raw_data()[nodeID].bObstacle;
 	}
 
@@ -50,10 +54,14 @@ namespace fdk { namespace game { namespace findpath
 
 	int GridMap::getNodeID(const VectorI& coord) const
 	{
+		if (!isValidNodeCoord(coord))
+		{
+			return INVALID_NODEID;
+		}
 		return coord.y*m_nodes.size_x()+coord.x;
 	}
 
-	bool GridMap::isValidCoord(const VectorI& coord) const
+	bool GridMap::isValidNodeCoord(const VectorI& coord) const
 	{
 		return coord.x >= 0 && coord.x < (int)m_nodes.size_x()
 			&& coord.y >= 0 && coord.y < (int)m_nodes.size_y();
