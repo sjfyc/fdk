@@ -14,6 +14,7 @@ void AStarRecorder::onCloseNode(int nodeID)
 	CellCoord cellCoord = g_Board.getNodeCoord(nodeID);
 	m_openCells.erase(cellCoord);
 	m_closeCells.insert(cellCoord);
+	m_currentClosedCell = cellCoord;
 }
 
 void AStarRecorder::render()
@@ -35,5 +36,9 @@ void AStarRecorder::render()
 			continue;
 		}
 		util::fillCell(cellCoord, ARGB(255, 210, 248, 207));
+	}
+	if (m_currentClosedCell != g_Game.m_startCoord && m_currentClosedCell != g_Game.m_targetCoord)
+	{
+		util::fillCell(m_currentClosedCell, MyColor_Yellow);
 	}
 }

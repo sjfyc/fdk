@@ -15,6 +15,7 @@ private:
 	typedef std::set<CellCoord> Cells;
 	Cells m_openCells;
 	Cells m_closeCells;
+	CellCoord m_currentClosedCell;
 };
 
 
