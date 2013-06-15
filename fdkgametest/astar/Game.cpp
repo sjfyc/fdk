@@ -131,7 +131,7 @@ void GameModeGame::render(Game& game)
 		const std::vector<int>& pathNodes = astar->getPath();
 
 		CellCoord prevCellCoord = game.m_startCoord;		
-		for (size_t i = pathNodes.size()-1; i >= 0; --i)
+		for (int i = (int)pathNodes.size()-1; i >= 0; --i)
 		{
 			Location prevCenterLocation = util::cellCoordToLocation(prevCellCoord);
 			prevCenterLocation += Location(CELL_SIZE_X/2, CELL_SIZE_Y/2);
@@ -144,6 +144,7 @@ void GameModeGame::render(Game& game)
 				currentCenterLocation.x, currentCenterLocation.y,
 				COLOR_YELLOW
 				);
+			prevCellCoord = currentCellCoord;
 		}
 		
 	}

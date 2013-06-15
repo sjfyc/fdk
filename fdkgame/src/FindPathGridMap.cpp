@@ -32,6 +32,10 @@ namespace fdk { namespace game { namespace findpath
 				{
 					continue;
 				}
+				if (isObstacle(nodeID))
+				{
+					continue;
+				}
 				info.cost = (x == 0 || y == 0) ? 100 : 142;
 				result.push_back(info);
 			}
