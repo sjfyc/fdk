@@ -18,11 +18,6 @@ public:
 	void render();
 	bool IsRunning;
 private:
-	enum EMode
-	{
-		Mode_Game,
-		Mode_MapEdit,
-	};
 	Game();
 	~Game();
 	virtual void onEvent(int eventType, void* params);
