@@ -1,17 +1,23 @@
-#ifndef __FDKGAME_FINDPATH_FINDPATHASTAR_H_INCLUDE__
-#define __FDKGAME_FINDPATH_FINDPATHASTAR_H_INCLUDE__
+#ifndef __FDKGAME_FINDPATHASTAR_H_INCLUDE__
+#define __FDKGAME_FINDPATHASTAR_H_INCLUDE__
 #include "FindPathBase.h"
 #include <queue>
 
-namespace fdk { namespace game 
+namespace fdk { namespace game { namespace findpath
 {
-	class FDKGAME_API FindPathAStar
-		: public FindPathAlgo
+	class FDKGAME_API AStar
 	{
 	public:
-		FindPathAStar();
-		virtual ~FindPathAStar();
-		virtual bool findPath(const FindPathEnv& env, int startNodeID, int targetNodeID);
+		enum SearchResult
+		{			
+			SearchResult_OK,
+			SearchResult_Completed,
+			SearchResult_NoPath,
+		};
+		AStar(const Environment& env, int startNodeID, int targetNodeID);
+		~AStar();
+		SearchResult search(int step=-1);
+		const std::vector<int>& getPath() const;
 	private:
 		enum NodeStateEnum
 		{
@@ -34,22 +40,31 @@ namespace fdk { namespace game
 			bool operator<(const OpenListItem& other) const;
 		};
 		typedef std::priority_queue<OpenListItem> OpenList;
-		void clear();
-		void inspectNode(const FindPathEnv& env, int testNodeID, int parentNodeID, int targetNodeID, int gValue);
+		void inspectNode(int testNodeID, int parentNodeID, int gValue);
+		void buildPath();
+		const Environment& m_env;
+		int m_startNodeID;
+		int m_targetNodeID;
 		NodeState* m_nodeStates;
 		NodeData* m_nodeDatas;
-		OpenList* m_openList;
+		OpenList m_openList;
+		std::vector<int> m_path;
 	};
 
-	inline int FindPathAStar::NodeData::fValue() const
+	inline int AStar::NodeData::fValue() const
 	{
 		return gValue + hValue; 
 	}
 
-	inline bool FindPathAStar::OpenListItem::operator<(const OpenListItem& other) const
+	inline bool AStar::OpenListItem::operator<(const OpenListItem& other) const
 	{
 		return fValue > other.fValue;
 	}
-}}
+
+	inline const std::vector<int>& AStar::getPath() const
+	{
+		return m_path;
+	}
+}}}
 
 #endif

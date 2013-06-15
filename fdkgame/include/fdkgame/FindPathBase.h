@@ -1,33 +1,28 @@
-#ifndef __FDKGAME_FINDPATH_FINDPATHBASE_H_INCLUDE__
-#define __FDKGAME_FINDPATH_FINDPATHBASE_H_INCLUDE__
+#ifndef __FDKGAME_FINDPATHBASE_H_INCLUDE__
+#define __FDKGAME_FINDPATHBASE_H_INCLUDE__
 #include "Base.h"
 #include <vector>
 
-namespace fdk { namespace game 
+namespace fdk { namespace game { namespace findpath
 {
-	const int FINDPATH_INVALID_NODEID = -1;
+	const int INVALID_NODEID = -1;
 
-	class FDKGAME_API FindPathEnv
+	struct SuccessorNodeInfo
 	{
-	public:		
-		struct SuccessorNodeInfo
-		{
-			int nodeID;
-			int cost;
-		};
-		virtual ~FindPathEnv() {}		
-		virtual bool isValidNodeId(int nodeId) const = 0;
+		int nodeID;
+		int cost;
+	};
+
+	class FDKGAME_API Environment
+	{
+	public:
+		virtual ~Environment() {}
+		virtual bool isValidNodeID(int nodeID) const = 0;
 		virtual int getNodeCount() const = 0;
 		virtual int getHeuristic(int startNodeID, int targetNodeID) const = 0;
 		virtual void getSuccessorNodes(int nodeId, std::vector<SuccessorNodeInfo>& result) const = 0;
+		virtual bool isObstacle(int nodeID) const = 0;
 	};
-
-	class FDKGAME_API FindPathAlgo
-	{
-	public:
-		virtual ~FindPathAlgo() {}
-		virtual bool findPath(const FindPathEnv& env, int startNodeID, int targetNodeID) = 0;
-	};
-}}
+}}}
 
 #endif

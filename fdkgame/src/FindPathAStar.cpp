@@ -1,120 +1,68 @@
 #include <fdkgame/FindPathAStar.h>
 
-namespace fdk { namespace game 
+namespace fdk { namespace game { namespace findpath
 {
-	FindPathAStar::FindPathAStar()
-		: m_nodeStates(0)
+	AStar::AStar(const Environment& env, int startNodeID, int targetNodeID)
+		: m_env(env)
+		, m_startNodeID(startNodeID)
+		, m_targetNodeID(targetNodeID)
+		, m_nodeStates(0)
 		, m_nodeDatas(0)
-		, m_openList(0)
+		, m_openList()
 	{
+		FDK_ASSERT(startNodeID != targetNodeID);
+		FDK_ASSERT(m_env.isValidNodeID(startNodeID));
+		FDK_ASSERT(m_env.isValidNodeID(targetNodeID));
+
+		const int nodeCount = m_env.getNodeCount();
+		m_nodeStates = new NodeState[nodeCount];
+		m_nodeDatas = new NodeData[nodeCount];
+		memset(m_nodeStates, 0, sizeof(NodeState)*nodeCount);
+
+		inspectNode(m_startNodeID, INVALID_NODEID, 0);
 	}
 
-	FindPathAStar::~FindPathAStar()
-	{
-		clear();
-	}
-
-	void FindPathAStar::clear()
+	AStar::~AStar()
 	{
 		FDK_DELETE_ARRAY(m_nodeStates);
 		FDK_DELETE_ARRAY(m_nodeDatas);
-		FDK_DELETE(m_openList);
 	}
-
-	bool FindPathAStar::findPath(const FindPathEnv& env, int startNodeID, int targetNodeID)
+	
+	AStar::SearchResult AStar::search(int step)
 	{
-		FDK_ASSERT(env.isValidNodeId(startNodeID));
-		FDK_ASSERT(env.isValidNodeId(targetNodeID));		
-
-		// prepare for new find
-		clear();
-		const int nodeCount = env.getNodeCount();
-		m_nodeStates = new NodeState[nodeCount];
-		m_nodeDatas = new NodeData[nodeCount];
-		m_openList = new OpenList;
-		memset(m_nodeStates, 0, sizeof(NodeState)*nodeCount);
-
-		inspectNode(env, startNodeID, FINDPATH_INVALID_NODEID, targetNodeID, 0);
-
-		// main loop
-		std::vector<FindPathEnv::SuccessorNodeInfo> successors;
-		while (!m_openList->empty())
+		int proceededStep = 0;
+		std::vector<SuccessorNodeInfo> successors;
+		while (!m_openList.empty())
 		{
-			OpenListItem current = m_openList->top();			
-			if (current.nodeID == targetNodeID)
+			if (step >=1 && proceededStep >= step)
 			{
-				// todo finish;
-				return true;
+				return SearchResult_OK;
 			}
-			m_openList->pop();
-			m_nodeStates[current.nodeID] = NodeState_Closed;
+			++proceededStep;
+
+			OpenListItem current = m_openList.top();			
+			m_openList.pop();
+			m_nodeStates[current.nodeID] = NodeState_Closed;			
+
+			if (current.nodeID == m_targetNodeID)
+			{
+				buildPath();
+				return SearchResult_Completed;
+			}			
 
 			successors.clear();
-			env.getSuccessorNodes(current.nodeID, successors);
+			m_env.getSuccessorNodes(current.nodeID, successors);
 			for (size_t i = 0; i < successors.size(); ++i)
 			{
-				FindPathEnv::SuccessorNodeInfo& successor = successors[i];
-				inspectNode(env, successor.nodeID, current.nodeID, targetNodeID,
+				SuccessorNodeInfo& successor = successors[i];
+				inspectNode(successor.nodeID, current.nodeID,
 					m_nodeDatas[current.nodeID].gValue+successor.cost);
 			}
 		}
-		return true;
+		return SearchResult_NoPath;
 	}
 
-	//void FindPathAStar::findPathMain(int startNodeID)
-	//{
-	//	int maxopen = 0;
-	//	//    int closedsize = 0;
-	//	int numberNodes = m_env->getNumberNodes();
-	//	m_closed->init(numberNodes);
-	//	m_open.init(numberNodes);
-	//	int heuristic = m_env->getHeuristic(start, m_target);
-	//	m_pathCost = NO_COST;
-	//	AStarNode startNode(start, NO_NODE, 0, heuristic);
-	//	m_open.insert(startNode);
-	//	vector<Environment::Successor> successors;
-	//	while (! m_open.isEmpty())
-	//	{
-	//		m_statistics.get("open_length").add(m_open.getSize());
-	//		if (m_open.getSize() > maxopen)
-	//			maxopen = m_open.getSize();
-	//		//m_open.print(cout);
-	//		AStarNode node = getBestNodeFromOpen();
-	//		//cout << '[';  node.print(cout); cout << ']' << endl;
-	//		if (node.m_nodeId == m_target)
-	//		{
-	//			finishSearch(start, node);
-	//			return;
-	//		}
-	//		++m_nodesExpanded;
-	//		m_env->getSuccessors(node.m_nodeId, NO_NODE, successors);
-	//		m_branchingFactor.add(successors.size());
-	//		for (vector<Environment::Successor>::const_iterator i
-	//			= successors.begin(); i != successors.end(); ++i)
-	//		{
-	//			int newg = node.m_g + i->m_cost;
-	//			int target = i->m_target;
-	//			const AStarNode* targetAStarNode = findNode(target);
-	//			if (targetAStarNode != 0)
-	//			{
-	//				if (newg >= targetAStarNode->m_g)
-	//					continue;
-	//				if (! m_open.remove(target))
-	//					m_closed->remove(target);
-	//			}
-	//			int newHeuristic = m_env->getHeuristic(target, m_target);
-	//			AStarNode newAStarNode(target, node.m_nodeId, newg, newHeuristic);
-	//			m_open.insert(newAStarNode);
-	//		}
-	//		//        closedsize++;
-	//		m_closed->add(node);
-	//		//        m_statistics.get("closed_length").add(m_closed.size());
-	//		//closed->print(cout);
-	//	}
-	//	m_statistics.get("open_max").add(maxopen);
-	//}
-
-	void FindPathAStar::inspectNode(const FindPathEnv& env, int testNodeID, int parentNodeID, int targetNodeID, int gValue)
+	void AStar::inspectNode(int testNodeID, int parentNodeID, int gValue)
 	{
 		switch (m_nodeStates[testNodeID])
 		{
@@ -123,9 +71,9 @@ namespace fdk { namespace game
 				m_nodeStates[testNodeID] = NodeState_Open;
 				m_nodeDatas[testNodeID].parentNodeID = parentNodeID;
 				m_nodeDatas[testNodeID].gValue = gValue;
-				m_nodeDatas[testNodeID].hValue = env.getHeuristic(testNodeID, targetNodeID);			
+				m_nodeDatas[testNodeID].hValue = m_env.getHeuristic(testNodeID, m_targetNodeID);			
 				OpenListItem openListItem = { testNodeID, m_nodeDatas[testNodeID].fValue() };
-				m_openList->push(openListItem);
+				m_openList.push(openListItem);
 			}			
 			break;
 		case NodeState_Open:
@@ -134,7 +82,7 @@ namespace fdk { namespace game
 				m_nodeDatas[testNodeID].parentNodeID = parentNodeID;
 				m_nodeDatas[testNodeID].gValue = gValue;
 				OpenListItem openListItem = { testNodeID, m_nodeDatas[testNodeID].fValue() };				
-				m_openList->push(openListItem); // 不需要删除旧项，新项必将被先从Open变Close，而旧项由于Close将被跳过
+				m_openList.push(openListItem); // 不需要删除旧项，新项必将被先从Open变Close，而旧项由于Close将被跳过
 			}
 			break;
 		case NodeState_Closed:
@@ -143,4 +91,22 @@ namespace fdk { namespace game
 			FDK_ASSERT(0);
 		}
 	}
-}}
+
+	void AStar::buildPath()
+	{
+		FDK_ASSERT(m_path.empty());
+		int nodeId = m_targetNodeID;
+		while (1)
+		{
+			if (nodeId == m_startNodeID)
+				break;
+			m_path.push_back(nodeId);			
+			if (m_env.isObstacle(nodeId)) // 障碍也可以以一个很大的代价称为后继节点
+			{
+				m_path.clear();
+			}
+			nodeId = m_nodeDatas[nodeId].parentNodeID;
+		}
+	}
+
+}}}
