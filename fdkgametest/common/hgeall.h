@@ -22,6 +22,7 @@ enum
 	MyColor_Red = 0xFFFF0000,
 	MyColor_Green = 0xFF00FF00,
 	MyColor_Blue = 0xFF0000FF,
+	MyColor_Yellow = 0xFFFFFF00,
 };
 
 enum 

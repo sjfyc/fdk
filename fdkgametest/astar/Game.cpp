@@ -145,9 +145,9 @@ void GameModeGame::render(Game& game)
 	{
 		game.m_astarRecorder->render();
 	}
-	if (game.m_astar && game.m_bAstarRunning)
+	if (game.m_astar && !game.m_bAstarRunning)
 	{
-		drawPath(game.m_startCoord, game.m_astar->getPath(), COLOR_YELLOW);		
+		drawPath(game.m_startCoord, game.m_astar->getPath(), MyColor_Blue);		
 	}
 }
 

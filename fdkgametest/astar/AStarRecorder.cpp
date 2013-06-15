@@ -25,7 +25,7 @@ void AStarRecorder::render()
 		{
 			continue;
 		}
-		util::fillCell(cellCoord, 0xff00ff00);
+		util::fillCell(cellCoord, ARGB(255, 128, 128, 255));
 	}
 	for (Cells::const_iterator it = m_closeCells.begin(); it != m_closeCells.end(); ++it)
 	{
@@ -34,6 +34,6 @@ void AStarRecorder::render()
 		{
 			continue;
 		}
-		util::fillCell(cellCoord, 0xffff0000);
+		util::fillCell(cellCoord, ARGB(255, 210, 248, 207));
 	}
 }
