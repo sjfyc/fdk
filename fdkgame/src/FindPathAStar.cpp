@@ -35,12 +35,6 @@ namespace fdk { namespace game { namespace findpath
 		std::vector<SuccessorNodeInfo> successors;
 		while (!m_openList.empty())
 		{
-			if (step >=1 && proceededStep >= step)
-			{
-				return SearchResult_OK;
-			}
-			++proceededStep;
-
 			OpenListItem current = m_openList.top();			
 			m_openList.pop();
 			m_nodeStates[current.nodeID] = NodeState_Closed;
@@ -62,6 +56,12 @@ namespace fdk { namespace game { namespace findpath
 				SuccessorNodeInfo& successor = successors[i];
 				inspectNode(successor.nodeID, current.nodeID,
 					m_nodeDatas[current.nodeID].gValue+successor.cost);
+			}
+
+			++proceededStep;
+			if (step >=1 && proceededStep >= step)
+			{
+				return SearchResult_OK;
 			}
 		}
 		return SearchResult_NoPath;
