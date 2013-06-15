@@ -21,6 +21,9 @@
     <ClInclude Include="include\fdkgame\FindPathBase.h">
       <Filter>include</Filter>
     </ClInclude>
+    <ClInclude Include="include\fdkgame\FindPathGridMap.h">
+      <Filter>include</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="src\Base.cpp">
@@ -30,6 +33,12 @@
       <Filter>src</Filter>
     </ClCompile>
     <ClCompile Include="src\FindPathAStar.cpp">
+      <Filter>src</Filter>
+    </ClCompile>
+    <ClCompile Include="src\FindPathGridMap.cpp">
+      <Filter>src</Filter>
+    </ClCompile>
+    <ClCompile Include="src\FindPathBase.cpp">
       <Filter>src</Filter>
     </ClCompile>
   </ItemGroup>
