@@ -29,4 +29,12 @@ namespace util
 			static_cast<CellCoord::ValueType>(location.y/CELL_SIZE_Y)
 			);
 	}
+
+	Location cellCoordToLocation(const CellCoord& cellCoord)
+	{
+		return Location(
+			static_cast<Location::ValueType>(cellCoord.x)*CELL_SIZE_X, 
+			static_cast<Location::ValueType>(cellCoord.y)*CELL_SIZE_Y
+			);
+	}
 }

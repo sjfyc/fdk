@@ -16,6 +16,8 @@ namespace fdk { namespace game
 		static const Vector2D ZERO;
 		Vector2D();
 		Vector2D(T x, T y);
+		template <class U>
+		Vector2D(const Vector2D<U>& other);
 		void reset();
 		void reset(T x, T y);
 		bool operator==(const Vector2D& other) const;
@@ -81,6 +83,12 @@ namespace fdk { namespace game
 	template <class T>
 	inline Vector2D<T>::Vector2D(T _x, T _y)
 		: x(_x), y(_y)
+	{}
+
+	template <class T>
+	template <class U>
+	inline Vector2D<T>::Vector2D(const Vector2D<U>& other)
+		: x(other.x), y(other.y)
 	{}
 
 	template <class T>

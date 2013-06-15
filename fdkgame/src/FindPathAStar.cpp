@@ -9,6 +9,8 @@ namespace fdk { namespace game { namespace findpath
 		, m_nodeStates(0)
 		, m_nodeDatas(0)
 		, m_openList()
+		, m_bCompleted(false)
+		, m_path()
 		, m_recorder(recorder)
 	{
 		FDK_ASSERT(startNodeID != targetNodeID);
@@ -46,6 +48,7 @@ namespace fdk { namespace game { namespace findpath
 			if (current.nodeID == m_targetNodeID)
 			{
 				buildPath();
+				m_bCompleted = true;
 				return SearchResult_Completed;
 			}			
 

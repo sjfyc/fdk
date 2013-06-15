@@ -1,13 +1,20 @@
 #ifndef __GAMETYPES_H_INCLUDE__
 #define __GAMETYPES_H_INCLUDE__
-#include <fdkgame/Math.h>
 #include <common/hgeall.h>
+#include <fdkgame/Math.h>
+#include <fdkgame/FindPathAStar.h>
 
 typedef fdkgame::Vector2D<short> CellCoord;
 typedef fdkgame::Vector2D<float> Location;
 typedef fdkgame::Vector2D<float> Velocity;
+typedef fdkgame::findpath::AStar AStar;
+
 enum 
 {
+	COLOR_BLACK = 0xFF000000,
+	COLOR_WHITE = 0xFFFFFFFF,
+	COLOR_YELLOW = 0xFFFFFF00,
+
 	CELL_COUNT_X = 26,
 	CELL_COUNT_Y = 20,
 
@@ -17,10 +24,7 @@ enum
 	COLOR_BOARD_LINE = 0x55020202,
 	COLOR_CELL_BLOCK = 0xFF222222,
 	COLOR_CELL_FROM = 0xFF00FF00,
-	COLOR_CELL_TO = 0xFFFF0000,
-
-	COLOR_BLACK = 0xFF000000,
-	COLOR_WHITE = 0xFFFFFFFF,
+	COLOR_CELL_TO = 0xFFFF0000,	
 };
 
 #endif

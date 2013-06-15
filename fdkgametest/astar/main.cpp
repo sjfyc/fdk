@@ -47,6 +47,7 @@ bool RenderFunc()
 	g_HGE->Gfx_Clear(0xFFFFFFFF);
 
 	g_Game.render();
+	g_HGE.DrawMouse();
 
 	g_HGE->Gfx_EndScene();
 	return false;

@@ -13,17 +13,17 @@ Board::~Board()
 
 bool Board::isValidCoord(const CellCoord& coord) const
 {
-	return _Base::isValidNodeCoord(fdkgame::VectorI(coord.x, coord.y));
+	return _Base::isValidNodeCoord(coord);
 }
 
 void Board::setBlock(const CellCoord& coord, bool bBlock)
 {
-	_Base::setObstacle(getNodeID(fdkgame::VectorI(coord.x, coord.y)), bBlock);
+	_Base::setObstacle(getNodeID(coord), bBlock);
 }
 
 bool Board::isBlock(const CellCoord& coord) const
 {
-	return _Base::isObstacle(getNodeID(fdkgame::VectorI(coord.x, coord.y)));
+	return _Base::isObstacle(getNodeID(coord));
 }
 
 void Board::draw()

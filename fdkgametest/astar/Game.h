@@ -2,8 +2,8 @@
 #define __GAME_H_INCLUDE__
 #include "Types.h"
 #include <fdk/EventHook.h>
-#include <fdkgame/FindPathAStar.h>
 class GameMode;
+class AStarRecorder;
 
 class Game 
 	: public fdk::Singleton<Game>
@@ -27,14 +27,18 @@ private:
 	GameMode* m_mode;
 	CellCoord m_startCoord;
 	CellCoord m_targetCoord;
-	fdkgame::findpath::AStar* m_astar;
+	AStar* m_astar;
+	AStarRecorder* m_astarRecorder;
 };
 
 class GameMode
 {
 public:
-	virtual void update(Game& game, float delta) = 0;
-	virtual void handleEvent(Game& game, int eventType, void* params) = 0;
+	virtual void enter(Game& game) {}
+	virtual void leave(Game& game) {}
+	virtual void update(Game& game, float delta) {}
+	virtual void render(Game& game) {}
+	virtual void handleEvent(Game& game, int eventType, void* params) {}
 };
 
 class GameModeGame
@@ -44,6 +48,7 @@ class GameModeGame
 	friend class fdk::Singleton<GameModeGame>;
 public:
 	virtual void update(Game& game, float delta);
+	virtual void render(Game& game);
 	virtual void handleEvent(Game& game, int eventType, void* params);
 };
 
@@ -53,6 +58,8 @@ class GameModeMapEdit
 {
 	friend class fdk::Singleton<GameModeMapEdit>;
 public:
+	virtual void enter(Game& game);
+	virtual void leave(Game& game);
 	virtual void update(Game& game, float delta);
 	virtual void handleEvent(Game& game, int eventType, void* params);
 private:	

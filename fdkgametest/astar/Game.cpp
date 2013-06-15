@@ -4,6 +4,7 @@
 #include "Util.h"
 #include "Board.h"
 #include "ActorBank.h"
+#include "AStarRecorder.h"
 
 Game::Game()
 	: m_mode(&g_GameModeGame)
@@ -45,7 +46,7 @@ void Game::update(float delta)
 	if (!fdk::ModuleManager::instance().tick(delta))
 	{
 		util::output(fdk::ModuleManager::instance().getErrorMessage().c_str());
-	}	
+	}
 }
 
 void Game::render()
@@ -54,7 +55,7 @@ void Game::render()
 	util::fillCell(m_startCoord, COLOR_CELL_FROM);
 	util::fillCell(m_targetCoord, COLOR_CELL_TO);
 	g_ActorBank.draw();
-	g_HGE.DrawMouse();
+	m_mode->render(*this);
 }
 
 void Game::onEvent(int eventType, void* params)
@@ -69,6 +70,18 @@ void Game::onEvent(int eventType, void* params)
 		else if (key == HGEK_M)
 		{
 			toggleMode();
+		}
+		else if (key == HGEK_F)
+		{
+			if (m_mode == &g_GameModeMapEdit)
+			{
+				toggleMode();
+			}
+			m_astarRecorder = new AStarRecorder;
+			m_astar = new AStar(g_Board, 
+				g_Board.getNodeID(m_startCoord),
+				g_Board.getNodeID(m_targetCoord),
+				m_astarRecorder);			
 		}
 	}
 	m_mode->handleEvent(*this, eventType, params);
@@ -96,6 +109,44 @@ void Game::outputUsage()
 
 void GameModeGame::update(Game& game, float delta)
 {
+	AStar* astar = game.m_astar;
+	if (astar)
+	{
+		AStar::SearchResult result = astar->search(1);
+		if (result == AStar::SearchResult_Completed)
+		{
+		}
+	}
+}
+
+void GameModeGame::render(Game& game)
+{
+	if (game.m_astarRecorder)
+	{
+		game.m_astarRecorder->render();
+	}
+	AStar* astar = game.m_astar;
+	if (astar && astar->isCompleted())
+	{
+		const std::vector<int>& pathNodes = astar->getPath();
+
+		CellCoord prevCellCoord = game.m_startCoord;		
+		for (size_t i = pathNodes.size()-1; i >= 0; --i)
+		{
+			Location prevCenterLocation = util::cellCoordToLocation(prevCellCoord);
+			prevCenterLocation += Location(CELL_SIZE_X/2, CELL_SIZE_Y/2);
+
+			CellCoord currentCellCoord = g_Board.getNodeCoord(pathNodes[i]);
+			Location currentCenterLocation = util::cellCoordToLocation(currentCellCoord);
+			currentCenterLocation += Location(CELL_SIZE_X/2, CELL_SIZE_Y/2);
+
+			g_HGE->Gfx_RenderLine(prevCenterLocation.x, prevCenterLocation.y, 
+				currentCenterLocation.x, currentCenterLocation.y,
+				COLOR_YELLOW
+				);
+		}
+		
+	}
 }
 
 void GameModeGame::handleEvent(Game& game, int eventType, void* params)
@@ -106,6 +157,16 @@ GameModeMapEdit::GameModeMapEdit()
 	: m_bMouseTracking(false)
 	, m_lastMouseCoord()
 	, m_brush(Brush_Block)
+{
+}
+
+void GameModeMapEdit::enter(Game& game)
+{
+	delete game.m_astar;
+	game.m_astar = 0;
+}
+
+void GameModeMapEdit::leave(Game& game)
 {
 }
 
