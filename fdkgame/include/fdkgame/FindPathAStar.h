@@ -5,6 +5,14 @@
 
 namespace fdk { namespace game { namespace findpath
 {
+	class FDKGAME_API AStarRecorder
+	{
+	public:
+		virtual ~AStarRecorder() {}
+		virtual void onOpenNode(int nodeID, int parentNodeID, bool bReopen) = 0;
+		virtual void onCloseNode(int nodeID) = 0;
+	};
+
 	class FDKGAME_API AStar
 	{
 	public:
@@ -14,7 +22,7 @@ namespace fdk { namespace game { namespace findpath
 			SearchResult_Completed,
 			SearchResult_NoPath,
 		};
-		AStar(const Environment& env, int startNodeID, int targetNodeID);
+		AStar(const Environment& env, int startNodeID, int targetNodeID, AStarRecorder* recorder=0);
 		~AStar();
 		SearchResult search(int step=-1);
 		const std::vector<int>& getPath() const;
@@ -40,7 +48,7 @@ namespace fdk { namespace game { namespace findpath
 			bool operator<(const OpenListItem& other) const;
 		};
 		typedef std::priority_queue<OpenListItem> OpenList;
-		void inspectNode(int testNodeID, int parentNodeID, int gValue);
+		void inspectNode(int nodeID, int parentNodeID, int gValue);
 		void buildPath();
 		const Environment& m_env;
 		int m_startNodeID;
@@ -49,6 +57,7 @@ namespace fdk { namespace game { namespace findpath
 		NodeData* m_nodeDatas;
 		OpenList m_openList;
 		std::vector<int> m_path;
+		AStarRecorder* m_recorder;
 	};
 
 	inline int AStar::NodeData::fValue() const

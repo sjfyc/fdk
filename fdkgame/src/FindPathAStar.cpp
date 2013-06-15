@@ -2,13 +2,14 @@
 
 namespace fdk { namespace game { namespace findpath
 {
-	AStar::AStar(const Environment& env, int startNodeID, int targetNodeID)
+	AStar::AStar(const Environment& env, int startNodeID, int targetNodeID, AStarRecorder* recorder)
 		: m_env(env)
 		, m_startNodeID(startNodeID)
 		, m_targetNodeID(targetNodeID)
 		, m_nodeStates(0)
 		, m_nodeDatas(0)
 		, m_openList()
+		, m_recorder(recorder)
 	{
 		FDK_ASSERT(startNodeID != targetNodeID);
 		FDK_ASSERT(m_env.isValidNodeID(startNodeID));
@@ -42,7 +43,11 @@ namespace fdk { namespace game { namespace findpath
 
 			OpenListItem current = m_openList.top();			
 			m_openList.pop();
-			m_nodeStates[current.nodeID] = NodeState_Closed;			
+			m_nodeStates[current.nodeID] = NodeState_Closed;
+			if (m_recorder)
+			{
+				m_recorder->onCloseNode(current.nodeID);
+			}
 
 			if (current.nodeID == m_targetNodeID)
 			{
@@ -62,27 +67,35 @@ namespace fdk { namespace game { namespace findpath
 		return SearchResult_NoPath;
 	}
 
-	void AStar::inspectNode(int testNodeID, int parentNodeID, int gValue)
+	void AStar::inspectNode(int nodeID, int parentNodeID, int gValue)
 	{
-		switch (m_nodeStates[testNodeID])
+		switch (m_nodeStates[nodeID])
 		{
 		case NodeState_Unknown:
 			{
-				m_nodeStates[testNodeID] = NodeState_Open;
-				m_nodeDatas[testNodeID].parentNodeID = parentNodeID;
-				m_nodeDatas[testNodeID].gValue = gValue;
-				m_nodeDatas[testNodeID].hValue = m_env.getHeuristic(testNodeID, m_targetNodeID);			
-				OpenListItem openListItem = { testNodeID, m_nodeDatas[testNodeID].fValue() };
+				m_nodeStates[nodeID] = NodeState_Open;
+				m_nodeDatas[nodeID].parentNodeID = parentNodeID;
+				m_nodeDatas[nodeID].gValue = gValue;
+				m_nodeDatas[nodeID].hValue = m_env.getHeuristic(nodeID, m_targetNodeID);			
+				OpenListItem openListItem = { nodeID, m_nodeDatas[nodeID].fValue() };
 				m_openList.push(openListItem);
+				if (m_recorder)
+				{
+					m_recorder->onOpenNode(nodeID, parentNodeID, false);
+				}
 			}			
 			break;
 		case NodeState_Open:
-			if (gValue < m_nodeDatas[testNodeID].gValue)
+			if (gValue < m_nodeDatas[nodeID].gValue)
 			{
-				m_nodeDatas[testNodeID].parentNodeID = parentNodeID;
-				m_nodeDatas[testNodeID].gValue = gValue;
-				OpenListItem openListItem = { testNodeID, m_nodeDatas[testNodeID].fValue() };				
+				m_nodeDatas[nodeID].parentNodeID = parentNodeID;
+				m_nodeDatas[nodeID].gValue = gValue;
+				OpenListItem openListItem = { nodeID, m_nodeDatas[nodeID].fValue() };				
 				m_openList.push(openListItem); // 不需要删除旧项，新项必将被先从Open变Close，而旧项由于Close将被跳过
+				if (m_recorder)
+				{
+					m_recorder->onOpenNode(nodeID, parentNodeID, true);
+				}
 			}
 			break;
 		case NodeState_Closed:
