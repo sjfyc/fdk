@@ -107,11 +107,6 @@ void Game::outputUsage()
 	util::output("S: start path finding step by step");
 }
 
-bool Game::isStartOrTargetCoord(const CellCoord& cellCoord) const
-{
-	return cellCoord == m_startCoord || cellCoord == m_targetCoord;
-}
-
 void GameModeGame::update(Game& game, float delta)
 {
 	AStar* astar = game.m_astar;

@@ -20,7 +20,6 @@ public:
 	bool IsRunning;
 	const CellCoord& getStartCoord() const;
 	const CellCoord& getTargetCoord() const;
-	bool isStartOrTargetCoord(const CellCoord& cellCoord) const;
 private:
 	Game();
 	~Game();
