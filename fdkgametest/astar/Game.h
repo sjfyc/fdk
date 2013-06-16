@@ -50,7 +50,11 @@ class GameModeGame
 public:
 	virtual void update(Game& game, float delta);
 	virtual void render(Game& game);
-	virtual void handleEvent(Game& game, int eventType, void* params);
+	virtual void handleEvent(Game& game, int eventType, void* params);	
+private:
+	GameModeGame();
+	void search(AStar& astar);
+	bool m_bStepByStep;
 };
 
 class GameModeMapEdit

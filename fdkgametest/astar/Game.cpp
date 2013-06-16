@@ -67,20 +67,23 @@ void Game::onEvent(int eventType, void* params)
 		{
 			IsRunning = false;
 		}
-		else if (key == HGEK_M)
+		else if (key == HGEK_T)
 		{
 			toggleMode();
 		}
-		else if (key == HGEK_SPACE)
+		else if (key == HGEK_SPACE || key == HGEK_S)
 		{
 			if (m_mode == &g_GameModeMapEdit)
 			{
 				toggleMode();
 			}
-			delete m_astar;
-			m_astar = new AStar(g_Board, 
-				g_Board.getNodeID(m_startCoord),
-				g_Board.getNodeID(m_targetCoord));
+			if (!m_astar || m_astar->getSearchResult() != AStar::SearchResult_Proceeding)
+			{				
+				delete m_astar;
+				m_astar = new AStar(g_Board, 
+					g_Board.getNodeID(m_startCoord),
+					g_Board.getNodeID(m_targetCoord));
+			}
 		}
 	}
 	m_mode->handleEvent(*this, eventType, params);
@@ -102,25 +105,23 @@ void Game::toggleMode()
 
 void Game::outputUsage()
 {
-	util::output("M: toggle between game & map edit mode");
-	util::output("SPACE: start path finding");
-	util::output("S: start path finding step by step");
+	util::output("T: toggle between game & map edit mode");
+	util::output("C: clear obstacles in map edit mode");
+	util::output("SPACE: restart/continue path finding");
+	util::output("S: restart/continue path finding step by step");
+}
+
+GameModeGame::GameModeGame()
+	: m_bStepByStep(false)
+{
 }
 
 void GameModeGame::update(Game& game, float delta)
 {
 	AStar* astar = game.m_astar;
-	if (astar && astar->getSearchResult() == AStar::SearchResult_Proceeding)
+	if (astar && astar->getSearchResult() == AStar::SearchResult_Proceeding && !m_bStepByStep)
 	{
-		AStar::SearchResult result = astar->search(1);
-		if (result == AStar::SearchResult_Completed)
-		{			
-			util::output("search completed");
-		}
-		else if (result == AStar::SearchResult_NoPath)
-		{
-			util::output("search failed");
-		}
+		search(*astar);	
 	}
 }
 
@@ -134,6 +135,32 @@ void GameModeGame::render(Game& game)
 
 void GameModeGame::handleEvent(Game& game, int eventType, void* params)
 {
+	if (eventType == GAME_SYSTEM_EVENT_KEYUP)
+	{
+		int key = (int)params;		
+		if (key == HGEK_SPACE)
+		{
+			m_bStepByStep = false;
+		}
+		else if (key == HGEK_S)
+		{
+			m_bStepByStep = true;
+			search(*game.m_astar);
+		}
+	}
+}
+
+void GameModeGame::search(AStar& astar)
+{
+	AStar::SearchResult result = astar.search(1);
+	if (result == AStar::SearchResult_Completed)
+	{			
+		util::output("search completed");
+	}
+	else if (result == AStar::SearchResult_NoPath)
+	{
+		util::output("search failed");
+	}
 }
 
 GameModeMapEdit::GameModeMapEdit()

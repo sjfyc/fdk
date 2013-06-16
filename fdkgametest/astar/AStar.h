@@ -13,7 +13,6 @@ class AStar
 public:
 	AStar(const fdkgame::findpath::Environment& env, int startNodeID, int targetNodeID);
 	~AStar();
-	bool isEnded() const;
 	// AStarRecorder interface
 	virtual void onOpenNode(int nodeID, int parentNodeID, bool bReopen);
 	virtual void onCloseNode(int nodeID);
