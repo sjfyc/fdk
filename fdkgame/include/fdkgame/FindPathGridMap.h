@@ -28,7 +28,8 @@ namespace fdk { namespace game { namespace findpath
 		virtual int getHeuristic(int startNodeID, int targetNodeID) const;
 		virtual void getSuccessorNodes(int nodeID, std::vector<SuccessorNodeInfo>& result) const;
 		virtual bool isObstacle(int nodeID) const;
-	private:		
+	private:
+		bool tryAddSuccessorNode(std::vector<SuccessorNodeInfo>& result, const VectorI& coord, int cost) const;
 		MapData m_nodes;
 	};
 
