@@ -18,6 +18,7 @@ namespace fdk { namespace game { namespace findpath
 		typedef Array2D<Node> MapData;
 		void resetMap(size_t sizeX, size_t sizeY);
 		const MapData& getMapData() const;
+		void clearObstacles();
 		void setObstacle(int nodeID, bool bSet=true);
 		VectorI getNodeCoord(int nodeID) const;
 		bool isValidNodeCoord(const VectorI& coord) const;

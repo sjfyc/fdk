@@ -6,6 +6,17 @@ namespace fdk { namespace game { namespace findpath
 	const int COST_ONE = 100;
 	const int COST_SQRT2 = 142;
 
+	void GridMap::clearObstacles()
+	{
+		for (size_t y = 0; y < m_nodes.size_y(); ++y)
+		{
+			for (size_t x = 0; x < m_nodes.size_x(); ++x)
+			{
+				m_nodes(x, y).bObstacle = false;
+			}
+		}
+	}
+
 	int GridMap::getNodeCount() const
 	{
 		return m_nodes.count();

@@ -208,7 +208,11 @@ void GameModeMapEdit::handleEvent(Game& game, int eventType, void* params)
 					g_Board.setBlock(mouseCoord, false);
 				}
 			}
-		}		
+		}
+		else if (key == HGEK_C)
+		{
+			g_Board.clearBlocks();
+		}
 	}
 }
 

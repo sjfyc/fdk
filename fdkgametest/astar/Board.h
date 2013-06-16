@@ -12,6 +12,7 @@ class Board
 public:		
 	bool isBlock(const CellCoord& coord) const;
 	void setBlock(const CellCoord& coord, bool bBlock);
+	void clearBlocks();
 	void draw();
 private:
 	Board();

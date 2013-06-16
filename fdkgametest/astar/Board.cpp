@@ -16,6 +16,11 @@ bool Board::isValidCoord(const CellCoord& coord) const
 	return _Base::isValidNodeCoord(coord);
 }
 
+void Board::clearBlocks()
+{
+	_Base::clearObstacles();
+}
+
 void Board::setBlock(const CellCoord& coord, bool bBlock)
 {
 	_Base::setObstacle(getNodeID(coord), bBlock);
