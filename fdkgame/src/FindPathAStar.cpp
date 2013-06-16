@@ -9,7 +9,7 @@ namespace fdk { namespace game { namespace findpath
 		, m_nodeStates(0)
 		, m_nodeDatas(0)
 		, m_openList()
-		, m_bCompleted(false)
+		, m_searchResult(SearchResult_Proceeding)
 		, m_path()
 		, m_recorder(recorder)
 	{
@@ -33,6 +33,10 @@ namespace fdk { namespace game { namespace findpath
 	
 	AStar::SearchResult AStar::search(int step)
 	{
+		if (m_searchResult != SearchResult_Proceeding)
+		{
+			return m_searchResult;
+		}
 		int proceededStep = 0;
 		std::vector<SuccessorNodeInfo> successors;
 		while (!m_openList.empty())
@@ -48,7 +52,7 @@ namespace fdk { namespace game { namespace findpath
 			if (current.nodeID == m_targetNodeID)
 			{
 				buildPath();
-				m_bCompleted = true;
+				m_searchResult = SearchResult_Completed;
 				return SearchResult_Completed;
 			}			
 
@@ -64,9 +68,10 @@ namespace fdk { namespace game { namespace findpath
 			++proceededStep;
 			if (step >=1 && proceededStep >= step)
 			{
-				return SearchResult_OK;
+				return SearchResult_Proceeding;
 			}
 		}
+		m_searchResult = SearchResult_NoPath;
 		return SearchResult_NoPath;
 	}
 

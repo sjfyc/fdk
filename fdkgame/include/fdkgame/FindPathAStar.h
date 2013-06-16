@@ -18,7 +18,7 @@ namespace fdk { namespace game { namespace findpath
 	public:
 		enum SearchResult
 		{			
-			SearchResult_OK,
+			SearchResult_Proceeding,
 			SearchResult_Completed,
 			SearchResult_NoPath,
 		};
@@ -56,7 +56,7 @@ namespace fdk { namespace game { namespace findpath
 		NodeState* m_nodeStates;
 		NodeData* m_nodeDatas;
 		OpenList m_openList;
-		bool m_bCompleted;
+		SearchResult m_searchResult;
 		std::vector<int> m_path;
 		AStarRecorder* m_recorder;
 	};
