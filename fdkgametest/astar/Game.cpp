@@ -4,12 +4,10 @@
 #include "Util.h"
 #include "Board.h"
 #include "ActorBank.h"
-#include "AStarRecorder.h"
+#include "AStar.h"
 
 Game::Game()
 	: m_mode(&g_GameModeGame)
-	, m_bStepByStep(false)
-	, m_bAstarRunning(false)
 {
 }
 
@@ -73,25 +71,16 @@ void Game::onEvent(int eventType, void* params)
 		{
 			toggleMode();
 		}
-		else if (key == HGEK_SPACE || key == HGEK_S)
+		else if (key == HGEK_SPACE)
 		{
 			if (m_mode == &g_GameModeMapEdit)
 			{
 				toggleMode();
 			}
-			delete m_astarRecorder;
 			delete m_astar;
-
-			m_bAstarRunning = true;
-			m_astarRecorder = new AStarRecorder;
 			m_astar = new AStar(g_Board, 
 				g_Board.getNodeID(m_startCoord),
-				g_Board.getNodeID(m_targetCoord),
-				m_astarRecorder);
-			if (key == HGEK_S)
-			{
-				m_bStepByStep = true;
-			}
+				g_Board.getNodeID(m_targetCoord));
 		}
 	}
 	m_mode->handleEvent(*this, eventType, params);
@@ -102,8 +91,6 @@ void Game::toggleMode()
 	if (m_mode == &g_GameModeGame)
 	{
 		m_mode = &g_GameModeMapEdit;
-		m_bAstarRunning = false;
-		FDK_DELETE(m_astarRecorder);
 		FDK_DELETE(m_astar);
 	}
 	else 
@@ -120,59 +107,38 @@ void Game::outputUsage()
 	util::output("S: start path finding step by step");
 }
 
+bool Game::isStartOrTargetCoord(const CellCoord& cellCoord) const
+{
+	return cellCoord == m_startCoord || cellCoord == m_targetCoord;
+}
+
 void GameModeGame::update(Game& game, float delta)
 {
 	AStar* astar = game.m_astar;
-	if (astar && game.m_bAstarRunning)
+	if (astar && astar->getSearchResult() == AStar::SearchResult_Proceeding)
 	{
 		AStar::SearchResult result = astar->search(1);
 		if (result == AStar::SearchResult_Completed)
 		{			
 			util::output("search completed");
-			game.m_bAstarRunning = false;
 		}
 		else if (result == AStar::SearchResult_NoPath)
 		{
 			util::output("search failed");
-			game.m_bAstarRunning = false;
 		}
 	}
 }
 
 void GameModeGame::render(Game& game)
 {
-	if (game.m_astarRecorder)
+	if (game.m_astar)
 	{
-		game.m_astarRecorder->render();
-	}
-	if (game.m_astar && !game.m_bAstarRunning)
-	{
-		drawPath(game.m_startCoord, game.m_astar->getPath(), MyColor_Blue);		
+		game.m_astar->render();
 	}
 }
 
 void GameModeGame::handleEvent(Game& game, int eventType, void* params)
 {
-}
-
-void GameModeGame::drawPath(const CellCoord& startCoord, const std::vector<int>& path, DWORD color)
-{
-	CellCoord prevCellCoord = startCoord;		
-	for (int i = (int)path.size()-1; i >= 0; --i)
-	{
-		Location prevCenterLocation = util::cellCoordToLocation(prevCellCoord);
-		prevCenterLocation += Location(CELL_SIZE_X/2, CELL_SIZE_Y/2);
-
-		CellCoord currentCellCoord = g_Board.getNodeCoord(path[i]);
-		Location currentCenterLocation = util::cellCoordToLocation(currentCellCoord);
-		currentCenterLocation += Location(CELL_SIZE_X/2, CELL_SIZE_Y/2);
-
-		g_HGE->Gfx_RenderLine(prevCenterLocation.x, prevCenterLocation.y, 
-			currentCenterLocation.x, currentCenterLocation.y,
-			color
-			);
-		prevCellCoord = currentCellCoord;
-	}
 }
 
 GameModeMapEdit::GameModeMapEdit()

@@ -2,7 +2,7 @@
 
 namespace fdk { namespace game { namespace findpath
 {
-	AStar::AStar(const Environment& env, int startNodeID, int targetNodeID, AStarRecorder* recorder)
+	AStar::AStar(const Environment& env, int startNodeID, int targetNodeID)
 		: m_env(env)
 		, m_startNodeID(startNodeID)
 		, m_targetNodeID(targetNodeID)
@@ -11,7 +11,7 @@ namespace fdk { namespace game { namespace findpath
 		, m_openList()
 		, m_searchResult(SearchResult_Proceeding)
 		, m_path()
-		, m_recorder(recorder)
+		, m_recorder(0)
 	{
 		FDK_ASSERT(startNodeID != targetNodeID);
 		FDK_ASSERT(m_env.isValidNodeID(startNodeID));

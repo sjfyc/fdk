@@ -3,7 +3,7 @@
 #include "Types.h"
 #include <fdk/EventHook.h>
 class GameMode;
-class AStarRecorder;
+class AStar;
 
 class Game 
 	: public fdk::Singleton<Game>
@@ -12,13 +12,15 @@ class Game
 	friend class fdk::Singleton<Game>;
 	friend class GameModeGame;
 	friend class GameModeMapEdit;
-	friend class AStarRecorder;
 public:
 	bool start();
 	void stop();
 	void update(float delta);
 	void render();
 	bool IsRunning;
+	const CellCoord& getStartCoord() const;
+	const CellCoord& getTargetCoord() const;
+	bool isStartOrTargetCoord(const CellCoord& cellCoord) const;
 private:
 	Game();
 	~Game();
@@ -28,10 +30,7 @@ private:
 	GameMode* m_mode;
 	CellCoord m_startCoord;
 	CellCoord m_targetCoord;
-	bool m_bStepByStep;
-	bool m_bAstarRunning;
 	AStar* m_astar;
-	AStarRecorder* m_astarRecorder;
 };
 
 class GameMode
@@ -53,8 +52,6 @@ public:
 	virtual void update(Game& game, float delta);
 	virtual void render(Game& game);
 	virtual void handleEvent(Game& game, int eventType, void* params);
-private:
-	void drawPath(const CellCoord& startCoord, const std::vector<int>& path, DWORD color);
 };
 
 class GameModeMapEdit
@@ -80,6 +77,16 @@ private:
 	CellCoord m_lastMouseCoord;
 	EBrush m_brush;
 };
+
+inline const CellCoord& Game::getStartCoord() const
+{
+	return m_startCoord;
+}
+
+inline const CellCoord& Game::getTargetCoord() const
+{
+	return m_targetCoord;
+}
 
 #define g_Game (Game::instance())
 #define g_GameModeGame (GameModeGame::instance())

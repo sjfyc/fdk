@@ -22,11 +22,12 @@ namespace fdk { namespace game { namespace findpath
 			SearchResult_Completed,
 			SearchResult_NoPath,
 		};
-		AStar(const Environment& env, int startNodeID, int targetNodeID, AStarRecorder* recorder=0);
+		AStar(const Environment& env, int startNodeID, int targetNodeID);
 		~AStar();
 		SearchResult search(int step=-1);
 		SearchResult getSearchResult() const;
 		const std::vector<int>& getPath() const;
+		AStarRecorder* setRecorder(AStarRecorder* recorder);
 	private:
 		enum NodeStateEnum
 		{
@@ -80,6 +81,13 @@ namespace fdk { namespace game { namespace findpath
 	inline const std::vector<int>& AStar::getPath() const
 	{
 		return m_path;
+	}
+
+	inline AStarRecorder* AStar::setRecorder(AStarRecorder* recorder)
+	{
+		AStarRecorder* old = m_recorder;
+		m_recorder = recorder;
+		return old;
 	}
 }}}
 
