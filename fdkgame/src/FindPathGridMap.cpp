@@ -3,8 +3,8 @@
 
 namespace fdk { namespace game { namespace findpath
 {
-	const int COST_ONE = 100;
-	const int COST_SQRT2 = 142;
+	const int COST_STRAIGHT = 100;	
+	const int COST_DIAGONAL = 142;
 
 	void GridMap::clearObstacles()
 	{
@@ -25,7 +25,7 @@ namespace fdk { namespace game { namespace findpath
 	int GridMap::getHeuristic(int startNodeID, int targetNodeID) const
 	{
 		VectorI startToTarget = getNodeCoord(targetNodeID) - getNodeCoord(startNodeID);
-		return (abs(startToTarget.x) + abs(startToTarget.y)) * COST_ONE;
+		return (abs(startToTarget.x) + abs(startToTarget.y)) * COST_STRAIGHT;
 	}
 
 	void GridMap::getSuccessorNodes(int nodeID, std::vector<SuccessorNodeInfo>& result) const
@@ -39,18 +39,23 @@ namespace fdk { namespace game { namespace findpath
 				{
 					continue;
 				}
-				VectorI aroundCoord(coord.x+x, coord.y+y);				
+				VectorI aroundCoord(coord.x+x, coord.y+y);
 				SuccessorNodeInfo info;
 				info.nodeID = getNodeID(aroundCoord);
 				if (info.nodeID == INVALID_NODEID)
 				{
 					continue;
-				}
+				}				
 				if (isObstacle(info.nodeID))
 				{
 					continue;
 				}
-				info.cost = (x == 0 || y == 0) ? COST_ONE : COST_SQRT2;
+				const bool bStraight = (x == 0 || y == 0);
+				if (!bStraight)
+				{// 横向纵向至少有一个可以移动才考虑斜向（两个都考虑就是别马脚算法）
+					
+				}
+				info.cost = bStraight ? COST_STRAIGHT : COST_DIAGONAL;
 				result.push_back(info);
 			}
 		}
