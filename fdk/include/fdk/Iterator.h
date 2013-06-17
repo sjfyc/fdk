@@ -82,12 +82,14 @@ namespace fdk
 	template <class IteratorT>
 	inline PointerIteratorToConstValueIterator<IteratorT>::PointerIteratorToConstValueIterator() 
 		: m_it()
-	{}
+	{
+	}
 
 	template <class IteratorT>
 	inline PointerIteratorToConstValueIterator<IteratorT>::PointerIteratorToConstValueIterator(IteratorT it)
 		: m_it(it)
-	{}
+	{
+	}
 
 	template <class IteratorT>
 	inline typename PointerIteratorToConstValueIterator<IteratorT>::reference PointerIteratorToConstValueIterator<IteratorT>::operator*() const
@@ -131,12 +133,14 @@ namespace fdk
 	template <class IteratorT>
 	inline PointerIteratorToValueIterator<IteratorT>::PointerIteratorToValueIterator()
 		: _Base()
-	{}
+	{
+	}
 
 	template <class IteratorT>
 	inline PointerIteratorToValueIterator<IteratorT>::PointerIteratorToValueIterator(IteratorT it)
 		: _Base(it)
-	{}
+	{
+	}
 	
 	template <class IteratorT>
 	inline typename PointerIteratorToValueIterator<IteratorT>::reference PointerIteratorToValueIterator<IteratorT>::operator*() const

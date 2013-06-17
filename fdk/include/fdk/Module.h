@@ -115,10 +115,12 @@ namespace fdk
 
 	inline _Module::_Module()
 		: m_bStarted(false)
-	{}
+	{
+	}
 
 	inline _Module::~_Module()
-	{}
+	{
+	}
 
 	inline bool _Module::isStarted() const
 	{
@@ -155,7 +157,8 @@ namespace fdk
 
 	template <class T>
 	inline Module<T>::~Module()
-	{}
+	{
+	}
 
 	template <class T>
 	inline bool Module<T>::s_checkStart(const _Module& module)
@@ -219,7 +222,8 @@ namespace fdk
 
 	template <class T>
 	inline void Module<T>::_stop(T& module, FalseType)
-	{}
+	{
+	}
 
 	template <class T>
 	inline bool Module<T>::_tick(T& module, float deltaSeconds, TrueType)
