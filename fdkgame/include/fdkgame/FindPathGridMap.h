@@ -35,7 +35,8 @@ namespace fdk { namespace game { namespace findpath
 
 	inline GridMap::Node::Node()
 		: bObstacle(false)
-	{}
+	{
+	}
 
 	inline void GridMap::resetMap(size_t sizeX, size_t sizeY)
 	{

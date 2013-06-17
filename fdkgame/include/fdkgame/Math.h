@@ -78,18 +78,21 @@ namespace fdk { namespace game
 	template <class T>
 	inline Vector2D<T>::Vector2D()
 		: x(), y()
-	{}
+	{
+	}
 	
 	template <class T>
 	inline Vector2D<T>::Vector2D(T _x, T _y)
 		: x(_x), y(_y)
-	{}
+	{
+	}
 
 	template <class T>
 	template <class U>
 	inline Vector2D<T>::Vector2D(const Vector2D<U>& other)
 		: x(other.x), y(other.y)
-	{}
+	{
+	}
 
 	template <class T>
 	inline void Vector2D<T>::reset()
@@ -234,19 +237,22 @@ namespace fdk { namespace game
 	inline Rect<T>::Rect()
 		: topLeft()
 		, bottomRight()
-	{}
+	{
+	}
 
 	template <class T>
 	inline Rect<T>::Rect(const VectorType& _topLeft, const VectorType& _bottomRight)
 		: topLeft(_topLeft)
 		, bottomRight(_bottomRight)
-	{}
+	{
+	}
 
 	template <class T>
 	inline Rect<T>::Rect(T x0, T y0, T x1, T y1)
 		: topLeft(x0, y0)
 		, bottomRight(x1, y1)
-	{}
+	{
+	}
 
 	template <class T>
 	inline void Rect<T>::reset()
