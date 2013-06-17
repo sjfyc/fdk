@@ -15,6 +15,13 @@
     <ClInclude Include="include\fdkgame\FindPathAStar.h" />
     <ClInclude Include="include\fdkgame\FindPathBase.h" />
     <ClInclude Include="include\fdkgame\FindPathGridMap.h" />
+    <ClInclude Include="include\fdkgame\FindPathHpa.h" />
+    <ClInclude Include="include\fdkgame\Graph.h" />
+    <ClInclude Include="include\fdkgame\Graph.hpp" />
+    <ClInclude Include="include\fdkgame\GraphEdge.h" />
+    <ClInclude Include="include\fdkgame\GraphEdge.hpp" />
+    <ClInclude Include="include\fdkgame\GraphNode.h" />
+    <ClInclude Include="include\fdkgame\GraphNode.hpp" />
     <ClInclude Include="include\fdkgame\Math.h" />
   </ItemGroup>
   <ItemGroup>
