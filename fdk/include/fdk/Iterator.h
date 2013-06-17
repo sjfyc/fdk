@@ -27,13 +27,13 @@ namespace fdk
 			typedef const T ConstValueType;
 		};
 
-		template <class PtrIteratorT>
+		template <class PointerIteratorT>
 		struct GetOrignValueTypeOfPointerIterator
 		{
 		private:
-			typedef typename std::iterator_traits<PtrIteratorT>::value_type PtrType;
+			typedef typename std::iterator_traits<PointerIteratorT>::value_type PointerType;
 		public:
-			typedef typename GetValueTypeOfPointer<PtrType>::ValueType ValueType;
+			typedef typename GetValueTypeOfPointer<PointerType>::ValueType ValueType;
 		};
 	}
 

@@ -36,7 +36,7 @@
     <ClInclude Include="include\fdk\Module.h">
       <Filter>include</Filter>
     </ClInclude>
-    <ClInclude Include="include\fdk\IteratorAdapters.h">
+    <ClInclude Include="include\fdk\Iterator.h">
       <Filter>include</Filter>
     </ClInclude>
   </ItemGroup>
