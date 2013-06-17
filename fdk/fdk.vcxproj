@@ -76,6 +76,7 @@
     <ClInclude Include="include\fdk\Array2D.h" />
     <ClInclude Include="include\fdk\Base.h" />
     <ClInclude Include="include\fdk\EventHook.h" />
+    <ClInclude Include="include\fdk\IteratorAdapters.h" />
     <ClInclude Include="include\fdk\Memory.h" />
     <ClInclude Include="include\fdk\Misc.h" />
     <ClInclude Include="include\fdk\Module.h" />

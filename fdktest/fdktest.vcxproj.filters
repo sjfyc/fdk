@@ -6,5 +6,6 @@
     <ClCompile Include="testString.cpp" />
     <ClCompile Include="testArray2D.cpp" />
     <ClCompile Include="testModule.cpp" />
+    <ClCompile Include="testIterator.cpp" />
   </ItemGroup>
 </Project>
