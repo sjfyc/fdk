@@ -30,21 +30,6 @@
     <ClInclude Include="include\fdkgame\Graph.h">
       <Filter>include</Filter>
     </ClInclude>
-    <ClInclude Include="include\fdkgame\GraphEdge.h">
-      <Filter>include</Filter>
-    </ClInclude>
-    <ClInclude Include="include\fdkgame\GraphEdge.hpp">
-      <Filter>include</Filter>
-    </ClInclude>
-    <ClInclude Include="include\fdkgame\GraphNode.h">
-      <Filter>include</Filter>
-    </ClInclude>
-    <ClInclude Include="include\fdkgame\GraphNode.hpp">
-      <Filter>include</Filter>
-    </ClInclude>
-    <ClInclude Include="include\fdkgame\Graph.hpp">
-      <Filter>include</Filter>
-    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="src\Base.cpp">
