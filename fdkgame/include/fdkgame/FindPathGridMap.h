@@ -49,16 +49,16 @@ namespace fdk { namespace game { namespace findpath
 		PartNodeCoord getPartNodeCoord(int partNodeID) const;
 		int getPartNodeID(const PartNodeCoord& partNodeCoord) const;
 		bool isValidPartNodeCoord(const PartNodeCoord& partNodeCoord) const;
+		int toOrignNodeID(int partNodeID) const;
+		OrginNodeCoord toOrignNodeCoord(const PartNodeCoord& partNodeCoord) const;
+		int toPartNodeID(int orignNodeID) const;
+		PartNodeCoord toPartNodeCoord(const OrginNodeCoord& orignNodeCoord) const;
 		// Environment interfaces
 		virtual int getNodeSpaceSize() const;
 		virtual int getHeuristic(int startNodeID, int targetNodeID) const;
 		virtual void getSuccessorNodes(int nodeID, std::vector<SuccessorNodeInfo>& result) const;
 		virtual bool isObstacle(int nodeID) const;
 	private:		
-		int toOrignNodeID(int partNodeID) const;
-		OrginNodeCoord toOrignNodeCoord(const PartNodeCoord& partNodeCoord) const;
-		int toPartNodeID(int orignNodeID) const;
-		PartNodeCoord toPartNodeCoord(const OrginNodeCoord& orignNodeCoord) const;
 		GridMap& m_orignMap;
 		Range m_range;
 	};

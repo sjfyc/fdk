@@ -10,17 +10,17 @@ namespace fdk { namespace game { namespace findpath
 		: public Environment
 	{
 	public:
-		struct AbsNodeInfo
+		struct AbstractNodeInfo
 		{
 			int lowLevelNodeID;
 		};
-		struct AbsEdgeInfo
+		struct AbstractEdgeInfo
 		{			
 			int cost;
 		};
-		typedef Graph<AbsNodeInfo, AbsEdgeInfo> AbsGraph;
-		typedef GraphNode<AbsNodeInfo, AbsEdgeInfo> AbsNode;
-		typedef GraphEdge<AbsNodeInfo, AbsEdgeInfo> AbsEdge;
+		typedef Graph<AbstractNodeInfo, AbstractEdgeInfo> AbstractGraph;
+		typedef GraphNode<AbstractNodeInfo, AbstractEdgeInfo> AbstractNode;
+		typedef GraphEdge<AbstractNodeInfo, AbstractEdgeInfo> AbstractEdge;
 		typedef VectorI ClusterCoord;
 		class Cluster;
 		struct Entrance
@@ -39,7 +39,7 @@ namespace fdk { namespace game { namespace findpath
 		private:
 			Cluster(GridMap& orignMap, const Range& range, const ClusterCoord& clusterCoord);
 			ClusterCoord m_clusterCoord;
-			std::vector<AbsNode*> m_entrances;
+			std::vector<AbstractNode*> m_entrances;
 		};
 
 		AbstractGridMap(GridMap& lowLevelMap, const VectorI& maxClusterSize);
@@ -47,18 +47,20 @@ namespace fdk { namespace game { namespace findpath
 		//
 		const VectorI& getMaxClusterSize() const;
 		// Environment interfaces
-		virtual int getNodeSpaceSize() const { return m_absGraph.getNodes().size(); }
+		virtual int getNodeSpaceSize() const { return m_abstractGraph.getNodes().size(); }
 		virtual int getHeuristic(int startNodeID, int targetNodeID) const;
 		virtual void getSuccessorNodes(int nodeID, std::vector<SuccessorNodeInfo>& result) const;
 		virtual bool isObstacle(int nodeID) const;
-	protected:		
+	protected:
+		void createClusterAndEntrances();
+		void buildAbstractGraph();
 		void createHorizontalEntrances(int xStart, int xEnd, int y, Cluster& cluster1);
 		void createVerticalEntrances(int yStart, int yEnd, int x, Cluster& cluster1);
 		GridMap& m_lowLevelMap;
 		const VectorI m_maxClusterSize;
 		Array2D<Cluster*> m_clusters;
 		std::vector<Entrance> m_entrances;
-		AbsGraph m_absGraph;
+		AbstractGraph m_abstractGraph;
 	};
 
 	inline AbstractGridMap::Cluster::Cluster(GridMap& orignMap, const Range& range, const ClusterCoord& clusterCoord)

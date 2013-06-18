@@ -1,4 +1,5 @@
 #include <fdkgame/FindPathHpa.h>
+#include <fdkgame/FindPathAStar.h>
 
 namespace fdk { namespace game { namespace findpath
 {
@@ -10,6 +11,12 @@ namespace fdk { namespace game { namespace findpath
 	}
 
 	void AbstractGridMap::buildAbstract()
+	{		
+		createClusterAndEntrances();
+		buildAbstractGraph();
+	}
+
+	void AbstractGridMap::createClusterAndEntrances()
 	{
 		const GridMap::MapData& lowLevelMapData = m_lowLevelMap.getMapData();
 		m_clusters.reset(
@@ -27,7 +34,7 @@ namespace fdk { namespace game { namespace findpath
 			{
 				clusterSize.x = minOf(m_maxClusterSize.x, (int)lowLevelMapData.size_x()-x);
 				clusterSize.y = minOf(m_maxClusterSize.y, (int)lowLevelMapData.size_y()-y);
-				
+
 				FDK_ASSERT(!m_clusters(clusterCoord.x, clusterCoord.y));
 				Cluster* cluster = new Cluster(m_lowLevelMap, Cluster::Range(VectorI(x, y), VectorI(x, y)+clusterSize), clusterCoord);
 				m_clusters(clusterCoord.x, clusterCoord.y) = cluster;
@@ -44,25 +51,75 @@ namespace fdk { namespace game { namespace findpath
 			}
 			++clusterCoord.y;
 		}
-		
+	}
+
+	void AbstractGridMap::buildAbstractGraph()
+	{
 		for (size_t i = 0; i < m_entrances.size(); ++i)
 		{
 			Entrance& entrance = m_entrances[i];
 
-			AbsNodeInfo absNodeInfo;
-			
+			AbstractNodeInfo absNodeInfo;
+
 			absNodeInfo.lowLevelNodeID = entrance.lowLevelNode1ID;
-			AbsNode* absNode1 = &m_absGraph.addNode(2*i, absNodeInfo);
+			AbstractNode* absNode1 = &m_abstractGraph.addNode(2*i, absNodeInfo);
 			entrance.cluster1->m_entrances.push_back(absNode1);
 
 			absNodeInfo.lowLevelNodeID = entrance.lowLevelNode2ID;
-			AbsNode* absNode2 = &m_absGraph.addNode(2*i+1, absNodeInfo);
+			AbstractNode* absNode2 = &m_abstractGraph.addNode(2*i+1, absNodeInfo);
 			entrance.cluster2->m_entrances.push_back(absNode2);
 
-			AbsEdgeInfo absEdgeInfo;
+			AbstractEdgeInfo absEdgeInfo;
 			absEdgeInfo.cost = GridMap::COST_STRAIGHT;
-			m_absGraph.addEdge(*absNode1, *absNode2, absEdgeInfo);
-			m_absGraph.addEdge(*absNode2, *absNode1, absEdgeInfo);
+			m_abstractGraph.addEdge(*absNode1, *absNode2, absEdgeInfo);
+			m_abstractGraph.addEdge(*absNode2, *absNode1, absEdgeInfo);
+		}
+		
+		for (size_t iCluster = 0; iCluster < m_clusters.count(); ++iCluster)
+		{
+			Cluster& cluster = *m_clusters.raw_data()[iCluster];
+
+			Array2D<bool> hasComputed(cluster.m_entrances.size(), cluster.m_entrances.size(), false);
+			Array2D<int> computedCost(cluster.m_entrances.size(), cluster.m_entrances.size(), AStar::NOPATH_COST);
+			for (size_t iEntrance1 = 0; iEntrance1 < cluster.m_entrances.size(); ++iEntrance1)
+			{
+				AbstractNode* entrance1 = cluster.m_entrances[iEntrance1];
+				for (size_t iEntrance2 = 0; iEntrance2 < cluster.m_entrances.size(); ++iEntrance2)
+				{
+					AbstractNode* entrance2 = cluster.m_entrances[iEntrance2];
+					if (entrance1 == entrance2)
+					{
+						continue;
+					}
+					int localNode1ID = cluster.toPartNodeID(entrance1->getInfo().lowLevelNodeID);
+					int localNode2ID = cluster.toPartNodeID(entrance2->getInfo().lowLevelNodeID);
+					
+					if (hasComputed(localNode1ID, localNode2ID))
+					{
+						int cost = computedCost(localNode1ID, localNode2ID);
+						if (cost != AStar::NOPATH_COST)
+						{
+							AbstractEdgeInfo absEdgeInfo;
+							absEdgeInfo.cost = cost;
+							m_abstractGraph.addEdge(*entrance1, *entrance2, absEdgeInfo);
+						}
+						continue;
+					}
+
+					hasComputed(localNode1ID, localNode2ID) = true;
+					hasComputed(localNode2ID, localNode1ID) = true;
+					AStar astar(cluster, 
+						cluster.toPartNodeID(entrance1->getInfo().lowLevelNodeID), 
+						cluster.toPartNodeID(entrance2->getInfo().lowLevelNodeID));
+					if (astar.search() == AStar::SearchResult_Completed)
+					{
+						AbstractEdgeInfo absEdgeInfo;
+						absEdgeInfo.cost = astar.getPathCost();
+						m_abstractGraph.addEdge(*entrance1, *entrance2, absEdgeInfo);
+						computedCost(localNode1ID, localNode2ID) = absEdgeInfo.cost;
+					}
+				}
+			}
 		}
 	}
 
@@ -156,15 +213,15 @@ namespace fdk { namespace game { namespace findpath
 
 	int AbstractGridMap::getHeuristic(int startNodeID, int targetNodeID) const
 	{
-		const AbsNode& startAbsNode = m_absGraph.getNode(startNodeID);
-		const AbsNode& targetAbsNode = m_absGraph.getNode(targetNodeID);
+		const AbstractNode& startAbsNode = m_abstractGraph.getNode(startNodeID);
+		const AbstractNode& targetAbsNode = m_abstractGraph.getNode(targetNodeID);
 		return m_lowLevelMap.getHeuristic(startAbsNode.getInfo().lowLevelNodeID, targetAbsNode.getInfo().lowLevelNodeID);
 	}
 
 	void AbstractGridMap::getSuccessorNodes(int nodeID, std::vector<SuccessorNodeInfo>& result) const
 	{
-		const AbsNode& absNode = m_absGraph.getNode(nodeID);
-		const AbsNode::OutEdges& outAbsEdges = absNode.getOutEdges();
+		const AbstractNode& absNode = m_abstractGraph.getNode(nodeID);
+		const AbstractNode::OutEdges& outAbsEdges = absNode.getOutEdges();
 		
 		//const vector<AbsTilingEdge>& edges = node.getOutEdges();
 		//for (vector<AbsTilingEdge>::const_iterator i = edges.begin(); i != edges.end(); ++i)
@@ -200,5 +257,8 @@ namespace fdk { namespace game { namespace findpath
 	{
 		return false;
 	}
+
+	
+
 }}}
 
