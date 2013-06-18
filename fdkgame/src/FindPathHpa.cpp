@@ -79,8 +79,8 @@ namespace fdk { namespace game { namespace findpath
 		{
 			Cluster& cluster = *m_clusters.raw_data()[iCluster];
 
-			Array2D<bool> hasComputed(cluster.m_entrances.size(), cluster.m_entrances.size(), false);
-			Array2D<int> computedCost(cluster.m_entrances.size(), cluster.m_entrances.size(), AStar::NOPATH_COST);
+			Array2D<bool> hasComputed(cluster.getRange().area(), cluster.getRange().area(), false);
+			Array2D<int> computedCost(cluster.getRange().area(), cluster.getRange().area(), AStar::NOPATH_COST);
 			for (size_t iEntrance1 = 0; iEntrance1 < cluster.m_entrances.size(); ++iEntrance1)
 			{
 				AbstractNode* entrance1 = cluster.m_entrances[iEntrance1];
@@ -123,7 +123,7 @@ namespace fdk { namespace game { namespace findpath
 		}
 	}
 
-	void AbstractGridMap::createHorizontalEntrances(int xStart, int xEnd, int y, Cluster& cluster1)
+	void AbstractGridMap::createHorizontalEntrances(int xStart, int xEnd, int y, Cluster& cluster2)
 	{
 		int node1ID, node2ID;
 
@@ -161,13 +161,13 @@ namespace fdk { namespace game { namespace findpath
 			Entrance entrance;
 			entrance.lowLevelNode1ID = m_lowLevelMap.getNodeID( (VectorI(entranceStart, y)+VectorI(entranceEnd, y))/2 );
 			entrance.lowLevelNode2ID = m_lowLevelMap.getNodeID( (VectorI(entranceStart, y+1)+VectorI(entranceEnd, y+1))/2 );
-			entrance.cluster1 = &cluster1;
-			entrance.cluster2 = m_clusters(cluster1.getClusterCoord().x, cluster1.getClusterCoord().y+1);
+			entrance.cluster1 = m_clusters(cluster2.getClusterCoord().x, cluster2.getClusterCoord().y-1);
+			entrance.cluster2 = &cluster2;
 			m_entrances.push_back(entrance);
 		}
 	}
 
-	void AbstractGridMap::createVerticalEntrances(int yStart, int yEnd, int x, Cluster& cluster1)
+	void AbstractGridMap::createVerticalEntrances(int yStart, int yEnd, int x, Cluster& cluster2)
 	{
 		int node1ID, node2ID;
 
@@ -205,8 +205,8 @@ namespace fdk { namespace game { namespace findpath
 			Entrance entrance;
 			entrance.lowLevelNode1ID = m_lowLevelMap.getNodeID( (VectorI(x, entranceStart)+VectorI(x, entranceEnd))/2 );
 			entrance.lowLevelNode2ID = m_lowLevelMap.getNodeID( (VectorI(x+1, entranceStart)+VectorI(x+1, entranceEnd))/2 );
-			entrance.cluster1 = &cluster1;
-			entrance.cluster2 = m_clusters(cluster1.getClusterCoord().x+1, cluster1.getClusterCoord().y);
+			entrance.cluster1 = m_clusters(cluster2.getClusterCoord().x-1, cluster2.getClusterCoord().y);
+			entrance.cluster2 = &cluster2;
 			m_entrances.push_back(entrance);
 		}
 	}

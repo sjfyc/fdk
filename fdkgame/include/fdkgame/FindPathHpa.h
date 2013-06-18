@@ -54,8 +54,8 @@ namespace fdk { namespace game { namespace findpath
 	protected:
 		void createClusterAndEntrances();
 		void buildAbstractGraph();
-		void createHorizontalEntrances(int xStart, int xEnd, int y, Cluster& cluster1);
-		void createVerticalEntrances(int yStart, int yEnd, int x, Cluster& cluster1);
+		void createHorizontalEntrances(int xStart, int xEnd, int y, Cluster& cluster2);
+		void createVerticalEntrances(int yStart, int yEnd, int x, Cluster& cluster2);
 		GridMap& m_lowLevelMap;
 		const VectorI m_maxClusterSize;
 		Array2D<Cluster*> m_clusters;

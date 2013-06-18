@@ -25,8 +25,8 @@ void AbstractMap::draw()
 	for (size_t i = 0; i < m_entrances.size(); ++i)
 	{
 		const Entrance& entrance = m_entrances[i];
-		CellCoord node1CellCoord = m_lowLevelMap.getNodeCoord(entrance.node1ID);
-		CellCoord node2CellCoord = m_lowLevelMap.getNodeCoord(entrance.node2ID);
+		CellCoord node1CellCoord = m_lowLevelMap.getNodeCoord(entrance.lowLevelNode1ID);
+		CellCoord node2CellCoord = m_lowLevelMap.getNodeCoord(entrance.lowLevelNode2ID);
 		util::fillCell(node1CellCoord, ARGB(255, 210, 248, 207));
 		util::fillCell(node2CellCoord, ARGB(255, 210, 248, 207));
 		g_HGE->Gfx_RenderLine(
