@@ -66,6 +66,9 @@ namespace fdk { namespace game
 		VectorType size() const;
 		T width() const;
 		T height() const;
+		T area() const;
+		template <class U>
+		U area() const;
 		VectorType center() const;
 		VectorType extent() const;
 		VectorType topLeft;
@@ -371,6 +374,19 @@ namespace fdk { namespace game
 	inline T Rect<T>::height() const
 	{
 		return bottomRight.y-topLeft.y;
+	}
+
+	template <class T>
+	T Rect<T>::area() const
+	{
+		return width() * height();
+	}
+
+	template <class T>
+	template <class U>
+	U Rect<T>::area() const
+	{
+		return static_cast<U>(width()) * height();
 	}
 
 	template <class T>

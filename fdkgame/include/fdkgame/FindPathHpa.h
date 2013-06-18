@@ -6,7 +6,7 @@
 
 namespace fdk { namespace game { namespace findpath
 {
-	class AbstractGridMap
+	class FDKGAME_API AbstractGridMap
 		: public Environment
 	{
 	public:

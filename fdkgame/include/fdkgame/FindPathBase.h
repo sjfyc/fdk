@@ -13,12 +13,13 @@ namespace fdk { namespace game { namespace findpath
 		int cost;
 	};
 
+	// 环境要求：所有节点ID必须从0开始并依次自增
 	class FDKGAME_API Environment
 	{
 	public:
 		virtual ~Environment() {}
 		virtual bool isValidNodeID(int nodeID) const;
-		virtual int getNodeCount() const = 0;
+		virtual int getNodeSpaceSize() const = 0;
 		virtual int getHeuristic(int startNodeID, int targetNodeID) const = 0;
 		virtual void getSuccessorNodes(int nodeID, std::vector<SuccessorNodeInfo>& result) const = 0;
 		virtual bool isObstacle(int nodeID) const = 0;

@@ -18,7 +18,7 @@ namespace fdk { namespace game { namespace findpath
 		FDK_ASSERT(m_env.isValidNodeID(startNodeID));
 		FDK_ASSERT(m_env.isValidNodeID(targetNodeID));
 
-		const int nodeCount = m_env.getNodeCount();
+		const int nodeCount = m_env.getNodeSpaceSize();
 		m_nodeStates = new NodeState[nodeCount];
 		m_nodeDatas = new NodeData[nodeCount];
 		memset(m_nodeStates, 0, sizeof(NodeState)*nodeCount);

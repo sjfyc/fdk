@@ -17,7 +17,7 @@ namespace fdk { namespace game { namespace findpath
 		}
 	}
 
-	int GridMap::getNodeCount() const
+	int GridMap::getNodeSpaceSize() const
 	{
 		return m_nodes.count();
 	}
@@ -30,33 +30,33 @@ namespace fdk { namespace game { namespace findpath
 
 	void GridMap::getSuccessorNodes(int nodeID, std::vector<SuccessorNodeInfo>& result) const
 	{
-		VectorI coord = getNodeCoord(nodeID);
+		NodeCoord coord = getNodeCoord(nodeID);
 	
-		const bool bLeft = tryAddSuccessorNode(result, VectorI(coord.x-1,coord.y), COST_STRAIGHT);		
-		const bool bTop = tryAddSuccessorNode(result, VectorI(coord.x,coord.y-1), COST_STRAIGHT);
-		const bool bRight = tryAddSuccessorNode(result, VectorI(coord.x+1,coord.y), COST_STRAIGHT);
-		const bool bBottom = tryAddSuccessorNode(result, VectorI(coord.x,coord.y+1), COST_STRAIGHT);
+		const bool bLeft = tryAddSuccessorNode(result, NodeCoord(coord.x-1,coord.y), COST_STRAIGHT);		
+		const bool bTop = tryAddSuccessorNode(result, NodeCoord(coord.x,coord.y-1), COST_STRAIGHT);
+		const bool bRight = tryAddSuccessorNode(result, NodeCoord(coord.x+1,coord.y), COST_STRAIGHT);
+		const bool bBottom = tryAddSuccessorNode(result, NodeCoord(coord.x,coord.y+1), COST_STRAIGHT);
 		
 		// 横向纵向至少有一个可以展开才考虑斜向（两个都考虑就是别马脚算法）
 		if (bLeft || bTop)
 		{
-			tryAddSuccessorNode(result, VectorI(coord.x-1,coord.y-1), COST_DIAGONAL);
+			tryAddSuccessorNode(result, NodeCoord(coord.x-1,coord.y-1), COST_DIAGONAL);
 		}
 		if (bTop || bRight)
 		{
-			tryAddSuccessorNode(result, VectorI(coord.x+1,coord.y-1), COST_DIAGONAL);
+			tryAddSuccessorNode(result, NodeCoord(coord.x+1,coord.y-1), COST_DIAGONAL);
 		}
 		if (bRight || bBottom)
 		{
-			tryAddSuccessorNode(result, VectorI(coord.x+1,coord.y+1), COST_DIAGONAL);
+			tryAddSuccessorNode(result, NodeCoord(coord.x+1,coord.y+1), COST_DIAGONAL);
 		}
 		if (bBottom || bLeft)
 		{
-			tryAddSuccessorNode(result, VectorI(coord.x-1,coord.y+1), COST_DIAGONAL);
+			tryAddSuccessorNode(result, NodeCoord(coord.x-1,coord.y+1), COST_DIAGONAL);
 		}		
 	}
 	
-	bool GridMap::tryAddSuccessorNode(std::vector<SuccessorNodeInfo>& result, const VectorI& coord, int cost) const
+	bool GridMap::tryAddSuccessorNode(std::vector<SuccessorNodeInfo>& result, const NodeCoord& coord, int cost) const
 	{
 		const int nodeID = getNodeID(coord);
 		if (nodeID == INVALID_NODEID)
@@ -83,26 +83,91 @@ namespace fdk { namespace game { namespace findpath
 		return m_nodes.raw_data()[nodeID].bObstacle;
 	}
 
-	VectorI GridMap::getNodeCoord(int nodeID) const
+	GridMap::NodeCoord GridMap::getNodeCoord(int nodeID) const
 	{
-		return VectorI(nodeID%m_nodes.size_x(), nodeID/m_nodes.size_x());
+		return NodeCoord(nodeID%m_nodes.size_x(), nodeID/m_nodes.size_x());
 	}
 
-	int GridMap::getNodeID(const VectorI& coord) const
+	int GridMap::getNodeID(const NodeCoord& coord) const
 	{
 		if (!isValidNodeCoord(coord))
 		{
 			return INVALID_NODEID;
 		}
-		return coord.y*m_nodes.size_x()+coord.x;
+		return coord.y * m_nodes.size_x() + coord.x;
 	}
 
-	bool GridMap::isValidNodeCoord(const VectorI& coord) const
+	bool GridMap::isValidNodeCoord(const NodeCoord& coord) const
 	{
-		return coord.x >= 0 && coord.x < (int)m_nodes.size_x()
-			&& coord.y >= 0 && coord.y < (int)m_nodes.size_y();
+		return coord.x >= 0 && coord.x < (NodeCoord::ValueType)m_nodes.size_x()
+			&& coord.y >= 0 && coord.y < (NodeCoord::ValueType)m_nodes.size_y();
 	}	
+	
+	inline GridMapPart::GridMapPart(GridMap& orignMap, const Range& range)
+		: m_orignMap(orignMap)
+		, m_range(range)
+	{
+		m_range.normalize();
+		m_range.clip(Range(0, 0, orignMap.getMapData().size_x(), orignMap.getMapData().size_y()));
+		FDK_ASSERT(getNodeSpaceSize() > 0);
+	}
 
+	int GridMapPart::getNodeSpaceSize() const
+	{
+		return m_range.area();
+	}
 
+	int GridMapPart::getHeuristic(int startNodeID, int targetNodeID) const
+	{
+		return m_orignMap.getHeuristic(toOrignNodeID(startNodeID), toOrignNodeID(targetNodeID));
+	}
 
+	void GridMapPart::getSuccessorNodes(int nodeID, std::vector<SuccessorNodeInfo>& result) const
+	{
+		int orignNodeID = toOrignNodeID(nodeID);
+		std::vector<SuccessorNodeInfo> temp;
+		m_orignMap.getSuccessorNodes(orignNodeID, temp);
+		for (size_t i = 0; i < temp.size(); ++i)
+		{
+			SuccessorNodeInfo info = temp[i];
+			int partNodeID = toPartNodeID(info.nodeID);
+			if (partNodeID != INVALID_NODEID)
+			{
+				info.nodeID = partNodeID;
+				result.push_back(info);
+			}
+		}
+	}
+
+	bool GridMapPart::isObstacle(int nodeID) const
+	{
+		return m_orignMap.isObstacle(toOrignNodeID(nodeID));
+	}
+	
+	int GridMapPart::getPartNodeID(const PartNodeCoord& partNodeCoord) const
+	{
+		if (!isValidPartNodeCoord(partNodeCoord))
+		{
+			return INVALID_NODEID;
+		}
+		return partNodeCoord.y * m_range.width() + partNodeCoord.x;
+	}
+
+	bool GridMapPart::isValidPartNodeCoord(const PartNodeCoord& partNodeCoord) const
+	{
+		return partNodeCoord.x >= 0 && partNodeCoord.x < (PartNodeCoord::ValueType)m_range.width()
+			&& partNodeCoord.y >= 0 && partNodeCoord.y < (PartNodeCoord::ValueType)m_range.height();
+	}
+
+	int GridMapPart::toOrignNodeID(int partNodeID) const
+	{
+		PartNodeCoord partNodeCoord = getPartNodeCoord(partNodeID);
+		return m_orignMap.getNodeID(toOrignNodeCoord(partNodeCoord));
+	}
+
+	int GridMapPart::toPartNodeID(int orignNodeID) const
+	{
+		OrginNodeCoord orginNodeCoord = m_orignMap.getNodeCoord(orignNodeID);
+		return getPartNodeID(toPartNodeCoord(orginNodeCoord));
+	}	
 }}}
