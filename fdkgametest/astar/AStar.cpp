@@ -75,6 +75,6 @@ void AStar::render()
 				);
 			prevCellCoord = currentCellCoord;
 		}
-	}
-	g_Font.printf(2, 2, HGETEXT_LEFT, "path total cost: %d", getPathCost());
+		g_Font.printf(2, 2, HGETEXT_LEFT, "path total cost: %d", getPathCost());
+	}	
 }
