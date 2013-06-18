@@ -1,5 +1,6 @@
 #include "Board.h"
 #include "Util.h"
+#include "Font.h"
 #pragma warning(disable:4244)
 
 Board::Board()
@@ -49,6 +50,17 @@ void Board::draw()
 			{
 				util::fillCell(CellCoord(x, y), COLOR_CELL_BLOCK);
 			}
+		}
+	}
+}
+
+void Board::drawCellCoord()
+{
+	for (int y = 0; y < CELL_COUNT_Y; ++y)
+	{	
+		for (int x = 0; x < CELL_COUNT_X; ++x)
+		{
+			g_Font.printf(x*CELL_SIZE_X+2, y*CELL_SIZE_Y+2, HGETEXT_LEFT, "%d,%d", x, y);
 		}
 	}
 }
