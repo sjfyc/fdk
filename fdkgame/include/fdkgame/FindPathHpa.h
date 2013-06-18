@@ -43,7 +43,7 @@ namespace fdk { namespace game { namespace findpath
 		};
 
 		AbstractGridMap(GridMap& lowLevelMap, const VectorI& maxClusterSize);
-		void buildAbstract();
+		void rebuildAbstract();
 		//
 		const VectorI& getMaxClusterSize() const;
 		// Environment interfaces
@@ -52,6 +52,7 @@ namespace fdk { namespace game { namespace findpath
 		virtual void getSuccessorNodes(int nodeID, std::vector<SuccessorNodeInfo>& result) const;
 		virtual bool isObstacle(int nodeID) const;
 	protected:
+		void clear();
 		void createClusterAndEntrances();
 		void buildAbstractGraph();
 		void createHorizontalEntrances(int xStart, int xEnd, int y, Cluster& cluster2);

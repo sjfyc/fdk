@@ -10,8 +10,20 @@ namespace fdk { namespace game { namespace findpath
 		FDK_ASSERT(maxClusterSize.x > 1 && maxClusterSize.y > 1);
 	}
 
-	void AbstractGridMap::buildAbstract()
-	{		
+	void AbstractGridMap::clear()
+	{
+		for (size_t i = 0; i < m_clusters.count(); ++i)
+		{
+			Cluster* cluster = m_clusters.raw_data()[i];
+			delete cluster;
+		}
+		m_entrances.clear();
+		m_abstractGraph.clear();		
+	}
+
+	void AbstractGridMap::rebuildAbstract()
+	{
+		clear();
 		createClusterAndEntrances();
 		buildAbstractGraph();
 	}

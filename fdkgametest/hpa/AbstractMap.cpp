@@ -6,7 +6,7 @@
 AbstractMap::AbstractMap()
 	: _Base(g_Board, fdkgame::VectorI(8, 8))
 {
-	buildAbstract();
+	rebuildAbstract();
 }
 
 void AbstractMap::draw()

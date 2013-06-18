@@ -91,15 +91,16 @@ void Game::onEvent(int eventType, void* params)
 
 void Game::toggleMode()
 {
+	m_mode->leave(*this);
 	if (m_mode == &g_GameModeGame)
 	{
 		m_mode = &g_GameModeMapEdit;
-		FDK_DELETE(m_astar);
 	}
 	else 
 	{
 		m_mode = &g_GameModeGame;
 	}
+	m_mode->enter(*this);
 	util::output("toggle to %s mode", (m_mode == &g_GameModeGame ? "game" : "map edit") );
 }
 
@@ -172,12 +173,12 @@ GameModeMapEdit::GameModeMapEdit()
 
 void GameModeMapEdit::enter(Game& game)
 {
-	delete game.m_astar;
-	game.m_astar = 0;
+	FDK_DELETE(game.m_astar);
 }
 
 void GameModeMapEdit::leave(Game& game)
 {
+	g_AbstractMap.rebuildAbstract();
 }
 
 void GameModeMapEdit::handleEvent(Game& game, int eventType, void* params)
