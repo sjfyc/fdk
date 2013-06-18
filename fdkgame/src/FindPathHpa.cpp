@@ -319,22 +319,68 @@ namespace fdk { namespace game { namespace findpath
 		, m_pathCost(PATHUNEXIST_COST)
 	{
 		FDK_ASSERT(startNodeID != targetNodeID);
-		FDK_ASSERT(m_env.isValidNodeID(startNodeID));
-		FDK_ASSERT(m_env.isValidNodeID(targetNodeID));
+		FDK_ASSERT(m_env.getLowLevelMap().isValidNodeID(startNodeID));
+		FDK_ASSERT(m_env.getLowLevelMap().isValidNodeID(targetNodeID));
+		initSearch();
+	}
 
-	/*	void AbstractGridMap::setStartTargetAfterBuildedAbstract(int lowLevelStartNodeID, int lowLevelTargetNodeID)
+	Hpa::~Hpa()
+	{
+		for (size_t i = 0; i < m_tempAddedStartTarget.size(); ++i)
 		{
-			std::pair<AbstractGridMap::AbstractNode*, bool> resultPair;
-			resultPair = addStartOrTargetNodeAfterBuildedAbstract(lowLevelStartNodeID, true);
-
-			addStartOrTargetNodeAfterBuildedAbstract(lowLevelTargetNodeID, false);
-		}*/
+			AbstractGridMap::AbstractNode* absNode = m_tempAddedStartTarget[i];
+			m_env.m_abstractGraph.removeNode(*absNode);
+		}
 	}
 
 	Hpa::SearchResult Hpa::search(int step)
 	{
 		// 如果处于相同cluster内,那么直接在cluster内寻路,如果cluster内的寻路失败,继续一下步奏
 		return Hpa::SearchResult_PathUnexist;
+	}
+
+	void Hpa::initSearch()
+	{
+		AbstractGridMap::Cluster& startCluster = m_env.getClusterOfLowLevelNode(m_startNodeID);
+		if (&startCluster == &m_env.getClusterOfLowLevelNode(m_targetNodeID))
+		{
+			AStar astar(startCluster, 
+				startCluster.toPartNodeID(m_startNodeID), 
+				startCluster.toPartNodeID(m_targetNodeID));
+			if (astar.search() == AStar::SearchResult_Completed)
+			{
+				m_searchResult = SearchResult_Completed;
+				m_path = astar.getPath();
+				m_pathCost = astar.getPathCost();
+				return;
+			}
+		}
+
+		std::pair<AbstractGridMap::AbstractNode*, bool> resultPair;
+		AbstractGridMap::AbstractNode* startAbsNode;
+		AbstractGridMap::AbstractNode* targetAbsNode;
+		
+		resultPair = m_env.addStartOrTargetNodeAfterBuildedAbstract(m_startNodeID, true);
+		startAbsNode = resultPair.first;
+		if (resultPair.second)
+		{
+			m_tempAddedStartTarget.push_back(startAbsNode);
+		}
+		resultPair = m_env.addStartOrTargetNodeAfterBuildedAbstract(m_targetNodeID, false);
+		targetAbsNode = resultPair.first;
+		if (resultPair.second)
+		{
+			m_tempAddedStartTarget.push_back(targetAbsNode);
+		}
+
+		AStar astar(m_env, startAbsNode->getID(), targetAbsNode->getID());
+		if (astar.search() == AStar::SearchResult_PathUnexist)
+		{
+			m_searchResult = SearchResult_PathUnexist;
+			return;
+		}
+
+		m_path = astar.getPath();
 	}
 
 }}}
