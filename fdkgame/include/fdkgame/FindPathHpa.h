@@ -9,6 +9,7 @@ namespace fdk { namespace game { namespace findpath
 	class FDKGAME_API AbstractGridMap
 		: public Environment
 	{
+		friend class Hpa;
 	public:
 		struct AbstractNodeInfo
 		{
@@ -46,9 +47,7 @@ namespace fdk { namespace game { namespace findpath
 		};
 
 		AbstractGridMap(GridMap& lowLevelMap, const VectorI& maxClusterSize);
-		void rebuildAbstract();
-		void setStartTargetAfterBuildedAbstract(int lowLevelStartNodeID, int lowLevelTargetNodeID);
-		//
+		void rebuildAbstract();		
 		const VectorI& getMaxClusterSize() const;
 		// Environment interfaces
 		virtual int getNodeSpaceSize() const { return m_abstractGraph.getNodes().size(); }
@@ -61,13 +60,33 @@ namespace fdk { namespace game { namespace findpath
 		void buildAbstractGraph();
 		void createHorizontalEntrances(int xStart, int xEnd, int y, Cluster& cluster2);
 		void createVerticalEntrances(int yStart, int yEnd, int x, Cluster& cluster2);
-		void addStartOrTargetNodeAfterBuildedAbstract(int lowLevelNodeID, bool bStart);
+		std::pair<AbstractNode*, bool> addStartOrTargetNodeAfterBuildedAbstract(int lowLevelNodeID, bool bStart);
 		Cluster& getClusterOfLowLevelNode(int lowLevelNodeID) const;
 		GridMap& m_lowLevelMap;
 		const VectorI m_maxClusterSize;
 		Array2D<Cluster*> m_clusters;
 		std::vector<Entrance> m_entrances;
 		AbstractGraph m_abstractGraph;
+	};
+
+	class Hpa
+	{
+	public:
+		enum SearchResult
+		{			
+			SearchResult_Proceeding,
+			SearchResult_Completed,
+			SearchResult_PathUnexist,
+		};
+		Hpa(AbstractGridMap& env, int startNodeID, int targetNodeID);
+		SearchResult search(int step=-1);
+	private:
+		AbstractGridMap& m_env;
+		int m_startNodeID;
+		int m_targetNodeID;
+		SearchResult m_searchResult;
+		std::vector<int> m_path;
+		int m_pathCost;
 	};
 
 	inline AbstractGridMap::Cluster::Cluster(GridMap& orignMap, const Range& range, const ClusterCoord& clusterCoord)

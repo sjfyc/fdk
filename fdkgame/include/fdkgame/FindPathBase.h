@@ -6,6 +6,7 @@
 namespace fdk { namespace game { namespace findpath
 {
 	const int INVALID_NODEID = -1;
+	const int PATHUNEXIST_COST = -1;
 
 	struct SuccessorNodeInfo
 	{

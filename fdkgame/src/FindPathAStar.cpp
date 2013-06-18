@@ -11,7 +11,7 @@ namespace fdk { namespace game { namespace findpath
 		, m_openList()
 		, m_searchResult(SearchResult_Proceeding)
 		, m_path()
-		, m_pathCost(NOPATH_COST)
+		, m_pathCost(PATHUNEXIST_COST)
 		, m_recorder(0)
 	{
 		FDK_ASSERT(startNodeID != targetNodeID);
@@ -73,8 +73,8 @@ namespace fdk { namespace game { namespace findpath
 				return SearchResult_Proceeding;
 			}
 		}
-		m_searchResult = SearchResult_NoPath;
-		return SearchResult_NoPath;
+		m_searchResult = SearchResult_PathUnexist;
+		return SearchResult_PathUnexist;
 	}
 
 	void AStar::inspectNode(int nodeID, int parentNodeID, int gValue)

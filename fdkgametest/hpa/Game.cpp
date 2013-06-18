@@ -158,7 +158,7 @@ void GameModeGame::search(AStar& astar)
 	{			
 		util::output("search completed");
 	}
-	else if (result == AStar::SearchResult_NoPath)
+	else if (result == AStar::SearchResult_PathUnexist)
 	{
 		util::output("search failed");
 	}

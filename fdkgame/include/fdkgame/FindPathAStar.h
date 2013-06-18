@@ -20,9 +20,8 @@ namespace fdk { namespace game { namespace findpath
 		{			
 			SearchResult_Proceeding,
 			SearchResult_Completed,
-			SearchResult_NoPath,
-		};
-		static const int NOPATH_COST = -1;
+			SearchResult_PathUnexist,
+		};		
 		AStar(const Environment& env, int startNodeID, int targetNodeID);
 		~AStar();
 		SearchResult search(int step=-1);
