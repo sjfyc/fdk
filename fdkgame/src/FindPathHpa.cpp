@@ -29,15 +29,16 @@ namespace fdk { namespace game { namespace findpath
 				clusterSize.y = minOf(m_maxClusterSize.y, (int)lowLevelMapData.size_y()-y);
 				
 				FDK_ASSERT(!m_clusters(clusterCoord.x, clusterCoord.y));
-				m_clusters(clusterCoord.x, clusterCoord.y) = new Cluster(m_lowLevelMap, Cluster::Range(VectorI(x, y), VectorI(x, y)+clusterSize), clusterCoord);
+				Cluster* cluster = new Cluster(m_lowLevelMap, Cluster::Range(VectorI(x, y), VectorI(x, y)+clusterSize), clusterCoord);
+				m_clusters(clusterCoord.x, clusterCoord.y) = cluster;
 
 				if (y > 0)
 				{
-					createHorizontalEntrances(x, x+clusterSize.x-1, y-1);
+					createHorizontalEntrances(x, x+clusterSize.x-1, y-1, *cluster);
 				}
 				if(x > 0)
 				{
-					createVerticalEntrances(y, y+clusterSize.y-1, x-1);
+					createVerticalEntrances(y, y+clusterSize.y-1, x-1, *cluster);
 				}
 				++clusterCoord.x;
 			}
@@ -46,20 +47,26 @@ namespace fdk { namespace game { namespace findpath
 		
 		for (size_t i = 0; i < m_entrances.size(); ++i)
 		{
-			const Entrance& entrance = m_entrances[i];
+			Entrance& entrance = m_entrances[i];
+
 			AbsNodeInfo absNodeInfo;
-			absNodeInfo.lowLevelNodeID = entrance.node1ID;
-			m_absGraph.addNode(2*i, absNodeInfo);
-			absNodeInfo.lowLevelNodeID = entrance.node2ID;
-			m_absGraph.addNode(2*i+1, absNodeInfo);
+			
+			absNodeInfo.lowLevelNodeID = entrance.lowLevelNode1ID;
+			AbsNode* absNode1 = &m_absGraph.addNode(2*i, absNodeInfo);
+			entrance.cluster1->m_entrances.push_back(absNode1);
+
+			absNodeInfo.lowLevelNodeID = entrance.lowLevelNode2ID;
+			AbsNode* absNode2 = &m_absGraph.addNode(2*i+1, absNodeInfo);
+			entrance.cluster2->m_entrances.push_back(absNode2);
+
 			AbsEdgeInfo absEdgeInfo;
 			absEdgeInfo.cost = GridMap::COST_STRAIGHT;
-			m_absGraph.addEdge(m_absGraph.getNode(2*i), m_absGraph.getNode(2*i+1), absEdgeInfo);
-			m_absGraph.addEdge(m_absGraph.getNode(2*i+1), m_absGraph.getNode(2*i), absEdgeInfo);
+			m_absGraph.addEdge(*absNode1, *absNode2, absEdgeInfo);
+			m_absGraph.addEdge(*absNode2, *absNode1, absEdgeInfo);
 		}
 	}
 
-	void AbstractGridMap::createHorizontalEntrances(int xStart, int xEnd, int y)
+	void AbstractGridMap::createHorizontalEntrances(int xStart, int xEnd, int y, Cluster& cluster1)
 	{
 		int node1ID, node2ID;
 
@@ -95,13 +102,15 @@ namespace fdk { namespace game { namespace findpath
 
 			// 在中间创建入口
 			Entrance entrance;
-			entrance.node1ID = m_lowLevelMap.getNodeID( (VectorI(entranceStart, y)+VectorI(entranceEnd, y))/2 );
-			entrance.node2ID = m_lowLevelMap.getNodeID( (VectorI(entranceStart, y+1)+VectorI(entranceEnd, y+1))/2 );
+			entrance.lowLevelNode1ID = m_lowLevelMap.getNodeID( (VectorI(entranceStart, y)+VectorI(entranceEnd, y))/2 );
+			entrance.lowLevelNode2ID = m_lowLevelMap.getNodeID( (VectorI(entranceStart, y+1)+VectorI(entranceEnd, y+1))/2 );
+			entrance.cluster1 = &cluster1;
+			entrance.cluster2 = m_clusters(cluster1.getClusterCoord().x, cluster1.getClusterCoord().y+1);
 			m_entrances.push_back(entrance);
 		}
 	}
 
-	void AbstractGridMap::createVerticalEntrances(int yStart, int yEnd, int x)
+	void AbstractGridMap::createVerticalEntrances(int yStart, int yEnd, int x, Cluster& cluster1)
 	{
 		int node1ID, node2ID;
 
@@ -137,8 +146,10 @@ namespace fdk { namespace game { namespace findpath
 
 			// 在中间创建入口
 			Entrance entrance;
-			entrance.node1ID = m_lowLevelMap.getNodeID( (VectorI(x, entranceStart)+VectorI(x, entranceEnd))/2 );
-			entrance.node2ID = m_lowLevelMap.getNodeID( (VectorI(x+1, entranceStart)+VectorI(x+1, entranceEnd))/2 );
+			entrance.lowLevelNode1ID = m_lowLevelMap.getNodeID( (VectorI(x, entranceStart)+VectorI(x, entranceEnd))/2 );
+			entrance.lowLevelNode2ID = m_lowLevelMap.getNodeID( (VectorI(x+1, entranceStart)+VectorI(x+1, entranceEnd))/2 );
+			entrance.cluster1 = &cluster1;
+			entrance.cluster2 = m_clusters(cluster1.getClusterCoord().x+1, cluster1.getClusterCoord().y);
 			m_entrances.push_back(entrance);
 		}
 	}
