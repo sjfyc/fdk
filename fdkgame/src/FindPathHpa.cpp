@@ -232,37 +232,15 @@ namespace fdk { namespace game { namespace findpath
 
 	void AbstractGridMap::getSuccessorNodes(int nodeID, std::vector<SuccessorNodeInfo>& result) const
 	{
-		const AbstractNode& absNode = m_abstractGraph.getNode(nodeID);
-		const AbstractNode::OutEdges& outAbsEdges = absNode.getOutEdges();
-		
-		//const vector<AbsTilingEdge>& edges = node.getOutEdges();
-		//for (vector<AbsTilingEdge>::const_iterator i = edges.begin(); i != edges.end(); ++i)
-		//{
-		//	if (i->getInfo().getInter())
-		//	{
-		//		if (i->getInfo().getLevel() < m_currentLevel)
-		//			continue;
-		//	}
-		//	else
-		//	{
-		//		if (i->getInfo().getLevel() != m_currentLevel)
-		//			continue;
-		//	}
-
-		//	// 边的目标节点
-		//	int targetNodeId = i->getTargetNodeId();
-		//	assert(isValidNodeId(targetNodeId));
-		//	const AbsTilingNodeInfo& targetNodeInfo = m_graph.getNodeInfo(targetNodeId);
-
-		//	if (targetNodeInfo.getLevel() < m_currentLevel)
-		//		continue;
-		//	if (!nodeInCurrentCluster(targetNodeInfo))
-		//		continue;
-		//	if (lastNodeId != NO_NODE)
-		//		if (pruneNode(targetNodeId, nodeId, lastNodeId))
-		//			continue;
-		//	result.push_back(Successor(targetNodeId, i->getInfo().getCost()));
-		//}
+		const AbstractNode::OutEdges& outAbsEdges = m_abstractGraph.getNode(nodeID).getOutEdges();
+		for (AbstractNode::OutEdges::const_iterator it = outAbsEdges.begin(); 
+			it != outAbsEdges.end(); ++it)
+		{
+			const AbstractEdge* absEdge = *it;
+			SuccessorNodeInfo info;
+			info.nodeID = absEdge->getTargetNode().getID();
+			info.cost = absEdge->getInfo().cost;
+		}
 	}
 
 	bool AbstractGridMap::isObstacle(int nodeID) const
@@ -270,7 +248,72 @@ namespace fdk { namespace game { namespace findpath
 		return false;
 	}
 
-	
+	void AbstractGridMap::setStartTargetAfterBuildedAbstract(int lowLevelStartNodeID, int lowLevelTargetNodeID)
+	{
+		addStartOrTargetNodeAfterBuildedAbstract(lowLevelStartNodeID, true);
+		addStartOrTargetNodeAfterBuildedAbstract(lowLevelTargetNodeID, false);
+	}
+
+	void AbstractGridMap::addStartOrTargetNodeAfterBuildedAbstract(int lowLevelNodeID, bool bStart)
+	{
+		Cluster& cluster = getClusterOfLowLevelNode(lowLevelNodeID);
+		AbstractNode* abstractNode = cluster.findEntranceWithLowLevelNodeID(lowLevelNodeID);
+		if (abstractNode)
+		{
+			return;
+		}
+		AbstractNodeInfo absNodeInfo;
+		absNodeInfo.lowLevelNodeID = lowLevelNodeID;
+		abstractNode = &m_abstractGraph.addNode(m_abstractGraph.getNodes().size(), absNodeInfo);
+
+		AbstractNode* startAbsNode = bStart ? abstractNode : 0;
+		AbstractNode* targetAbsNode = bStart ? 0 : abstractNode;
+		for (size_t i = 0; i < cluster.m_entrances.size(); ++i)
+		{
+			AbstractNode* entrance = cluster.m_entrances[i];
+			if (bStart)
+			{
+				targetAbsNode = entrance;
+			}
+			else
+			{
+				startAbsNode = entrance;
+			}
+			if (bStart)
+			{
+				AStar astar(cluster, 
+					cluster.toPartNodeID(startAbsNode->getInfo().lowLevelNodeID), 
+					cluster.toPartNodeID(targetAbsNode->getInfo().lowLevelNodeID));
+				if (astar.search() == AStar::SearchResult_Completed)
+				{
+					AbstractEdgeInfo absEdgeInfo;
+					absEdgeInfo.cost = astar.getPathCost();
+					m_abstractGraph.addEdge(*startAbsNode, *targetAbsNode, absEdgeInfo);
+				}
+			}
+		}		
+	}
+
+	AbstractGridMap::Cluster& AbstractGridMap::getClusterOfLowLevelNode(int lowLevelNodeID) const
+	{
+		GridMap::NodeCoord lowLevelNodeCoord = m_lowLevelMap.getNodeCoord(lowLevelNodeID);
+		ClusterCoord::ValueType clusterCoordX = lowLevelNodeCoord.x/m_maxClusterSize.x;
+		ClusterCoord::ValueType clusterCoordY = lowLevelNodeCoord.y/m_maxClusterSize.y;
+		return *m_clusters(clusterCoordX, clusterCoordY);
+	}
+
+	AbstractGridMap::AbstractNode* AbstractGridMap::Cluster::findEntranceWithLowLevelNodeID(int lowLevelNodeID) const
+	{
+		for (size_t i = 0; i < m_entrances.size(); ++i)
+		{
+			AbstractNode* abstractNode = m_entrances[i];
+			if (abstractNode->getInfo().lowLevelNodeID == lowLevelNodeID)
+			{
+				return abstractNode;
+			}
+		}
+		return 0;
+	}
 
 }}}
 

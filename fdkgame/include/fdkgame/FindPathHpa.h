@@ -35,15 +35,19 @@ namespace fdk { namespace game { namespace findpath
 		{
 			friend class AbstractGridMap;
 		public:
+			typedef std::vector<AbstractNode*> Entrances;
 			const ClusterCoord& getClusterCoord() const;
+			const Entrances& getEntrances() const;
+			AbstractNode* findEntranceWithLowLevelNodeID(int lowLevelNodeID) const;
 		private:
 			Cluster(GridMap& orignMap, const Range& range, const ClusterCoord& clusterCoord);
 			ClusterCoord m_clusterCoord;
-			std::vector<AbstractNode*> m_entrances;
+			Entrances m_entrances;
 		};
 
 		AbstractGridMap(GridMap& lowLevelMap, const VectorI& maxClusterSize);
 		void rebuildAbstract();
+		void setStartTargetAfterBuildedAbstract(int lowLevelStartNodeID, int lowLevelTargetNodeID);
 		//
 		const VectorI& getMaxClusterSize() const;
 		// Environment interfaces
@@ -57,6 +61,8 @@ namespace fdk { namespace game { namespace findpath
 		void buildAbstractGraph();
 		void createHorizontalEntrances(int xStart, int xEnd, int y, Cluster& cluster2);
 		void createVerticalEntrances(int yStart, int yEnd, int x, Cluster& cluster2);
+		void addStartOrTargetNodeAfterBuildedAbstract(int lowLevelNodeID, bool bStart);
+		Cluster& getClusterOfLowLevelNode(int lowLevelNodeID) const;
 		GridMap& m_lowLevelMap;
 		const VectorI m_maxClusterSize;
 		Array2D<Cluster*> m_clusters;
@@ -73,6 +79,11 @@ namespace fdk { namespace game { namespace findpath
 	inline const AbstractGridMap::ClusterCoord& AbstractGridMap::Cluster::getClusterCoord() const
 	{
 		return m_clusterCoord;
+	}
+
+	inline const AbstractGridMap::Cluster::Entrances& AbstractGridMap::Cluster::getEntrances() const
+	{
+		return m_entrances;
 	}
 
 	inline const VectorI& AbstractGridMap::getMaxClusterSize() const
