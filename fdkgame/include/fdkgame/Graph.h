@@ -17,10 +17,10 @@ namespace fdk { namespace game
 	template <class NodeInfoT, class EdgeInfoT>
 	class GraphEdge
 	{
-		//friend class GraphNode<NodeInfoT, EdgeInfoT>;
 		friend class Graph<NodeInfoT, EdgeInfoT>;
-		typedef GraphNode<NodeInfoT, EdgeInfoT> NodeType;
+		friend class GraphNode<NodeInfoT, EdgeInfoT>;		
 	public:
+		typedef GraphNode<NodeInfoT, EdgeInfoT> NodeType;
 		NodeType& getStartNode();
 		const NodeType& getStartNode() const;
 		NodeType& getTargetNode();
@@ -109,10 +109,10 @@ namespace fdk { namespace game
 		const NodeType& getNode(int nodeID) const;
 
 		const Edges& getEdges() const;
-		EdgeType* findEdge(NodeType& startNode, const NodeType& targetNode);
-		const EdgeType* findEdge(NodeType& startNode, const NodeType& targetNode) const;
-		EdgeType& getEdge(NodeType& startNode, const NodeType& targetNode);
-		const EdgeType& getEdge(NodeType& startNode, const NodeType& targetNode) const;
+		EdgeType* findEdge(NodeType& startNode, NodeType& targetNode);
+		const EdgeType* findEdge(const NodeType& startNode, const NodeType& targetNode) const;
+		EdgeType& getEdge(NodeType& startNode, NodeType& targetNode);
+		const EdgeType& getEdge(const NodeType& startNode, const NodeType& targetNode) const;
 	private:
 		Nodes m_nodes;
 		Edges m_edges;
@@ -124,12 +124,6 @@ namespace fdk { namespace game
 		, m_targetNode(&targetNode)
 		, m_info(info)
 	{
-	}
-
-	template <class NodeInfoT, class EdgeInfoT>
-	inline int GraphEdge<NodeInfoT, EdgeInfoT>::getTargetNodeID() const
-	{
-		return m_targetNodeID;
 	}
 
 	template <class NodeInfoT, class EdgeInfoT>
@@ -362,13 +356,13 @@ namespace fdk { namespace game
 
 		while (!node.getOutEdges().empty())
 		{
-			EdgeType* edge = node.getOutEdges().begin();
+			EdgeType* edge = const_cast<EdgeType*>( *node.getOutEdges().begin() );
 			removeEdge(*edge);
 		}
 
 		while (!node.getInEdges().empty())
 		{
-			EdgeType* edge = node.getInEdges().begin();
+			EdgeType* edge = const_cast<EdgeType*>( *node.getInEdges().begin() );
 			removeEdge(*edge);
 		}
 
@@ -403,9 +397,9 @@ namespace fdk { namespace game
 
 		bool result = m_edges.erase(&edge) > 0;
 		FDK_ASSERT(result);		
-		targetNode.m_inEdges.erase(&edge) > 0;
+		result = targetNode.m_inEdges.erase(&edge) > 0;
 		FDK_ASSERT(result);
-		startNode.m_outEdges.erase(&edge) > 0;
+		result = startNode.m_outEdges.erase(&edge) > 0;
 		FDK_ASSERT(result);
 		delete &edge;
 	}
@@ -460,7 +454,7 @@ namespace fdk { namespace game
 	}
 
 	template <class NodeInfoT, class EdgeInfoT>
-	inline GraphEdge<NodeInfoT, EdgeInfoT>* Graph<NodeInfoT, EdgeInfoT>::findEdge(NodeType& startNode, const NodeType& targetNode)
+	inline GraphEdge<NodeInfoT, EdgeInfoT>* Graph<NodeInfoT, EdgeInfoT>::findEdge(NodeType& startNode, NodeType& targetNode)
 	{
 		return const_cast<GraphEdge<NodeInfoT, EdgeInfoT>* >(
 			static_cast<const _Self&>(*this).findEdge(startNode, targetNode)
@@ -468,11 +462,11 @@ namespace fdk { namespace game
 	}
 
 	template <class NodeInfoT, class EdgeInfoT>
-	inline const GraphEdge<NodeInfoT, EdgeInfoT>* Graph<NodeInfoT, EdgeInfoT>::findEdge(NodeType& startNode, const NodeType& targetNode) const
+	inline const GraphEdge<NodeInfoT, EdgeInfoT>* Graph<NodeInfoT, EdgeInfoT>::findEdge(const NodeType& startNode, const NodeType& targetNode) const
 	{
 		FDK_CMP_PTR(EdgeType, search);
-		search->m_startNode = &startNode;
-		search->m_targetNode = &targetNode;
+		search->m_startNode = const_cast<NodeType*>(&startNode);
+		search->m_targetNode = const_cast<NodeType*>(&targetNode);
 		Edges::const_iterator it = m_edges.find(search);
 		if (it == m_edges.end())
 		{
@@ -482,7 +476,7 @@ namespace fdk { namespace game
 	}
 
 	template <class NodeInfoT, class EdgeInfoT>
-	inline GraphEdge<NodeInfoT, EdgeInfoT>& Graph<NodeInfoT, EdgeInfoT>::getEdge(NodeType& startNode, const NodeType& targetNode)
+	inline GraphEdge<NodeInfoT, EdgeInfoT>& Graph<NodeInfoT, EdgeInfoT>::getEdge(NodeType& startNode, NodeType& targetNode)
 	{
 		EdgeType* edge = findEdge(startNode, targetNode);
 		FDK_ASSERT(edge);
@@ -490,7 +484,7 @@ namespace fdk { namespace game
 	}
 
 	template <class NodeInfoT, class EdgeInfoT>
-	inline const GraphEdge<NodeInfoT, EdgeInfoT>& Graph<NodeInfoT, EdgeInfoT>::getEdge(NodeType& startNode, const NodeType& targetNode) const
+	inline const GraphEdge<NodeInfoT, EdgeInfoT>& Graph<NodeInfoT, EdgeInfoT>::getEdge(const NodeType& startNode, const NodeType& targetNode) const
 	{
 		const EdgeType* edge = findEdge(startNode, targetNode);
 		FDK_ASSERT(edge);
