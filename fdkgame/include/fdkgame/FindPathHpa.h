@@ -24,15 +24,14 @@ namespace fdk { namespace game { namespace findpath
 			int node2ID;
 		};
 		class Cluster
+			: public GridMapPart
 		{
 			friend class AbstractGridMap;
 		public:
 			const VectorI& getClusterCoord() const;
-			const VectorI& getSize() const;
 		private:
-			Cluster(const VectorI& clusterCoord, const VectorI& size);
+			Cluster(GridMap& orignMap, const Range& range, const VectorI& clusterCoord);
 			VectorI m_clusterCoord;
-			VectorI m_size;
 			std::vector<int> m_absEntranceNodes;
 		};
 
@@ -41,7 +40,7 @@ namespace fdk { namespace game { namespace findpath
 		//
 		const VectorI& getMaxClusterSize() const;
 		// Environment interfaces
-		virtual int getNodeCount() const { return m_absGraph.getNodes().size(); }
+		virtual int getNodeSpaceSize() const { return m_absGraph.getNodes().size(); }
 		virtual int getHeuristic(int startNodeID, int targetNodeID) const;
 		virtual void getSuccessorNodes(int nodeID, std::vector<SuccessorNodeInfo>& result) const;
 		virtual bool isObstacle(int nodeID) const;
@@ -58,9 +57,9 @@ namespace fdk { namespace game { namespace findpath
 		AbsGraph m_absGraph;
 	};
 
-	inline AbstractGridMap::Cluster::Cluster(const VectorI& clusterCoord, const VectorI& size)
-		: m_clusterCoord(clusterCoord)
-		, m_size(size)
+	inline AbstractGridMap::Cluster::Cluster(GridMap& orignMap, const Range& range, const VectorI& clusterCoord)
+		: GridMapPart(orignMap, range)
+		, m_clusterCoord(clusterCoord)
 	{
 	}
 
@@ -68,11 +67,6 @@ namespace fdk { namespace game { namespace findpath
 	{
 		return m_clusterCoord;
 	}
-
-	inline const VectorI& AbstractGridMap::Cluster::getSize() const
-	{
-		return m_size;
-	}	
 
 	inline const VectorI& AbstractGridMap::getMaxClusterSize() const
 	{

@@ -3,9 +3,6 @@
 
 namespace fdk { namespace game { namespace findpath
 {
-	const int COST_STRAIGHT = 100;	
-	const int COST_DIAGONAL = 142;
-
 	void GridMap::clearObstacles()
 	{
 		for (size_t y = 0; y < m_nodes.size_y(); ++y)
@@ -103,7 +100,7 @@ namespace fdk { namespace game { namespace findpath
 			&& coord.y >= 0 && coord.y < (NodeCoord::ValueType)m_nodes.size_y();
 	}	
 	
-	inline GridMapPart::GridMapPart(GridMap& orignMap, const Range& range)
+	GridMapPart::GridMapPart(GridMap& orignMap, const Range& range)
 		: m_orignMap(orignMap)
 		, m_range(range)
 	{

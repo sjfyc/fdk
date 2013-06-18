@@ -296,6 +296,7 @@ namespace fdk { namespace game
 		{
 			std::swap(topLeft.y, bottomRight.y);
 		}
+		return *this;
 	}
 
 	template <class T>

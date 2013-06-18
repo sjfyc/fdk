@@ -17,6 +17,8 @@ namespace fdk { namespace game { namespace findpath
 		};
 		typedef Array2D<Node> MapData;
 		typedef VectorI NodeCoord;
+		static const int COST_STRAIGHT = 100;	
+		static const int COST_DIAGONAL = 142;
 		void resetMap(size_t sizeX, size_t sizeY);
 		const MapData& getMapData() const;
 		void clearObstacles();

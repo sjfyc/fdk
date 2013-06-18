@@ -29,7 +29,7 @@ namespace fdk { namespace game { namespace findpath
 				clusterSize.y = minOf(m_maxClusterSize.y, (int)lowLevelMapData.size_y()-y);
 				
 				FDK_ASSERT(!m_clusters(clusterCoord.x, clusterCoord.y));
-				m_clusters(clusterCoord.x, clusterCoord.y) = new Cluster(clusterCoord, clusterSize);
+				m_clusters(clusterCoord.x, clusterCoord.y) = new Cluster(m_lowLevelMap, Cluster::Range(VectorI(x, y), VectorI(x, y)+clusterSize), clusterCoord);
 
 				if (y > 0)
 				{
@@ -53,7 +53,7 @@ namespace fdk { namespace game { namespace findpath
 			absNodeInfo.lowLevelNodeID = entrance.node2ID;
 			m_absGraph.addNode(2*i+1, absNodeInfo);
 			AbsEdgeInfo absEdgeInfo;
-			absEdgeInfo.cost = 100;
+			absEdgeInfo.cost = GridMap::COST_STRAIGHT;
 			m_absGraph.addEdge(m_absGraph.getNode(2*i), m_absGraph.getNode(2*i+1), absEdgeInfo);
 			m_absGraph.addEdge(m_absGraph.getNode(2*i+1), m_absGraph.getNode(2*i), absEdgeInfo);
 		}

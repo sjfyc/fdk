@@ -18,7 +18,7 @@ void AbstractMap::draw()
 		topLeftCellCoord.x = cluster.getClusterCoord().x*getMaxClusterSize().x;
 		topLeftCellCoord.y = cluster.getClusterCoord().y*getMaxClusterSize().y;
 		g_HGE.FrameRect(topLeftCellCoord.x*CELL_SIZE_X, topLeftCellCoord.y*CELL_SIZE_Y,
-			(topLeftCellCoord.x+cluster.getSize().x)*CELL_SIZE_X, (topLeftCellCoord.y+cluster.getSize().y)*CELL_SIZE_Y, 
+			(topLeftCellCoord.x+cluster.getRange().width())*CELL_SIZE_X, (topLeftCellCoord.y+cluster.getRange().height())*CELL_SIZE_Y, 
 			ARGB(255, 45, 151, 128), 2);
 	}
 
