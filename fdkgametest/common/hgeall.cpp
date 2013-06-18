@@ -67,12 +67,15 @@ void MyHGE::Rectangle(float x1, float y1, float x2, float y2, DWORD col, DWORD b
 	m_hge->Gfx_RenderQuad(&quad);
 }
 
-void MyHGE::FrameRect(float x1, float y1, float x2, float y2, DWORD col)
+void MyHGE::FrameRect(float x1, float y1, float x2, float y2, DWORD col, int width)
 {
-	m_hge->Gfx_RenderLine(x1, y1, x2, y1, col);
-	m_hge->Gfx_RenderLine(x1, y1, x1, y2, col);
-	m_hge->Gfx_RenderLine(x1, y2, x2, y2, col);
-	m_hge->Gfx_RenderLine(x2, y1, x2, y2, col);
+	for (int i = 0; i <= width-1; ++i)
+	{
+		m_hge->Gfx_RenderLine(x1, y1+i, x2, y1+i, col);
+		m_hge->Gfx_RenderLine(x1+i, y1, x1+i, y2, col);
+		m_hge->Gfx_RenderLine(x1, y2-i, x2, y2-i, col);
+		m_hge->Gfx_RenderLine(x2-i, y1, x2-i, y2, col);
+	}	
 }
 
 void MyHGE::DrawMouse(DWORD col)

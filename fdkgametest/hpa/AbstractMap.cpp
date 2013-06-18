@@ -4,13 +4,21 @@
 #pragma warning(disable:4244)
 
 AbstractMap::AbstractMap()
-	: _Base(g_Board, fdkgame::VectorI(10, 10))
+	: _Base(g_Board, fdkgame::VectorI(8, 8))
 {
 	buildEntrances();
 }
 
 void AbstractMap::draw()
 {
+	for (size_t i = 0; i < m_clusters.size(); ++i)
+	{
+		const fdkgame::findpath::Cluster& cluster = m_clusters[i];
+		g_HGE.FrameRect(cluster.m_topLeftCellCoord.x*CELL_SIZE_X, cluster.m_topLeftCellCoord.y*CELL_SIZE_Y,
+			(cluster.m_topLeftCellCoord.x+cluster.m_size.x)*CELL_SIZE_X, (cluster.m_topLeftCellCoord.y+cluster.m_size.y)*CELL_SIZE_Y, 
+			ARGB(255, 45, 151, 128), 2);
+	}
+
 	for (size_t i = 0; i < m_entrances.size(); ++i)
 	{
 		const fdkgame::findpath::Entrance& entrance = m_entrances[i];

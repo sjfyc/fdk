@@ -39,7 +39,7 @@ class MyHGE
 public:
 	bool IsKeyDown(int key);
 	void Rectangle(float x1, float y1, float x2, float y2, DWORD col = MyColor_White, DWORD blendMode = BLEND_DEFAULT);
-	void FrameRect(float x1, float y1, float x2, float y2, DWORD col = MyColor_White);
+	void FrameRect(float x1, float y1, float x2, float y2, DWORD col = MyColor_White, int width=1);
 	void DrawMouse(DWORD col=MyColor_Black);
 	void Update();
 	void OnKeyDown(int key);
