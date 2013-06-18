@@ -54,4 +54,16 @@ void testArray2D()
 			FDK_ASSERT(ia1(x, y) == 3);
 		}
 	}
+
+	{
+		fdk::Array2D<int*> ar;
+		ar.reset(5, 10);
+		for (size_t y = 0; y < 10; ++y)
+		{
+			for (size_t x = 0; x < 5; ++x)
+			{
+				FDK_ASSERT(ar(x, y) == 0);
+			}
+		}
+	}	
 }
