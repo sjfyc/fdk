@@ -6,22 +6,25 @@
 AbstractMap::AbstractMap()
 	: _Base(g_Board, fdkgame::VectorI(8, 8))
 {
-	buildEntrances();
+	buildAbstract();
 }
 
 void AbstractMap::draw()
 {
-	for (size_t i = 0; i < m_clusters.size(); ++i)
+	for (size_t i = 0; i < m_clusters.count(); ++i)
 	{
-		const fdkgame::findpath::Cluster& cluster = m_clusters[i];
-		g_HGE.FrameRect(cluster.m_topLeftCellCoord.x*CELL_SIZE_X, cluster.m_topLeftCellCoord.y*CELL_SIZE_Y,
-			(cluster.m_topLeftCellCoord.x+cluster.m_size.x)*CELL_SIZE_X, (cluster.m_topLeftCellCoord.y+cluster.m_size.y)*CELL_SIZE_Y, 
+		const Cluster& cluster = *m_clusters.raw_data()[i];
+		CellCoord topLeftCellCoord;
+		topLeftCellCoord.x = cluster.getClusterCoord().x*getMaxClusterSize().x;
+		topLeftCellCoord.y = cluster.getClusterCoord().y*getMaxClusterSize().y;
+		g_HGE.FrameRect(topLeftCellCoord.x*CELL_SIZE_X, topLeftCellCoord.y*CELL_SIZE_Y,
+			(topLeftCellCoord.x+cluster.getSize().x)*CELL_SIZE_X, (topLeftCellCoord.y+cluster.getSize().y)*CELL_SIZE_Y, 
 			ARGB(255, 45, 151, 128), 2);
 	}
 
 	for (size_t i = 0; i < m_entrances.size(); ++i)
 	{
-		const fdkgame::findpath::Entrance& entrance = m_entrances[i];
+		const Entrance& entrance = m_entrances[i];
 		CellCoord node1CellCoord = m_lowLevelMap.getNodeCoord(entrance.node1ID);
 		CellCoord node2CellCoord = m_lowLevelMap.getNodeCoord(entrance.node2ID);
 		util::fillCell(node1CellCoord, ARGB(255, 210, 248, 207));

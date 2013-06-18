@@ -22,11 +22,13 @@ namespace fdk { namespace game { namespace findpath
 			SearchResult_Completed,
 			SearchResult_NoPath,
 		};
+		static const int NOPATH_COST = -1;
 		AStar(const Environment& env, int startNodeID, int targetNodeID);
 		~AStar();
 		SearchResult search(int step=-1);
 		SearchResult getSearchResult() const;
 		const std::vector<int>& getPath() const;
+		int getPathCost() const;
 		AStarRecorder* setRecorder(AStarRecorder* recorder);
 	private:
 		enum NodeStateEnum
@@ -60,6 +62,7 @@ namespace fdk { namespace game { namespace findpath
 		OpenList m_openList;
 		SearchResult m_searchResult;
 		std::vector<int> m_path;
+		int m_pathCost;
 		AStarRecorder* m_recorder;
 	};
 
@@ -81,6 +84,11 @@ namespace fdk { namespace game { namespace findpath
 	inline const std::vector<int>& AStar::getPath() const
 	{
 		return m_path;
+	}
+	
+	inline int AStar::getPathCost() const
+	{
+		return m_pathCost;
 	}
 
 	inline AStarRecorder* AStar::setRecorder(AStarRecorder* recorder)

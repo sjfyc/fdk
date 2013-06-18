@@ -11,6 +11,7 @@ namespace fdk { namespace game { namespace findpath
 		, m_openList()
 		, m_searchResult(SearchResult_Proceeding)
 		, m_path()
+		, m_pathCost(NOPATH_COST)
 		, m_recorder(0)
 	{
 		FDK_ASSERT(startNodeID != targetNodeID);
@@ -52,6 +53,7 @@ namespace fdk { namespace game { namespace findpath
 			if (current.nodeID == m_targetNodeID)
 			{
 				buildPath();
+				m_pathCost = current.fValue;
 				m_searchResult = SearchResult_Completed;
 				return SearchResult_Completed;
 			}			

@@ -2,6 +2,7 @@
 #include "Util.h"
 #include "Game.h"
 #include "Board.h"
+#include "Font.h"
 
 AStar::AStar(const fdkgame::findpath::Environment& env, int startNodeID, int targetNodeID)
 	: _Base(env, startNodeID, targetNodeID)
@@ -74,5 +75,6 @@ void AStar::render()
 				);
 			prevCellCoord = currentCellCoord;
 		}
-	}	
+	}
+	g_Font.printf(2, 2, HGETEXT_LEFT, "path total cost: %d", getPathCost());
 }
