@@ -99,7 +99,42 @@ namespace fdk { namespace game { namespace findpath
 		return coord.x >= 0 && coord.x < (NodeCoord::ValueType)m_nodes.size_x()
 			&& coord.y >= 0 && coord.y < (NodeCoord::ValueType)m_nodes.size_y();
 	}	
-	
+
+	void GridMap::annotateMap()
+	{
+		for (int x = m_nodes.size_x()-1; x >= 0; --x)
+		{
+			for (int y = m_nodes.size_y()-1; y>=0; --y)
+			{
+				annotateNode(NodeCoord(x, y));
+			}
+		}
+	}
+
+	void GridMap::annotateNode(const NodeCoord& coord)
+	{
+		const NodeCoord bottomNodeCoord(coord.x, coord.y+1);
+		const NodeCoord rightNodeCoord(coord.x+1, coord.y);		
+		const NodeCoord bottomRightNodeCoord(coord.x+1, coord.y+1);
+		if (isValidNodeCoord(rightNodeCoord) && 
+			isValidNodeCoord(bottomNodeCoord) && 
+			isValidNodeCoord(bottomRightNodeCoord) )
+		{
+			int temp = minOf(				
+				m_nodes(bottomNodeCoord.x, bottomNodeCoord.y).clearanceValue,
+				m_nodes(rightNodeCoord.x, rightNodeCoord.y).clearanceValue
+				);
+			m_nodes(coord.x, coord.y).clearanceValue = minOf(
+				temp, 
+				m_nodes(bottomRightNodeCoord.x, bottomRightNodeCoord.y).clearanceValue
+				);
+		}
+		else
+		{
+			m_nodes(coord.x, coord.y).clearanceValue = 1;
+		}
+	}
+
 	GridMapPart::GridMapPart(GridMap& orignMap, const Range& range)
 		: m_orignMap(orignMap)
 		, m_range(range)

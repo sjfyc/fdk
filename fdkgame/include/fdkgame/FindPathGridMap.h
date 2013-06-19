@@ -14,15 +14,17 @@ namespace fdk { namespace game { namespace findpath
 		{
 			Node();
 			bool bObstacle;
+			int clearanceValue;
 		};
 		typedef Array2D<Node> MapData;
 		typedef VectorI NodeCoord;
 		static const int COST_STRAIGHT = 100;	
 		static const int COST_DIAGONAL = 142;
 		void resetMap(size_t sizeX, size_t sizeY);
+		void annotateMap();
 		const MapData& getMapData() const;
 		void clearObstacles();
-		void setObstacle(int nodeID, bool bSet=true);
+		void setObstacle(int nodeID, bool bSet=true);		
 		NodeCoord getNodeCoord(int nodeID) const;
 		int getNodeID(const NodeCoord& coord) const;
 		bool isValidNodeCoord(const NodeCoord& coord) const;
@@ -32,6 +34,7 @@ namespace fdk { namespace game { namespace findpath
 		virtual void getSuccessorNodes(int nodeID, std::vector<SuccessorNodeInfo>& result) const;
 		virtual bool isObstacle(int nodeID) const;
 	private:
+		void annotateNode(const NodeCoord& coord);
 		bool tryAddSuccessorNode(std::vector<SuccessorNodeInfo>& result, const NodeCoord& coord, int cost) const;
 		MapData m_nodes;
 	};
@@ -62,9 +65,10 @@ namespace fdk { namespace game { namespace findpath
 		GridMap& m_orignMap;
 		Range m_range;
 	};
-
+	
 	inline GridMap::Node::Node()
 		: bObstacle(false)
+		, clearanceValue(0)
 	{
 	}
 
