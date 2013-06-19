@@ -1,34 +1,36 @@
 #include <fdkgame/FindPathHpa.h>
+#include <map>
 #include <fdkgame/FindPathAStar.h>
 
 namespace fdk { namespace game { namespace findpath
 {
-	AbstractGridMap::AbstractGridMap(GridMap& lowLevelMap, const VectorI& maxClusterSize)
+	HpaMap::HpaMap(GridMap& lowLevelMap, const VectorI& maxClusterSize)
 		: m_lowLevelMap(lowLevelMap)
 		, m_maxClusterSize(maxClusterSize)
 	{
 		FDK_ASSERT(maxClusterSize.x > 1 && maxClusterSize.y > 1);
 	}
 
-	void AbstractGridMap::clear()
+	void HpaMap::clear()
 	{
 		for (size_t i = 0; i < m_clusters.count(); ++i)
 		{
 			Cluster* cluster = m_clusters.raw_data()[i];
 			delete cluster;
 		}
-		m_entrances.clear();
+		m_clusters.clear();
+		m_bridges.clear();
 		m_abstractGraph.clear();		
 	}
 
-	void AbstractGridMap::rebuildAbstract()
+	void HpaMap::rebuildAbstract()
 	{
 		clear();
 		createClusterAndEntrances();
 		buildAbstractGraph();
 	}
 
-	void AbstractGridMap::createClusterAndEntrances()
+	void HpaMap::createClusterAndEntrances()
 	{
 		const GridMap::MapData& lowLevelMapData = m_lowLevelMap.getMapData();
 		m_clusters.reset(
@@ -53,11 +55,11 @@ namespace fdk { namespace game { namespace findpath
 
 				if (y > 0)
 				{
-					createHorizontalEntrances(x, x+clusterSize.x-1, y-1, *cluster);
+					createVerticalBridges(x, x+clusterSize.x-1, y-1, *cluster);
 				}
 				if(x > 0)
 				{
-					createVerticalEntrances(y, y+clusterSize.y-1, x-1, *cluster);
+					createHorizontalBridges(y, y+clusterSize.y-1, x-1, *cluster);
 				}
 				++clusterCoord.x;
 			}
@@ -65,24 +67,59 @@ namespace fdk { namespace game { namespace findpath
 		}
 	}
 
-	void AbstractGridMap::buildAbstractGraph()
+	void HpaMap::buildAbstractGraph()
 	{
-		for (size_t i = 0; i < m_entrances.size(); ++i)
+		std::map<int, int> lowLevelID_to_absID;
+		
+		int absNodeID = 0;
+		for (size_t i = 0; i < m_bridges.size(); ++i)
 		{
-			Entrance& entrance = m_entrances[i];
+			Bridge& entrance = m_bridges[i];			
+			AbstractNode* absNode1;
+			AbstractNode* absNode2;			
 
-			AbstractNodeInfo absNodeInfo;
+			{
+				std::map<int, int>::iterator it = lowLevelID_to_absID.find(entrance.lowLevelNode1ID);
+				if (it == lowLevelID_to_absID.end())
+				{
+					lowLevelID_to_absID.insert(std::make_pair(entrance.lowLevelNode1ID, absNodeID) );
 
-			absNodeInfo.lowLevelNodeID = entrance.lowLevelNode1ID;
-			AbstractNode* absNode1 = &m_abstractGraph.addNode(2*i, absNodeInfo);
-			entrance.cluster1->m_entrances.push_back(absNode1);
+					AbstractNodeInfo absNodeInfo;
+					absNodeInfo.lowLevelNodeID = entrance.lowLevelNode1ID;
 
-			absNodeInfo.lowLevelNodeID = entrance.lowLevelNode2ID;
-			AbstractNode* absNode2 = &m_abstractGraph.addNode(2*i+1, absNodeInfo);
-			entrance.cluster2->m_entrances.push_back(absNode2);
+					absNode1 = &m_abstractGraph.addNode(absNodeID, absNodeInfo);
+					entrance.cluster1->m_entrances.push_back(absNode1);
+
+					++absNodeID;
+				}
+				else
+				{
+					absNode1 = &m_abstractGraph.getNode(it->second);
+				}
+			}			
+			{
+				std::map<int, int>::iterator it = lowLevelID_to_absID.find(entrance.lowLevelNode2ID);
+				if (it == lowLevelID_to_absID.end())
+				{
+					lowLevelID_to_absID.insert(std::make_pair(entrance.lowLevelNode2ID, absNodeID) );
+
+					AbstractNodeInfo absNodeInfo;
+					absNodeInfo.lowLevelNodeID = entrance.lowLevelNode2ID;
+
+					absNode2 = &m_abstractGraph.addNode(absNodeID, absNodeInfo);
+					entrance.cluster2->m_entrances.push_back(absNode2);
+
+					++absNodeID;
+				}
+				else
+				{
+					absNode2 = &m_abstractGraph.getNode(it->second);
+				}
+			}
 
 			AbstractEdgeInfo absEdgeInfo;
 			absEdgeInfo.cost = GridMap::COST_STRAIGHT;
+			absEdgeInfo.bIntra = false;
 			m_abstractGraph.addEdge(*absNode1, *absNode2, absEdgeInfo);
 			m_abstractGraph.addEdge(*absNode2, *absNode1, absEdgeInfo);
 		}
@@ -112,6 +149,7 @@ namespace fdk { namespace game { namespace findpath
 						if (cost != PATHUNEXIST_COST)
 						{
 							AbstractEdgeInfo absEdgeInfo;
+							absEdgeInfo.bIntra = true;
 							absEdgeInfo.cost = cost;
 							m_abstractGraph.addEdge(*entrance1, *entrance2, absEdgeInfo);
 						}
@@ -126,6 +164,7 @@ namespace fdk { namespace game { namespace findpath
 					if (astar.search() == AStar::SearchResult_Completed)
 					{
 						AbstractEdgeInfo absEdgeInfo;
+						absEdgeInfo.bIntra = true;
 						absEdgeInfo.cost = astar.getPathCost();
 						m_abstractGraph.addEdge(*entrance1, *entrance2, absEdgeInfo);
 						computedCost(localNode1ID, localNode2ID) = absEdgeInfo.cost;
@@ -135,7 +174,7 @@ namespace fdk { namespace game { namespace findpath
 		}
 	}
 
-	void AbstractGridMap::createHorizontalEntrances(int xStart, int xEnd, int y, Cluster& cluster2)
+	void HpaMap::createVerticalBridges(int xStart, int xEnd, int y, Cluster& cluster2)
 	{
 		int node1ID, node2ID;
 
@@ -170,16 +209,16 @@ namespace fdk { namespace game { namespace findpath
 			}
 
 			// 在中间创建入口
-			Entrance entrance;
+			Bridge entrance;
 			entrance.lowLevelNode1ID = m_lowLevelMap.getNodeID( (VectorI(entranceStart, y)+VectorI(entranceEnd, y))/2 );
 			entrance.lowLevelNode2ID = m_lowLevelMap.getNodeID( (VectorI(entranceStart, y+1)+VectorI(entranceEnd, y+1))/2 );
 			entrance.cluster1 = m_clusters(cluster2.getClusterCoord().x, cluster2.getClusterCoord().y-1);
 			entrance.cluster2 = &cluster2;
-			m_entrances.push_back(entrance);
+			m_bridges.push_back(entrance);
 		}
 	}
 
-	void AbstractGridMap::createVerticalEntrances(int yStart, int yEnd, int x, Cluster& cluster2)
+	void HpaMap::createHorizontalBridges(int yStart, int yEnd, int x, Cluster& cluster2)
 	{
 		int node1ID, node2ID;
 
@@ -214,23 +253,23 @@ namespace fdk { namespace game { namespace findpath
 			}
 
 			// 在中间创建入口
-			Entrance entrance;
+			Bridge entrance;
 			entrance.lowLevelNode1ID = m_lowLevelMap.getNodeID( (VectorI(x, entranceStart)+VectorI(x, entranceEnd))/2 );
 			entrance.lowLevelNode2ID = m_lowLevelMap.getNodeID( (VectorI(x+1, entranceStart)+VectorI(x+1, entranceEnd))/2 );
 			entrance.cluster1 = m_clusters(cluster2.getClusterCoord().x-1, cluster2.getClusterCoord().y);
 			entrance.cluster2 = &cluster2;
-			m_entrances.push_back(entrance);
+			m_bridges.push_back(entrance);
 		}
 	}
 
-	int AbstractGridMap::getHeuristic(int startNodeID, int targetNodeID) const
+	int HpaMap::getHeuristic(int startNodeID, int targetNodeID) const
 	{
 		const AbstractNode& startAbsNode = m_abstractGraph.getNode(startNodeID);
 		const AbstractNode& targetAbsNode = m_abstractGraph.getNode(targetNodeID);
 		return m_lowLevelMap.getHeuristic(startAbsNode.getInfo().lowLevelNodeID, targetAbsNode.getInfo().lowLevelNodeID);
 	}
 
-	void AbstractGridMap::getSuccessorNodes(int nodeID, std::vector<SuccessorNodeInfo>& result) const
+	void HpaMap::getSuccessorNodes(int nodeID, std::vector<SuccessorNodeInfo>& result) const
 	{
 		const AbstractNode::OutEdges& outAbsEdges = m_abstractGraph.getNode(nodeID).getOutEdges();
 		for (AbstractNode::OutEdges::const_iterator it = outAbsEdges.begin(); 
@@ -243,12 +282,12 @@ namespace fdk { namespace game { namespace findpath
 		}
 	}
 
-	bool AbstractGridMap::isObstacle(int nodeID) const
+	bool HpaMap::isObstacle(int nodeID) const
 	{
 		return false;
 	}
 	
-	std::pair<AbstractGridMap::AbstractNode*, bool> AbstractGridMap::addStartOrTargetNodeAfterBuildedAbstract(int lowLevelNodeID, bool bStart)
+	std::pair<HpaMap::AbstractNode*, bool> HpaMap::addStartOrTargetNodeAfterBuildedAbstract(int lowLevelNodeID, bool bStart)
 	{
 		Cluster& cluster = getClusterOfLowLevelNode(lowLevelNodeID);
 		AbstractNode* abstractNode = cluster.findEntranceWithLowLevelNodeID(lowLevelNodeID);
@@ -289,7 +328,7 @@ namespace fdk { namespace game { namespace findpath
 		return std::make_pair(abstractNode, true);
 	}
 
-	AbstractGridMap::Cluster& AbstractGridMap::getClusterOfLowLevelNode(int lowLevelNodeID) const
+	HpaMap::Cluster& HpaMap::getClusterOfLowLevelNode(int lowLevelNodeID) const
 	{
 		GridMap::NodeCoord lowLevelNodeCoord = m_lowLevelMap.getNodeCoord(lowLevelNodeID);
 		ClusterCoord::ValueType clusterCoordX = lowLevelNodeCoord.x/m_maxClusterSize.x;
@@ -297,7 +336,7 @@ namespace fdk { namespace game { namespace findpath
 		return *m_clusters(clusterCoordX, clusterCoordY);
 	}
 
-	AbstractGridMap::AbstractNode* AbstractGridMap::Cluster::findEntranceWithLowLevelNodeID(int lowLevelNodeID) const
+	HpaMap::AbstractNode* HpaMap::Cluster::findEntranceWithLowLevelNodeID(int lowLevelNodeID) const
 	{
 		for (size_t i = 0; i < m_entrances.size(); ++i)
 		{
@@ -310,7 +349,7 @@ namespace fdk { namespace game { namespace findpath
 		return 0;
 	}
 
-	Hpa::Hpa(AbstractGridMap& env, int startNodeID, int targetNodeID)
+	Hpa::Hpa(HpaMap& env, int startNodeID, int targetNodeID)
 		: m_env(env)
 		, m_startNodeID(startNodeID)
 		, m_targetNodeID(targetNodeID)
@@ -328,7 +367,7 @@ namespace fdk { namespace game { namespace findpath
 	{
 		for (size_t i = 0; i < m_tempAddedStartTarget.size(); ++i)
 		{
-			AbstractGridMap::AbstractNode* absNode = m_tempAddedStartTarget[i];
+			HpaMap::AbstractNode* absNode = m_tempAddedStartTarget[i];
 			m_env.m_abstractGraph.removeNode(*absNode);
 		}
 	}
@@ -381,7 +420,7 @@ namespace fdk { namespace game { namespace findpath
 	void Hpa::initSearch()
 	{
 		// 处于相同的cluster, 直接在局部搜索
-		AbstractGridMap::Cluster& startCluster = m_env.getClusterOfLowLevelNode(m_startNodeID);
+		HpaMap::Cluster& startCluster = m_env.getClusterOfLowLevelNode(m_startNodeID);
 		if (&startCluster == &m_env.getClusterOfLowLevelNode(m_targetNodeID))
 		{
 			AStar astar(startCluster, 
@@ -397,9 +436,9 @@ namespace fdk { namespace game { namespace findpath
 		}
 
 		// 否则先搜一条抽象路径
-		std::pair<AbstractGridMap::AbstractNode*, bool> resultPair;
-		AbstractGridMap::AbstractNode* startAbsNode;
-		AbstractGridMap::AbstractNode* targetAbsNode;
+		std::pair<HpaMap::AbstractNode*, bool> resultPair;
+		HpaMap::AbstractNode* startAbsNode;
+		HpaMap::AbstractNode* targetAbsNode;
 		
 		resultPair = m_env.addStartOrTargetNodeAfterBuildedAbstract(m_startNodeID, true);
 		startAbsNode = resultPair.first;

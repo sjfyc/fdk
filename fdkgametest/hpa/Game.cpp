@@ -4,7 +4,7 @@
 #include "Util.h"
 #include "Board.h"
 #include "AStar.h"
-#include "AbstractMap.h"
+#include "HpaMap.h"
 
 Game::Game()
 	: m_mode(&g_GameModeGame)
@@ -54,7 +54,7 @@ void Game::render()
 	g_Board.draw();
 	util::fillCell(m_startCoord, COLOR_CELL_FROM);
 	util::fillCell(m_targetCoord, COLOR_CELL_TO);
-	g_AbstractMap.draw();
+	g_HpaMap.draw();
 	m_mode->render(*this);
 }
 
@@ -178,7 +178,7 @@ void GameModeMapEdit::enter(Game& game)
 
 void GameModeMapEdit::leave(Game& game)
 {
-	g_AbstractMap.rebuildAbstract();
+	g_HpaMap.rebuildAbstract();
 }
 
 void GameModeMapEdit::handleEvent(Game& game, int eventType, void* params)

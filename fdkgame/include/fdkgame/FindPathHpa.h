@@ -6,7 +6,7 @@
 
 namespace fdk { namespace game { namespace findpath
 {
-	class FDKGAME_API AbstractGridMap
+	class FDKGAME_API HpaMap
 		: public Environment
 	{
 		friend class Hpa;
@@ -16,7 +16,8 @@ namespace fdk { namespace game { namespace findpath
 			int lowLevelNodeID;
 		};
 		struct AbstractEdgeInfo
-		{			
+		{
+			bool bIntra;
 			int cost;
 		};
 		typedef Graph<AbstractNodeInfo, AbstractEdgeInfo> AbstractGraph;
@@ -24,7 +25,7 @@ namespace fdk { namespace game { namespace findpath
 		typedef GraphEdge<AbstractNodeInfo, AbstractEdgeInfo> AbstractEdge;
 		typedef VectorI ClusterCoord;
 		class Cluster;
-		struct Entrance
+		struct Bridge
 		{
 			int lowLevelNode1ID;
 			int lowLevelNode2ID;
@@ -34,7 +35,7 @@ namespace fdk { namespace game { namespace findpath
 		class Cluster
 			: public GridMapPart
 		{
-			friend class AbstractGridMap;
+			friend class HpaMap;
 		public:
 			typedef std::vector<AbstractNode*> Entrances;
 			const ClusterCoord& getClusterCoord() const;
@@ -46,14 +47,14 @@ namespace fdk { namespace game { namespace findpath
 			Entrances m_entrances;
 		};
 
-		AbstractGridMap(GridMap& lowLevelMap, const VectorI& maxClusterSize);
+		HpaMap(GridMap& lowLevelMap, const VectorI& maxClusterSize);
 		void rebuildAbstract();
 
 		GridMap& getLowLevelMap() const;
+		const VectorI& getMaxClusterSize() const;
+		const Array2D<Cluster*>& getClusters() const;
 		AbstractGraph& getAbstractGraph();
 		const AbstractGraph& getAbstractGraph() const;
-
-		const VectorI& getMaxClusterSize() const;
 		// Environment interfaces
 		virtual int getNodeSpaceSize() const { return m_abstractGraph.getNodes().size(); }
 		virtual int getHeuristic(int startNodeID, int targetNodeID) const;
@@ -63,15 +64,15 @@ namespace fdk { namespace game { namespace findpath
 		void clear();
 		void createClusterAndEntrances();
 		void buildAbstractGraph();
-		void createHorizontalEntrances(int xStart, int xEnd, int y, Cluster& cluster2);
-		void createVerticalEntrances(int yStart, int yEnd, int x, Cluster& cluster2);
+		void createVerticalBridges(int xStart, int xEnd, int y, Cluster& cluster2);
+		void createHorizontalBridges(int yStart, int yEnd, int x, Cluster& cluster2);
 		std::pair<AbstractNode*, bool> addStartOrTargetNodeAfterBuildedAbstract(int lowLevelNodeID, bool bStart);
 		Cluster& getClusterOfLowLevelNode(int lowLevelNodeID) const;
 		GridMap& m_lowLevelMap;
 		const VectorI m_maxClusterSize;
-		Array2D<Cluster*> m_clusters;
-		std::vector<Entrance> m_entrances;
+		Array2D<Cluster*> m_clusters;		
 		AbstractGraph m_abstractGraph;
+		std::vector<Bridge> m_bridges;
 	};
 
 	class Hpa
@@ -83,58 +84,62 @@ namespace fdk { namespace game { namespace findpath
 			SearchResult_Completed,
 			SearchResult_PathUnexist,
 		};
-		Hpa(AbstractGridMap& env, int startNodeID, int targetNodeID);
+		Hpa(HpaMap& env, int startNodeID, int targetNodeID);
 		~Hpa();
 		SearchResult search(int step=-1);
 		int popNextPathNode();
 	private:
 		void initSearch();		
-		AbstractGridMap& m_env;
+		HpaMap& m_env;
 		int m_startNodeID;
 		int m_targetNodeID;
-		std::vector<AbstractGridMap::AbstractNode*> m_tempAddedStartTarget;
+		std::vector<HpaMap::AbstractNode*> m_tempAddedStartTarget;
 		SearchResult m_searchResult;
 		std::vector<int> m_path;
 		std::vector<int> m_localRefinedPath;
 		int m_pathCost;
 	};
 
-	inline AbstractGridMap::Cluster::Cluster(GridMap& orignMap, const Range& range, const ClusterCoord& clusterCoord)
+	inline HpaMap::Cluster::Cluster(GridMap& orignMap, const Range& range, const ClusterCoord& clusterCoord)
 		: GridMapPart(orignMap, range)
 		, m_clusterCoord(clusterCoord)
 	{
 	}
 
-	inline const AbstractGridMap::ClusterCoord& AbstractGridMap::Cluster::getClusterCoord() const
+	inline const HpaMap::ClusterCoord& HpaMap::Cluster::getClusterCoord() const
 	{
 		return m_clusterCoord;
 	}
 
-	inline const AbstractGridMap::Cluster::Entrances& AbstractGridMap::Cluster::getEntrances() const
+	inline const HpaMap::Cluster::Entrances& HpaMap::Cluster::getEntrances() const
 	{
 		return m_entrances;
 	}
 
-	inline GridMap& AbstractGridMap::getLowLevelMap() const
+	inline GridMap& HpaMap::getLowLevelMap() const
 	{
 		return m_lowLevelMap;
 	}
 
-	inline AbstractGridMap::AbstractGraph& AbstractGridMap::getAbstractGraph()
-	{
-		return m_abstractGraph;
-	}
-
-	inline const AbstractGridMap::AbstractGraph& AbstractGridMap::getAbstractGraph() const
-	{
-		return m_abstractGraph;
-	}
-
-	inline const VectorI& AbstractGridMap::getMaxClusterSize() const
+	inline const VectorI& HpaMap::getMaxClusterSize() const
 	{
 		return m_maxClusterSize;
 	}
 
+	inline const Array2D<HpaMap::Cluster*>& HpaMap::getClusters() const
+	{
+		return m_clusters;
+	}
+
+	inline HpaMap::AbstractGraph& HpaMap::getAbstractGraph()
+	{
+		return m_abstractGraph;
+	}
+
+	inline const HpaMap::AbstractGraph& HpaMap::getAbstractGraph() const
+	{
+		return m_abstractGraph;
+	}
 }}}
 
 #endif
