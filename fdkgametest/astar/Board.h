@@ -15,6 +15,7 @@ public:
 	void clearBlocks();
 	void draw();
 	void drawCellCoord();
+	void drawCellClearanceValue();
 private:
 	Board();
 	~Board();

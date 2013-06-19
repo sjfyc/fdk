@@ -116,23 +116,33 @@ namespace fdk { namespace game { namespace findpath
 		const NodeCoord bottomNodeCoord(coord.x, coord.y+1);
 		const NodeCoord rightNodeCoord(coord.x+1, coord.y);		
 		const NodeCoord bottomRightNodeCoord(coord.x+1, coord.y+1);
-		if (isValidNodeCoord(rightNodeCoord) && 
-			isValidNodeCoord(bottomNodeCoord) && 
-			isValidNodeCoord(bottomRightNodeCoord) )
-		{
-			int temp = minOf(				
-				m_nodes(bottomNodeCoord.x, bottomNodeCoord.y).clearanceValue,
-				m_nodes(rightNodeCoord.x, rightNodeCoord.y).clearanceValue
-				);
-			m_nodes(coord.x, coord.y).clearanceValue = minOf(
-				temp, 
-				m_nodes(bottomRightNodeCoord.x, bottomRightNodeCoord.y).clearanceValue
-				);
-		}
-		else
+		if (!isValidNodeCoord(rightNodeCoord) || 
+			!isValidNodeCoord(bottomNodeCoord) || 			
+			!isValidNodeCoord(bottomRightNodeCoord) )
 		{
 			m_nodes(coord.x, coord.y).clearanceValue = 1;
+			return;
 		}
+
+		const Node& bottomNode = m_nodes(bottomNodeCoord.x, bottomNodeCoord.y);
+		const Node& rightNode = m_nodes(rightNodeCoord.x, rightNodeCoord.y);
+		const Node& bottomRightNode = m_nodes(bottomRightNodeCoord.x, bottomRightNodeCoord.y);
+		if (bottomNode.bObstacle ||
+			rightNode.bObstacle ||
+			bottomRightNode.bObstacle)
+		{
+			m_nodes(coord.x, coord.y).clearanceValue = 1;
+			return;
+		}
+
+		int temp = minOf(			
+			bottomNode.clearanceValue,
+			rightNode.clearanceValue
+			);
+		m_nodes(coord.x, coord.y).clearanceValue = minOf(
+			temp, 
+			bottomRightNode.clearanceValue
+			) + 1;
 	}
 
 	GridMapPart::GridMapPart(GridMap& orignMap, const Range& range)

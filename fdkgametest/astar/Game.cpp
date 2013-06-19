@@ -52,6 +52,7 @@ void Game::update(float delta)
 void Game::render()
 {
 	g_Board.draw();
+	g_Board.drawCellClearanceValue();
 	util::fillCell(m_startCoord, COLOR_CELL_FROM);
 	util::fillCell(m_targetCoord, COLOR_CELL_TO);
 	g_ActorBank.draw();
@@ -178,6 +179,7 @@ void GameModeMapEdit::enter(Game& game)
 
 void GameModeMapEdit::leave(Game& game)
 {
+	g_Board.annotateMap();
 }
 
 void GameModeMapEdit::handleEvent(Game& game, int eventType, void* params)

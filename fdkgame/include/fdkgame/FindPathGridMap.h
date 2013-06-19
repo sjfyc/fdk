@@ -24,7 +24,8 @@ namespace fdk { namespace game { namespace findpath
 		void annotateMap();
 		const MapData& getMapData() const;
 		void clearObstacles();
-		void setObstacle(int nodeID, bool bSet=true);		
+		void setObstacle(int nodeID, bool bSet=true);
+		int getClearanceValue(int nodeID) const;
 		NodeCoord getNodeCoord(int nodeID) const;
 		int getNodeID(const NodeCoord& coord) const;
 		bool isValidNodeCoord(const NodeCoord& coord) const;
@@ -81,13 +82,19 @@ namespace fdk { namespace game { namespace findpath
 	{
 		return m_nodes;
 	}
-
+	
 	inline void GridMap::setObstacle(int nodeID, bool bSet)
 	{
 		FDK_ASSERT(isValidNodeID(nodeID));
 		m_nodes.raw_data()[nodeID].bObstacle = bSet;
 	}
 	
+	inline int GridMap::getClearanceValue(int nodeID) const
+	{
+		FDK_ASSERT(isValidNodeID(nodeID));
+		return m_nodes.raw_data()[nodeID].clearanceValue;
+	}
+
 	inline GridMap& GridMapPart::getOrignMap() const
 	{
 		return m_orignMap;

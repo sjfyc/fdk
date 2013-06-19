@@ -6,6 +6,7 @@
 Board::Board()
 {
 	_Base::resetMap(CELL_COUNT_X, CELL_COUNT_Y);
+	annotateMap();
 }
 
 Board::~Board()
@@ -61,6 +62,17 @@ void Board::drawCellCoord()
 		for (int x = 0; x < CELL_COUNT_X; ++x)
 		{
 			g_Font.printf(x*CELL_SIZE_X+2, y*CELL_SIZE_Y+2, HGETEXT_LEFT, "%d,%d", x, y);
+		}
+	}
+}
+
+void Board::drawCellClearanceValue()
+{
+	for (int y = 0; y < CELL_COUNT_Y; ++y)
+	{	
+		for (int x = 0; x < CELL_COUNT_X; ++x)
+		{
+			g_Font.printf(x*CELL_SIZE_X+CELL_SIZE_X/2, y*CELL_SIZE_Y+CELL_SIZE_Y/2, HGETEXT_LEFT, "%d", getClearanceValue(getNodeID(CellCoord(x, y)) ) );
 		}
 	}
 }
