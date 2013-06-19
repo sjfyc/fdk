@@ -43,7 +43,7 @@ namespace fdk { namespace game { namespace findpath
 			const TransitionPoints& getTransitionPoints() const;			
 		private:
 			AbstractNode* findTransitionPointWithLowLevelNodeID(int lowLevelNodeID) const;
-			void convertLocalToLowLevelPath(const std::vector<int>& local, std::vector<int>& lowLevel) const;
+			void localToLowLevelPath(const std::vector<int>& local, std::vector<int>& lowLevel) const;
 			Cluster(GridMap& orignMap, const Range& range, const ClusterCoord& clusterCoord);
 			ClusterCoord m_clusterCoord;
 			TransitionPoints m_transitionPoints;
@@ -51,6 +51,8 @@ namespace fdk { namespace game { namespace findpath
 
 		HpaMap(GridMap& lowLevelMap, const VectorI& maxClusterSize);
 		void clear();
+
+		// 需要lowLevelMap先annotateMap,因为transition point的建立依赖于clearanceValue
 		void rebuildAbstract();
 
 		GridMap& getLowLevelMap() const;
@@ -68,8 +70,9 @@ namespace fdk { namespace game { namespace findpath
 		void buildAbstractGraph_addIntraEdgesInCluster(Cluster& cluster);
 		void createVerticalBridges(int xStart, int xEnd, int y, Cluster& cluster2);
 		void createHorizontalBridges(int yStart, int yEnd, int x, Cluster& cluster2);
-		std::pair<AbstractNode*, bool> addStartOrTargetNodeAfterBuildedAbstract(int lowLevelNodeID, bool bStart);
+		std::pair<AbstractNode*, bool> addStartOrTargetNodeForHpa(int lowLevelNodeID, bool bStart);
 		Cluster& getClusterOfLowLevelNode(int lowLevelNodeID) const;
+		void abstractToLowLevelPath(const std::vector<int>& abstract, std::vector<int>& lowLevel) const;
 		GridMap& m_lowLevelMap;
 		const VectorI m_maxClusterSize;
 		Array2D<Cluster*> m_clusters;		
@@ -86,19 +89,19 @@ namespace fdk { namespace game { namespace findpath
 			Error_PathCompleted,
 			Error_PathUnexist,
 		};
-		Hpa(HpaMap& env, int startNodeID, int targetNodeID);
+		Hpa(HpaMap& env, int startNodeID, int targetNodeID, int minClearanceValueRequired=1);
 		~Hpa();		
 		int popNextPathNode();
 		ErrorType getError() const;
-		const std::vector<int>& getAbstractPath() const;
+		const std::vector<int>& getRoughPath() const;
 	protected:
 		void initSearch();
 		HpaMap& m_env;
 		int m_lowLevelStartNodeID;
 		int m_lowLevelTargetNodeID;
-		std::vector<HpaMap::AbstractNode*> m_tempAddedStartTarget;
+		int m_minClearanceValueRequired;
 		ErrorType m_error;
-		std::vector<int> m_abstractPath;
+		std::vector<int> m_roughPath;
 		std::vector<int> m_localRefinedPath;
 		int m_pathCost;
 	};
@@ -144,9 +147,9 @@ namespace fdk { namespace game { namespace findpath
 		return m_error;
 	}
 
-	inline const std::vector<int>& Hpa::getAbstractPath() const
+	inline const std::vector<int>& Hpa::getRoughPath() const
 	{
-		return m_abstractPath;
+		return m_roughPath;
 	}
 }}}
 

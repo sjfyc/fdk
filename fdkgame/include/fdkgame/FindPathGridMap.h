@@ -36,7 +36,7 @@ namespace fdk { namespace game { namespace findpath
 		virtual bool isObstacle(int nodeID) const;
 	private:
 		void annotateNode(const NodeCoord& coord);
-		bool tryAddSuccessorNode(PathFinder& pathFinder, std::vector<SuccessorNodeInfo>& result, const NodeCoord& coord, int cost) const;
+		bool tryAddSuccessorNode(int minClearanceValueRequired, std::vector<SuccessorNodeInfo>& result, const NodeCoord& coord, int cost) const;
 		MapData m_nodes;
 	};
 

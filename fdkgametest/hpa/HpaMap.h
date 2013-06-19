@@ -27,7 +27,7 @@ public:
 	void render();
 	int popNextPathNode();
 private:
-	std::vector<int> m_abstractPath;
+	std::vector<int> m_roughPath;
 	std::vector<int> m_path;
 };
 

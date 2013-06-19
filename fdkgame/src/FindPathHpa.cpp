@@ -263,6 +263,14 @@ namespace fdk { namespace game { namespace findpath
 
 			int start = y;
 			int end;
+
+			int maxClearanceValue = maxOf(
+				m_lowLevelMap.getClearanceValue(node1ID),
+				m_lowLevelMap.getClearanceValue(node2ID)
+				);
+			int maxClearanceValueNode1ID = node1ID;
+			int maxClearanceValueNode2ID = node2ID;
+
 			while (1)
 			{
 				end = y;
@@ -279,12 +287,26 @@ namespace fdk { namespace game { namespace findpath
 				{
 					break;
 				}
-			}
 
-			// 在中间创建入口
+				int temp = maxOf(
+					m_lowLevelMap.getClearanceValue(node1ID),
+					m_lowLevelMap.getClearanceValue(node2ID)
+					);
+				if (temp > maxClearanceValue)
+				{
+					maxClearanceValue = temp;
+					maxClearanceValueNode1ID = node1ID;
+					maxClearanceValueNode2ID = node2ID;
+				}
+			}
+						
 			Bridge bridge;
-			bridge.lowLevelNode1ID = m_lowLevelMap.getNodeID( (VectorI(x, start)+VectorI(x, end))/2 );
-			bridge.lowLevelNode2ID = m_lowLevelMap.getNodeID( (VectorI(x+1, start)+VectorI(x+1, end))/2 );
+			// 在中间创建入口
+			//bridge.lowLevelNode1ID = m_lowLevelMap.getNodeID( (VectorI(x, start)+VectorI(x, end))/2 );
+			//bridge.lowLevelNode2ID = m_lowLevelMap.getNodeID( (VectorI(x+1, start)+VectorI(x+1, end))/2 );
+			// 选择净空间最大的节点对创建入口
+			bridge.lowLevelNode1ID = maxClearanceValueNode1ID;
+			bridge.lowLevelNode2ID = maxClearanceValueNode2ID;
 			bridge.cluster1 = m_clusters(cluster2.getClusterCoord().x-1, cluster2.getClusterCoord().y);
 			bridge.cluster2 = &cluster2;
 			m_bridges.push_back(bridge);
@@ -305,13 +327,19 @@ namespace fdk { namespace game { namespace findpath
 
 	void HpaMap::getSuccessorNodes(PathFinder& pathFinder, int nodeID, std::vector<SuccessorNodeInfo>& result) const
 	{
+		const int minClearanceValueRequired = pathFinder.getMinClearanceValueRequired();
 		const AbstractNode::OutEdges& outAbsEdges = m_abstractGraph.getNode(nodeID).getOutEdges();
 		for (AbstractNode::OutEdges::const_iterator it = outAbsEdges.begin(); 
 			it != outAbsEdges.end(); ++it)
 		{
 			const AbstractEdge* absEdge = *it;
+			const AbstractNode& absTargetNode = absEdge->getTargetNode();
+			if (m_lowLevelMap.getClearanceValue(absTargetNode.getInfo().lowLevelNodeID) < minClearanceValueRequired)
+			{
+				continue;
+			}
 			SuccessorNodeInfo info;
-			info.nodeID = absEdge->getTargetNode().getID();
+			info.nodeID = absTargetNode.getID();
 			info.cost = absEdge->getInfo().cost;
 			result.push_back(info);
 		}
@@ -322,7 +350,7 @@ namespace fdk { namespace game { namespace findpath
 		return false;
 	}
 	
-	std::pair<HpaMap::AbstractNode*, bool> HpaMap::addStartOrTargetNodeAfterBuildedAbstract(int lowLevelNodeID, bool bStart)
+	std::pair<HpaMap::AbstractNode*, bool> HpaMap::addStartOrTargetNodeForHpa(int lowLevelNodeID, bool bStart)
 	{
 		Cluster& cluster = getClusterOfLowLevelNode(lowLevelNodeID);
 		AbstractNode* abstractNode = cluster.findTransitionPointWithLowLevelNodeID(lowLevelNodeID);
@@ -369,6 +397,15 @@ namespace fdk { namespace game { namespace findpath
 		return *m_clusters(clusterCoordX, clusterCoordY);
 	}
 
+	void HpaMap::abstractToLowLevelPath(const std::vector<int>& abstract, std::vector<int>& lowLevel) const
+	{
+		for (size_t i = 0; i < abstract.size(); ++i)
+		{
+			const HpaMap::AbstractNode& absNode = m_abstractGraph.getNode(abstract[i]);
+			lowLevel.push_back(absNode.getInfo().lowLevelNodeID);
+		}
+	}
+
 	HpaMap::AbstractNode* HpaMap::Cluster::findTransitionPointWithLowLevelNodeID(int lowLevelNodeID) const
 	{
 		for (size_t i = 0; i < m_transitionPoints.size(); ++i)
@@ -382,7 +419,7 @@ namespace fdk { namespace game { namespace findpath
 		return 0;
 	}
 
-	void HpaMap::Cluster::convertLocalToLowLevelPath(const std::vector<int>& local, std::vector<int>& lowLevel) const
+	void HpaMap::Cluster::localToLowLevelPath(const std::vector<int>& local, std::vector<int>& lowLevel) const
 	{
 		for (size_t i = 0; i < local.size(); ++i)
 		{
@@ -390,12 +427,13 @@ namespace fdk { namespace game { namespace findpath
 		}
 	}
 
-	Hpa::Hpa(HpaMap& env, int startNodeID, int targetNodeID)
+	Hpa::Hpa(HpaMap& env, int startNodeID, int targetNodeID, int minClearanceValueRequired)
 		: m_env(env)
 		, m_lowLevelStartNodeID(startNodeID)
 		, m_lowLevelTargetNodeID(targetNodeID)
+		, m_minClearanceValueRequired(minClearanceValueRequired)
 		, m_error(Error_OK)
-		, m_abstractPath()
+		, m_roughPath()
 		, m_pathCost(PATHUNEXIST_COST)
 	{
 		FDK_ASSERT(startNodeID != targetNodeID);
@@ -405,12 +443,7 @@ namespace fdk { namespace game { namespace findpath
 	}
 
 	Hpa::~Hpa()
-	{
-		for (size_t i = 0; i < m_tempAddedStartTarget.size(); ++i)
-		{
-			HpaMap::AbstractNode* absNode = m_tempAddedStartTarget[i];
-			m_env.m_abstractGraph.removeNode(*absNode);
-		}
+	{		
 	}
 
 	void Hpa::initSearch()
@@ -421,10 +454,11 @@ namespace fdk { namespace game { namespace findpath
 		{
 			AStar astar(startCluster, 
 				startCluster.toPartNodeID(m_lowLevelStartNodeID), 
-				startCluster.toPartNodeID(m_lowLevelTargetNodeID));
+				startCluster.toPartNodeID(m_lowLevelTargetNodeID),
+				m_minClearanceValueRequired);
 			if (astar.search() == AStar::SearchResult_Completed)
 			{
-				startCluster.convertLocalToLowLevelPath(astar.getPath(), m_localRefinedPath);
+				startCluster.localToLowLevelPath(astar.getPath(), m_localRefinedPath);
 				m_pathCost = astar.getPathCost();
 				return;
 			}
@@ -434,31 +468,43 @@ namespace fdk { namespace game { namespace findpath
 		std::pair<HpaMap::AbstractNode*, bool> resultPair;
 		HpaMap::AbstractNode* startAbsNode;
 		HpaMap::AbstractNode* targetAbsNode;
-		
-		resultPair = m_env.addStartOrTargetNodeAfterBuildedAbstract(m_lowLevelStartNodeID, true);
+		std::vector<HpaMap::AbstractNode*> tempAddedStartTarget;
+
+		resultPair = m_env.addStartOrTargetNodeForHpa(m_lowLevelStartNodeID, true);
 		startAbsNode = resultPair.first;
 		if (resultPair.second)
 		{
-			m_tempAddedStartTarget.push_back(startAbsNode);
+			tempAddedStartTarget.push_back(startAbsNode);
 		}
-		resultPair = m_env.addStartOrTargetNodeAfterBuildedAbstract(m_lowLevelTargetNodeID, false);
+		resultPair = m_env.addStartOrTargetNodeForHpa(m_lowLevelTargetNodeID, false);
 		targetAbsNode = resultPair.first;
 		if (resultPair.second)
 		{
-			m_tempAddedStartTarget.push_back(targetAbsNode);
+			tempAddedStartTarget.push_back(targetAbsNode);
 		}
 
 		// 如果抽象路径搜索失败则不存在路径
-		AStar astar(m_env, startAbsNode->getID(), targetAbsNode->getID());
-		if (astar.search() == AStar::SearchResult_PathUnexist)
+		const int startAbsNodeID = startAbsNode->getID();
+		const int targetAbsNodeID = targetAbsNode->getID();
+		AStar astar(m_env, startAbsNodeID, targetAbsNodeID, m_minClearanceValueRequired);
+		AStar::SearchResult searchResult = astar.search();
+		
+		if (searchResult == AStar::SearchResult_PathUnexist)
 		{
-			m_error = Error_PathUnexist;
-			return;
+			m_error = Error_PathUnexist;			
+		}
+		else
+		{
+			m_env.abstractToLowLevelPath(astar.getPath(), m_roughPath);
+			m_roughPath.push_back(m_lowLevelStartNodeID);
+			m_localRefinedPath.clear();
 		}
 
-		m_abstractPath = astar.getPath();
-		m_abstractPath.push_back(startAbsNode->getID());
-		m_localRefinedPath.clear();
+		for (size_t i = 0; i < tempAddedStartTarget.size(); ++i)
+		{
+			HpaMap::AbstractNode* absNode = tempAddedStartTarget[i];
+			m_env.m_abstractGraph.removeNode(*absNode);
+		}
 		return;
 	}
 
@@ -472,32 +518,27 @@ namespace fdk { namespace game { namespace findpath
 
 		if (m_localRefinedPath.empty())
 		{
-			if (m_abstractPath.size() >= 2)
+			if (m_roughPath.size() >= 2)
 			{
-				int startAbsNodeID = m_abstractPath.back();
-				m_abstractPath.pop_back();
-				int targetAbsNodeID = m_abstractPath.back();				
-
-				HpaMap::AbstractNode& startAbsNode = m_env.m_abstractGraph.getNode(startAbsNodeID);
-				HpaMap::AbstractNode& targetAbsNode = m_env.m_abstractGraph.getNode(targetAbsNodeID);
-
-				int startNodeID = startAbsNode.getInfo().lowLevelNodeID;
-				int targetNodeID = targetAbsNode.getInfo().lowLevelNodeID;
+				int startNodeID = m_roughPath.back();
+				m_roughPath.pop_back();
+				int targetNodeID = m_roughPath.back();
 
 				HpaMap::Cluster& startCluster = m_env.getClusterOfLowLevelNode(startNodeID);
 				HpaMap::Cluster& targetCluster = m_env.getClusterOfLowLevelNode(targetNodeID);
-				if (&startCluster != &targetCluster)
+				if (&startCluster != &targetCluster) // must be inter-edge
 				{
-					m_localRefinedPath.push_back(targetAbsNode.getInfo().lowLevelNodeID);			
+					m_localRefinedPath.push_back(targetNodeID);			
 				}
 				else
 				{
 					AStar astar(startCluster, 
 						startCluster.toPartNodeID(startNodeID), 
-						startCluster.toPartNodeID(targetNodeID));
+						startCluster.toPartNodeID(targetNodeID),
+						m_minClearanceValueRequired);
 					if (astar.search() == AStar::SearchResult_Completed)
 					{
-						startCluster.convertLocalToLowLevelPath(astar.getPath(), m_localRefinedPath);
+						startCluster.localToLowLevelPath(astar.getPath(), m_localRefinedPath);
 					}
 					else
 					{
@@ -508,7 +549,7 @@ namespace fdk { namespace game { namespace findpath
 			}
 			else
 			{
-				m_abstractPath.clear();
+				m_roughPath.clear();
 				m_error = Error_PathCompleted;
 				return INVALID_NODEID;
 			}

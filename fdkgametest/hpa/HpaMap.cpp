@@ -80,9 +80,9 @@ void HpaMap::draw()
 }
 
 Hpa::Hpa(fdkgame::findpath::HpaMap& env, int startNodeID, int targetNodeID)
-	: _Base(env, startNodeID, targetNodeID)
+	: _Base(env, startNodeID, targetNodeID, g_Option.getUnitSize())
 {
-	m_abstractPath = getAbstractPath();
+	m_roughPath = getRoughPath();
 }
 
 Hpa::~Hpa()
@@ -94,13 +94,13 @@ void Hpa::render()
 	// »æÖÆ³éÏóÂ·¾¶
 	{
 		CellCoord prevCellCoord = g_Game.getStartCoord();
-		const std::vector<int>& path = m_abstractPath;
+		const std::vector<int>& path = m_roughPath;
 		for (int i = (int)path.size()-1; i >= 0; --i)
 		{
 			Location prevCenterLocation = util::cellCoordToLocation(prevCellCoord);
 			prevCenterLocation += Location(CELL_SIZE_X/2, CELL_SIZE_Y/2);
 
-			CellCoord currentCellCoord = g_Board.getNodeCoord(m_env.getAbstractGraph().getNode(path[i]).getInfo().lowLevelNodeID);
+			CellCoord currentCellCoord = g_Board.getNodeCoord(path[i]);
 			Location currentCenterLocation = util::cellCoordToLocation(currentCellCoord);
 			currentCenterLocation += Location(CELL_SIZE_X/2, CELL_SIZE_Y/2);
 

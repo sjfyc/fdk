@@ -74,7 +74,7 @@ void Option::outputUsage()
 	util::output("1: show/hide cell coord");
 	util::output("2: show/hide cell clearance value");
 	util::output("3: show/hide cluster coord");
-	util::output("4: show/hide transition point");
+	util::output("4: show/hide transition point id");
 	util::output("+: increase unit size");
 	util::output("-: decrease unit size");
 }
