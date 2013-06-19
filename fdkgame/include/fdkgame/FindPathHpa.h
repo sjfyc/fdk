@@ -86,7 +86,6 @@ namespace fdk { namespace game { namespace findpath
 		};
 		Hpa(HpaMap& env, int startNodeID, int targetNodeID);
 		~Hpa();
-		SearchResult search(int step=-1);
 		int popNextPathNode();
 	private:
 		void initSearch();		

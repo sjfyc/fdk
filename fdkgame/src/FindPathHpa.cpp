@@ -384,51 +384,6 @@ namespace fdk { namespace game { namespace findpath
 		}
 	}
 
-	Hpa::SearchResult Hpa::search(int step)
-	{
-		//if (m_searchResult != SearchResult_Proceeding)
-		//{
-		//	return m_searchResult;
-		//}
-		//int proceededStep = 0;
-		//std::vector<SuccessorNodeInfo> successors;
-		//while (!m_openList.empty())
-		//{
-		//	OpenListItem current = m_openList.top();			
-		//	m_openList.pop();
-		//	m_nodeStates[current.nodeID] = NodeState_Closed;
-		//	if (m_recorder)
-		//	{
-		//		m_recorder->onCloseNode(current.nodeID);
-		//	}
-
-		//	if (current.nodeID == m_targetNodeID)
-		//	{
-		//		buildPath();
-		//		m_pathCost = current.fValue;
-		//		m_searchResult = SearchResult_Completed;
-		//		return SearchResult_Completed;
-		//	}			
-
-		//	successors.clear();
-		//	m_env.getSuccessorNodes(current.nodeID, successors);
-		//	for (size_t i = 0; i < successors.size(); ++i)
-		//	{
-		//		SuccessorNodeInfo& successor = successors[i];
-		//		inspectNode(successor.nodeID, current.nodeID,
-		//			m_nodeDatas[current.nodeID].gValue+successor.cost);
-		//	}
-
-		//	++proceededStep;
-		//	if (step >=1 && proceededStep >= step)
-		//	{
-		//		return SearchResult_Proceeding;
-		//	}
-		//}
-		//m_searchResult = SearchResult_PathUnexist;
-		return SearchResult_PathUnexist;
-	}
-
 	void Hpa::initSearch()
 	{
 		// 处于相同的cluster, 直接在局部搜索
@@ -505,32 +460,47 @@ namespace fdk { namespace game { namespace findpath
 			{
 				int startAbsNodeID = m_path.back();
 				m_path.pop_back();
-				int targetAbsNodeID = m_path.back();
+				int targetAbsNodeID = m_path.back();				
 
-				/*		AbstractGridMap::Cluster& startCluster = getClusterOfLowLevelNode(startAbsNode.getInfo().lowLevelNodeID);
-				AbstractGridMap::Cluster& targetCluster = getClusterOfLowLevelNode(targetAbsNode.getInfo().lowLevelNodeID);
+				HpaMap::AbstractNode& startAbsNode = m_env.m_abstractGraph.getNode(startAbsNodeID);
+				HpaMap::AbstractNode& targetAbsNode = m_env.m_abstractGraph.getNode(targetAbsNodeID);
+
+				int startNodeID = startAbsNode.getInfo().lowLevelNodeID;
+				int targetNodeID = targetAbsNode.getInfo().lowLevelNodeID;
+
+				HpaMap::Cluster& startCluster = m_env.getClusterOfLowLevelNode(startNodeID);
+				HpaMap::Cluster& targetCluster = m_env.getClusterOfLowLevelNode(targetNodeID);
 				if (&startCluster != &targetCluster)
 				{
-				output.push_back(targetAbsNode.getInfo().lowLevelNodeID);			
+					m_localRefinedPath.push_back(targetAbsNode.getInfo().lowLevelNodeID);			
 				}
 				else
 				{
-				AStar astar(startCluster, 
-				startCluster.toPartNodeID(m_startNodeID), 
-				startCluster.toPartNodeID(m_targetNodeID));
-				if (astar.search() == AStar::SearchResult_Completed)
-				{
-				m_searchResult = SearchResult_Completed;
-				m_path = astar.getPath();
-				m_pathCost = astar.getPathCost();
-				return;
+					AStar astar(startCluster, 
+						startCluster.toPartNodeID(startNodeID), 
+						startCluster.toPartNodeID(targetNodeID));
+					if (astar.search() == AStar::SearchResult_Completed)
+					{
+						m_localRefinedPath = astar.getPath();
+					}
+					else
+					{
+						m_searchResult = SearchResult_PathUnexist;
+						return INVALID_NODEID;
+					}
 				}
-				}*/
-
-
-			}			
+			}
+			else
+			{
+				m_searchResult = SearchResult_Completed;
+				m_path.clear();
+				return INVALID_NODEID;
+			}
 		}
-		return INVALID_NODEID;
+		
+		int node = m_localRefinedPath.back();
+		m_localRefinedPath.pop_back();
+		return node;
 	}
 
 }}}
