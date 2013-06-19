@@ -77,13 +77,16 @@ void Game::onEvent(int eventType, void* params)
 			{
 				toggleMode();
 			}
-			if (!m_hpa || m_hpa->getSearchResult() != Hpa::SearchResult_Proceeding)
+			if (!m_hpa || m_hpa->getError() != Hpa::Error_OK)
 			{				
 				delete m_hpa;
 				m_hpa = new Hpa(g_HpaMap, 
 					g_Board.getNodeID(m_startCoord),
 					g_Board.getNodeID(m_targetCoord));
-				m_hpa->search();
+				if (m_hpa->getError() == Hpa::Error_PathUnexist)
+				{
+					util::output("path unexist");
+				}
 			}
 		}
 	}
@@ -121,7 +124,7 @@ GameModeGame::GameModeGame()
 void GameModeGame::update(Game& game, float delta)
 {
 	Hpa* hpa = game.m_hpa;
-	if (hpa && hpa->getSearchResult() != Hpa::SearchResult_PathUnexist && !m_bStepByStep)
+	if (hpa && hpa->getError() == Hpa::Error_OK && !m_bStepByStep)
 	{
 		search(*hpa);
 	}
@@ -154,18 +157,17 @@ void GameModeGame::handleEvent(Game& game, int eventType, void* params)
 
 void GameModeGame::search(Hpa& hpa)
 {
-	Hpa::SearchResult result = hpa.getSearchResult();
-	if (result == Hpa::SearchResult_PathUnexist)
-	{
-		util::output("search failed");
-	}
-	if (result == Hpa::SearchResult_Completed)
-	{			
-		util::output("search completed");
-	}
 	int node = hpa.popNextPathNode();
 	if (node == fdkgame::findpath::INVALID_NODEID)
 	{
+		if (hpa.getError() == Hpa::Error_PathCompleted)
+		{
+			util::output("target reached");
+		}
+		else
+		{
+			util::output("path unexist");
+		}
 		return;
 	}
 }
@@ -180,6 +182,7 @@ GameModeMapEdit::GameModeMapEdit()
 void GameModeMapEdit::enter(Game& game)
 {
 	FDK_DELETE(game.m_hpa);
+	g_HpaMap.clear();
 }
 
 void GameModeMapEdit::leave(Game& game)

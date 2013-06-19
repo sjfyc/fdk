@@ -25,7 +25,6 @@ public:
 	Hpa(fdkgame::findpath::HpaMap& env, int startNodeID, int targetNodeID);
 	~Hpa();	
 	void render();
-	SearchResult search();
 	int popNextPathNode();
 private:
 	std::vector<int> m_abstractPath;

@@ -50,6 +50,7 @@ namespace fdk { namespace game { namespace findpath
 		};
 
 		HpaMap(GridMap& lowLevelMap, const VectorI& maxClusterSize);
+		void clear();
 		void rebuildAbstract();
 
 		GridMap& getLowLevelMap() const;
@@ -61,8 +62,7 @@ namespace fdk { namespace game { namespace findpath
 		virtual int getHeuristic(int startNodeID, int targetNodeID) const;
 		virtual void getSuccessorNodes(int nodeID, std::vector<SuccessorNodeInfo>& result) const;
 		virtual bool isObstacle(int nodeID) const;
-	protected:
-		void clear();
+	protected:		
 		void createClusterAndBridges();
 		void buildAbstractGraph();
 		void buildAbstractGraph_addIntraEdgesInCluster(Cluster& cluster);
@@ -80,24 +80,24 @@ namespace fdk { namespace game { namespace findpath
 	class Hpa
 	{
 	public:
-		enum SearchResult
+		enum ErrorType
 		{			
-			SearchResult_Proceeding,
-			SearchResult_Completed,
-			SearchResult_PathUnexist,
+			Error_OK,
+			Error_PathCompleted,
+			Error_PathUnexist,
 		};
 		Hpa(HpaMap& env, int startNodeID, int targetNodeID);
-		~Hpa();
-		SearchResult search();
-		SearchResult getSearchResult() const;
+		~Hpa();		
+		int popNextPathNode();
+		ErrorType getError() const;
 		const std::vector<int>& getAbstractPath() const;
-		int popNextPathNode();		
 	protected:
+		void initSearch();
 		HpaMap& m_env;
 		int m_lowLevelStartNodeID;
 		int m_lowLevelTargetNodeID;
 		std::vector<HpaMap::AbstractNode*> m_tempAddedStartTarget;
-		SearchResult m_searchResult;
+		ErrorType m_error;
 		std::vector<int> m_abstractPath;
 		std::vector<int> m_localRefinedPath;
 		int m_pathCost;
@@ -139,9 +139,9 @@ namespace fdk { namespace game { namespace findpath
 		return m_abstractGraph;
 	}
 
-	inline Hpa::SearchResult Hpa::getSearchResult() const
+	inline Hpa::ErrorType Hpa::getError() const
 	{
-		return m_searchResult;
+		return m_error;
 	}
 
 	inline const std::vector<int>& Hpa::getAbstractPath() const

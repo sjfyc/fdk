@@ -66,17 +66,11 @@ void HpaMap::draw()
 Hpa::Hpa(fdkgame::findpath::HpaMap& env, int startNodeID, int targetNodeID)
 	: _Base(env, startNodeID, targetNodeID)
 {
+	m_abstractPath = getAbstractPath();
 }
 
 Hpa::~Hpa()
 {
-}
-
-Hpa::SearchResult Hpa::search()
-{
-	Hpa::SearchResult result = _Base::search();
-	m_abstractPath = getAbstractPath();
-	return result;
 }
 
 void Hpa::render()

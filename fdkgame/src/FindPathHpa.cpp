@@ -372,13 +372,14 @@ namespace fdk { namespace game { namespace findpath
 		: m_env(env)
 		, m_lowLevelStartNodeID(startNodeID)
 		, m_lowLevelTargetNodeID(targetNodeID)
-		, m_searchResult(SearchResult_Proceeding)
+		, m_error(Error_OK)
 		, m_abstractPath()
 		, m_pathCost(PATHUNEXIST_COST)
 	{
 		FDK_ASSERT(startNodeID != targetNodeID);
 		FDK_ASSERT(m_env.getLowLevelMap().isValidNodeID(startNodeID));
 		FDK_ASSERT(m_env.getLowLevelMap().isValidNodeID(targetNodeID));
+		initSearch();
 	}
 
 	Hpa::~Hpa()
@@ -390,7 +391,7 @@ namespace fdk { namespace game { namespace findpath
 		}
 	}
 
-	Hpa::SearchResult Hpa::search()
+	void Hpa::initSearch()
 	{
 		// 处于相同的cluster, 直接在局部搜索
 		HpaMap::Cluster& startCluster = m_env.getClusterOfLowLevelNode(m_lowLevelStartNodeID);
@@ -401,10 +402,9 @@ namespace fdk { namespace game { namespace findpath
 				startCluster.toPartNodeID(m_lowLevelTargetNodeID));
 			if (astar.search() == AStar::SearchResult_Completed)
 			{
-				m_searchResult = SearchResult_Completed;
 				startCluster.convertLocalToLowLevelPath(astar.getPath(), m_localRefinedPath);
 				m_pathCost = astar.getPathCost();
-				return m_searchResult;
+				return;
 			}
 		}
 
@@ -430,35 +430,22 @@ namespace fdk { namespace game { namespace findpath
 		AStar astar(m_env, startAbsNode->getID(), targetAbsNode->getID());
 		if (astar.search() == AStar::SearchResult_PathUnexist)
 		{
-			m_searchResult = SearchResult_PathUnexist;
-			return m_searchResult;
+			m_error = Error_PathUnexist;
+			return;
 		}
 
 		m_abstractPath = astar.getPath();
 		m_abstractPath.push_back(startAbsNode->getID());
 		m_localRefinedPath.clear();
-		return m_searchResult;
+		return;
 	}
 
 	int Hpa::popNextPathNode()
 	{
-		if (m_searchResult == SearchResult_PathUnexist)
+		if (m_error == Error_PathUnexist ||
+			m_error == Error_PathCompleted)
 		{
 			return INVALID_NODEID;
-		}
-		
-		if (m_searchResult == SearchResult_Completed)
-		{
-			if (!m_abstractPath.empty())
-			{
-				int nodeID = m_abstractPath.back();
-				m_abstractPath.pop_back();
-				return nodeID;
-			}
-			else
-			{
-				return INVALID_NODEID;
-			}
 		}
 
 		if (m_localRefinedPath.empty())
@@ -492,15 +479,15 @@ namespace fdk { namespace game { namespace findpath
 					}
 					else
 					{
-						m_searchResult = SearchResult_PathUnexist;
+						m_error = Error_PathUnexist;
 						return INVALID_NODEID;
 					}
 				}
 			}
 			else
 			{
-				m_searchResult = SearchResult_Completed;
 				m_abstractPath.clear();
+				m_error = Error_PathCompleted;
 				return INVALID_NODEID;
 			}
 		}
@@ -511,5 +498,3 @@ namespace fdk { namespace game { namespace findpath
 	}
 
 }}}
-
-
