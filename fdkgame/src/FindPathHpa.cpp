@@ -335,12 +335,52 @@ namespace fdk { namespace game { namespace findpath
 
 	Hpa::SearchResult Hpa::search(int step)
 	{
-		// 如果处于相同cluster内,那么直接在cluster内寻路,如果cluster内的寻路失败,继续一下步奏
-		return Hpa::SearchResult_PathUnexist;
+		//if (m_searchResult != SearchResult_Proceeding)
+		//{
+		//	return m_searchResult;
+		//}
+		//int proceededStep = 0;
+		//std::vector<SuccessorNodeInfo> successors;
+		//while (!m_openList.empty())
+		//{
+		//	OpenListItem current = m_openList.top();			
+		//	m_openList.pop();
+		//	m_nodeStates[current.nodeID] = NodeState_Closed;
+		//	if (m_recorder)
+		//	{
+		//		m_recorder->onCloseNode(current.nodeID);
+		//	}
+
+		//	if (current.nodeID == m_targetNodeID)
+		//	{
+		//		buildPath();
+		//		m_pathCost = current.fValue;
+		//		m_searchResult = SearchResult_Completed;
+		//		return SearchResult_Completed;
+		//	}			
+
+		//	successors.clear();
+		//	m_env.getSuccessorNodes(current.nodeID, successors);
+		//	for (size_t i = 0; i < successors.size(); ++i)
+		//	{
+		//		SuccessorNodeInfo& successor = successors[i];
+		//		inspectNode(successor.nodeID, current.nodeID,
+		//			m_nodeDatas[current.nodeID].gValue+successor.cost);
+		//	}
+
+		//	++proceededStep;
+		//	if (step >=1 && proceededStep >= step)
+		//	{
+		//		return SearchResult_Proceeding;
+		//	}
+		//}
+		//m_searchResult = SearchResult_PathUnexist;
+		return SearchResult_PathUnexist;
 	}
 
 	void Hpa::initSearch()
 	{
+		// 处于相同的cluster, 直接在局部搜索
 		AbstractGridMap::Cluster& startCluster = m_env.getClusterOfLowLevelNode(m_startNodeID);
 		if (&startCluster == &m_env.getClusterOfLowLevelNode(m_targetNodeID))
 		{
@@ -356,6 +396,7 @@ namespace fdk { namespace game { namespace findpath
 			}
 		}
 
+		// 否则先搜一条抽象路径
 		std::pair<AbstractGridMap::AbstractNode*, bool> resultPair;
 		AbstractGridMap::AbstractNode* startAbsNode;
 		AbstractGridMap::AbstractNode* targetAbsNode;
@@ -373,6 +414,7 @@ namespace fdk { namespace game { namespace findpath
 			m_tempAddedStartTarget.push_back(targetAbsNode);
 		}
 
+		// 如果抽象路径搜索失败则不存在路径
 		AStar astar(m_env, startAbsNode->getID(), targetAbsNode->getID());
 		if (astar.search() == AStar::SearchResult_PathUnexist)
 		{
@@ -381,6 +423,63 @@ namespace fdk { namespace game { namespace findpath
 		}
 
 		m_path = astar.getPath();
+		m_path.push_back(startAbsNode->getID());
+		m_localRefinedPath.clear();
+	}
+
+	int Hpa::popNextPathNode()
+	{
+		if (m_searchResult == SearchResult_PathUnexist)
+		{
+			return INVALID_NODEID;
+		}
+		
+		if (m_searchResult == SearchResult_Completed)
+		{
+			if (!m_path.empty())
+			{
+				int nodeID = m_path.back();
+				m_path.pop_back();
+				return nodeID;
+			}
+			else
+			{
+				return INVALID_NODEID;
+			}
+		}
+
+		if (m_localRefinedPath.empty())
+		{
+			if (m_path.size() >= 2)
+			{
+				int startAbsNodeID = m_path.back();
+				m_path.pop_back();
+				int targetAbsNodeID = m_path.back();
+
+				/*		AbstractGridMap::Cluster& startCluster = getClusterOfLowLevelNode(startAbsNode.getInfo().lowLevelNodeID);
+				AbstractGridMap::Cluster& targetCluster = getClusterOfLowLevelNode(targetAbsNode.getInfo().lowLevelNodeID);
+				if (&startCluster != &targetCluster)
+				{
+				output.push_back(targetAbsNode.getInfo().lowLevelNodeID);			
+				}
+				else
+				{
+				AStar astar(startCluster, 
+				startCluster.toPartNodeID(m_startNodeID), 
+				startCluster.toPartNodeID(m_targetNodeID));
+				if (astar.search() == AStar::SearchResult_Completed)
+				{
+				m_searchResult = SearchResult_Completed;
+				m_path = astar.getPath();
+				m_pathCost = astar.getPathCost();
+				return;
+				}
+				}*/
+
+
+			}			
+		}
+		return INVALID_NODEID;
 	}
 
 }}}

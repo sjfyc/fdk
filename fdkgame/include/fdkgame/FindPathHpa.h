@@ -50,6 +50,9 @@ namespace fdk { namespace game { namespace findpath
 		void rebuildAbstract();
 
 		GridMap& getLowLevelMap() const;
+		AbstractGraph& getAbstractGraph();
+		const AbstractGraph& getAbstractGraph() const;
+
 		const VectorI& getMaxClusterSize() const;
 		// Environment interfaces
 		virtual int getNodeSpaceSize() const { return m_abstractGraph.getNodes().size(); }
@@ -83,14 +86,16 @@ namespace fdk { namespace game { namespace findpath
 		Hpa(AbstractGridMap& env, int startNodeID, int targetNodeID);
 		~Hpa();
 		SearchResult search(int step=-1);
+		int popNextPathNode();
 	private:
-		void initSearch();
+		void initSearch();		
 		AbstractGridMap& m_env;
 		int m_startNodeID;
 		int m_targetNodeID;
 		std::vector<AbstractGridMap::AbstractNode*> m_tempAddedStartTarget;
 		SearchResult m_searchResult;
 		std::vector<int> m_path;
+		std::vector<int> m_localRefinedPath;
 		int m_pathCost;
 	};
 
@@ -113,6 +118,16 @@ namespace fdk { namespace game { namespace findpath
 	inline GridMap& AbstractGridMap::getLowLevelMap() const
 	{
 		return m_lowLevelMap;
+	}
+
+	inline AbstractGridMap::AbstractGraph& AbstractGridMap::getAbstractGraph()
+	{
+		return m_abstractGraph;
+	}
+
+	inline const AbstractGridMap::AbstractGraph& AbstractGridMap::getAbstractGraph() const
+	{
+		return m_abstractGraph;
 	}
 
 	inline const VectorI& AbstractGridMap::getMaxClusterSize() const
