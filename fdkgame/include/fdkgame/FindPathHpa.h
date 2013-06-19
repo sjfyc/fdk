@@ -36,12 +36,14 @@ namespace fdk { namespace game { namespace findpath
 			: public GridMapPart
 		{
 			friend class HpaMap;
+			friend class Hpa;
 		public:
 			typedef std::vector<AbstractNode*> Entrances;
 			const ClusterCoord& getClusterCoord() const;
-			const Entrances& getEntrances() const;
-			AbstractNode* findEntranceWithLowLevelNodeID(int lowLevelNodeID) const;
+			const Entrances& getEntrances() const;			
 		private:
+			AbstractNode* findEntranceWithLowLevelNodeID(int lowLevelNodeID) const;
+			void convertLocalToLowLevelPath(const std::vector<int>& local, std::vector<int>& lowLevel) const;
 			Cluster(GridMap& orignMap, const Range& range, const ClusterCoord& clusterCoord);
 			ClusterCoord m_clusterCoord;
 			Entrances m_entrances;
@@ -86,15 +88,17 @@ namespace fdk { namespace game { namespace findpath
 		};
 		Hpa(HpaMap& env, int startNodeID, int targetNodeID);
 		~Hpa();
-		int popNextPathNode();
-	private:
-		void initSearch();		
+		SearchResult search();
+		SearchResult getSearchResult() const;
+		const std::vector<int>& getAbstractPath() const;
+		int popNextPathNode();		
+	protected:
 		HpaMap& m_env;
-		int m_startNodeID;
-		int m_targetNodeID;
+		int m_lowLevelStartNodeID;
+		int m_lowLevelTargetNodeID;
 		std::vector<HpaMap::AbstractNode*> m_tempAddedStartTarget;
 		SearchResult m_searchResult;
-		std::vector<int> m_path;
+		std::vector<int> m_abstractPath;
 		std::vector<int> m_localRefinedPath;
 		int m_pathCost;
 	};
@@ -133,6 +137,16 @@ namespace fdk { namespace game { namespace findpath
 	inline const HpaMap::AbstractGraph& HpaMap::getAbstractGraph() const
 	{
 		return m_abstractGraph;
+	}
+
+	inline Hpa::SearchResult Hpa::getSearchResult() const
+	{
+		return m_searchResult;
+	}
+
+	inline const std::vector<int>& Hpa::getAbstractPath() const
+	{
+		return m_abstractPath;
 	}
 }}}
 

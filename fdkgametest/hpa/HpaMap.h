@@ -17,5 +17,20 @@ public:
 private:
 };
 
+class Hpa
+	: public fdkgame::findpath::Hpa
+{
+	typedef fdkgame::findpath::Hpa _Base;
+public:
+	Hpa(fdkgame::findpath::HpaMap& env, int startNodeID, int targetNodeID);
+	~Hpa();	
+	void render();
+	SearchResult search();
+	int popNextPathNode();
+private:
+	std::vector<int> m_abstractPath;
+	std::vector<int> m_path;
+};
+
 #define g_HpaMap (HpaMap::instance())
 #endif

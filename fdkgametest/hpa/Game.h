@@ -3,7 +3,7 @@
 #include "Types.h"
 #include <fdk/EventHook.h>
 class GameMode;
-class AStar;
+class Hpa;
 
 class Game 
 	: public fdk::Singleton<Game>
@@ -29,7 +29,7 @@ private:
 	GameMode* m_mode;
 	CellCoord m_startCoord;
 	CellCoord m_targetCoord;
-	AStar* m_astar;
+	Hpa* m_hpa;
 };
 
 class GameMode
@@ -53,7 +53,7 @@ public:
 	virtual void handleEvent(Game& game, int eventType, void* params);	
 private:
 	GameModeGame();
-	void search(AStar& astar);
+	void search(Hpa& astar);
 	bool m_bStepByStep;
 };
 

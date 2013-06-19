@@ -3,11 +3,11 @@
 #include <fdk/Module.h>
 #include "Util.h"
 #include "Board.h"
-#include "AStar.h"
 #include "HpaMap.h"
 
 Game::Game()
 	: m_mode(&g_GameModeGame)
+	, m_hpa(0)
 {
 }
 
@@ -77,12 +77,13 @@ void Game::onEvent(int eventType, void* params)
 			{
 				toggleMode();
 			}
-			if (!m_astar || m_astar->getSearchResult() != AStar::SearchResult_Proceeding)
+			if (!m_hpa || m_hpa->getSearchResult() != Hpa::SearchResult_Proceeding)
 			{				
-				delete m_astar;
-				m_astar = new AStar(g_Board, 
+				delete m_hpa;
+				m_hpa = new Hpa(g_HpaMap, 
 					g_Board.getNodeID(m_startCoord),
 					g_Board.getNodeID(m_targetCoord));
+				m_hpa->search();
 			}
 		}
 	}
@@ -119,18 +120,18 @@ GameModeGame::GameModeGame()
 
 void GameModeGame::update(Game& game, float delta)
 {
-	AStar* astar = game.m_astar;
-	if (astar && astar->getSearchResult() == AStar::SearchResult_Proceeding && !m_bStepByStep)
+	Hpa* hpa = game.m_hpa;
+	if (hpa && hpa->getSearchResult() != Hpa::SearchResult_PathUnexist && !m_bStepByStep)
 	{
-		search(*astar);	
+		search(*hpa);
 	}
 }
 
 void GameModeGame::render(Game& game)
 {
-	if (game.m_astar)
+	if (game.m_hpa)
 	{
-		game.m_astar->render();
+		game.m_hpa->render();
 	}
 }
 
@@ -146,21 +147,26 @@ void GameModeGame::handleEvent(Game& game, int eventType, void* params)
 		else if (key == HGEK_S)
 		{
 			m_bStepByStep = true;
-			search(*game.m_astar);
+			search(*game.m_hpa);
 		}
 	}
 }
 
-void GameModeGame::search(AStar& astar)
+void GameModeGame::search(Hpa& hpa)
 {
-	AStar::SearchResult result = astar.search(1);
-	if (result == AStar::SearchResult_Completed)
+	Hpa::SearchResult result = hpa.getSearchResult();
+	if (result == Hpa::SearchResult_PathUnexist)
+	{
+		util::output("search failed");
+	}
+	if (result == Hpa::SearchResult_Completed)
 	{			
 		util::output("search completed");
 	}
-	else if (result == AStar::SearchResult_PathUnexist)
+	int node = hpa.popNextPathNode();
+	if (node == fdkgame::findpath::INVALID_NODEID)
 	{
-		util::output("search failed");
+		return;
 	}
 }
 
@@ -173,7 +179,7 @@ GameModeMapEdit::GameModeMapEdit()
 
 void GameModeMapEdit::enter(Game& game)
 {
-	FDK_DELETE(game.m_astar);
+	FDK_DELETE(game.m_hpa);
 }
 
 void GameModeMapEdit::leave(Game& game)
