@@ -18,19 +18,19 @@ namespace fdk { namespace game { namespace findpath
 			Cluster* cluster = m_clusters.raw_data()[i];
 			delete cluster;
 		}
-		m_clusters.clear();
+		m_clusters.clear();		
+		m_abstractGraph.clear();
 		m_bridges.clear();
-		m_abstractGraph.clear();		
 	}
 
 	void HpaMap::rebuildAbstract()
 	{
 		clear();
-		createClusterAndEntrances();
+		createClusterAndBridges();
 		buildAbstractGraph();
 	}
 
-	void HpaMap::createClusterAndEntrances()
+	void HpaMap::createClusterAndBridges()
 	{
 		const GridMap::MapData& lowLevelMapData = m_lowLevelMap.getMapData();
 		m_clusters.reset(
@@ -123,13 +123,18 @@ namespace fdk { namespace game { namespace findpath
 			m_abstractGraph.addEdge(*absNode1, *absNode2, absEdgeInfo);
 			m_abstractGraph.addEdge(*absNode2, *absNode1, absEdgeInfo);
 		}
-		
+
+		buildAbstractGraph_addIntraEdges();
+	}
+
+	void HpaMap::buildAbstractGraph_addIntraEdges()
+	{
+		std::map<std::pair<AbstractNode*, AbstractNode*>, int> computedCostMap;
+
 		for (size_t iCluster = 0; iCluster < m_clusters.count(); ++iCluster)
 		{
 			Cluster& cluster = *m_clusters.raw_data()[iCluster];
 
-			Array2D<bool> hasComputed(cluster.getRange().area(), cluster.getRange().area(), false);
-			Array2D<int> computedCost(cluster.getRange().area(), cluster.getRange().area(), PATHUNEXIST_COST);
 			for (size_t iEntrance1 = 0; iEntrance1 < cluster.m_entrances.size(); ++iEntrance1)
 			{
 				AbstractNode* entrance1 = cluster.m_entrances[iEntrance1];
@@ -140,12 +145,11 @@ namespace fdk { namespace game { namespace findpath
 					{
 						continue;
 					}
-					int localNode1ID = cluster.toPartNodeID(entrance1->getInfo().lowLevelNodeID);
-					int localNode2ID = cluster.toPartNodeID(entrance2->getInfo().lowLevelNodeID);
-					
-					if (hasComputed(localNode1ID, localNode2ID))
+					std::map<std::pair<AbstractNode*, AbstractNode*>, int>::iterator it = 
+						computedCostMap.find(std::make_pair(entrance1, entrance2) );
+					if (it != computedCostMap.end())
 					{
-						int cost = computedCost(localNode1ID, localNode2ID);
+						int cost = it->second;
 						if (cost != PATHUNEXIST_COST)
 						{
 							AbstractEdgeInfo absEdgeInfo;
@@ -156,8 +160,7 @@ namespace fdk { namespace game { namespace findpath
 						continue;
 					}
 
-					hasComputed(localNode1ID, localNode2ID) = true;
-					hasComputed(localNode2ID, localNode1ID) = true;
+					int cost = PATHUNEXIST_COST;
 					AStar astar(cluster, 
 						cluster.toPartNodeID(entrance1->getInfo().lowLevelNodeID), 
 						cluster.toPartNodeID(entrance2->getInfo().lowLevelNodeID));
@@ -167,8 +170,13 @@ namespace fdk { namespace game { namespace findpath
 						absEdgeInfo.bIntra = true;
 						absEdgeInfo.cost = astar.getPathCost();
 						m_abstractGraph.addEdge(*entrance1, *entrance2, absEdgeInfo);
-						computedCost(localNode1ID, localNode2ID) = absEdgeInfo.cost;
+						cost = absEdgeInfo.cost;
 					}
+
+					computedCostMap.insert(std::make_pair( 
+						std::make_pair(entrance2, entrance1),
+						cost
+						));
 				}
 			}
 		}
@@ -188,11 +196,11 @@ namespace fdk { namespace game { namespace findpath
 				continue;
 			}
 
-			int entranceStart = x;
-			int entranceEnd;
+			int start = x;
+			int end;
 			while (1)
 			{
-				entranceEnd = x;
+				end = x;
 
 				++x;
 				if (x > xEnd)
@@ -209,12 +217,12 @@ namespace fdk { namespace game { namespace findpath
 			}
 
 			// 在中间创建入口
-			Bridge entrance;
-			entrance.lowLevelNode1ID = m_lowLevelMap.getNodeID( (VectorI(entranceStart, y)+VectorI(entranceEnd, y))/2 );
-			entrance.lowLevelNode2ID = m_lowLevelMap.getNodeID( (VectorI(entranceStart, y+1)+VectorI(entranceEnd, y+1))/2 );
-			entrance.cluster1 = m_clusters(cluster2.getClusterCoord().x, cluster2.getClusterCoord().y-1);
-			entrance.cluster2 = &cluster2;
-			m_bridges.push_back(entrance);
+			Bridge bridge;
+			bridge.lowLevelNode1ID = m_lowLevelMap.getNodeID( (VectorI(start, y)+VectorI(end, y))/2 );
+			bridge.lowLevelNode2ID = m_lowLevelMap.getNodeID( (VectorI(start, y+1)+VectorI(end, y+1))/2 );
+			bridge.cluster1 = m_clusters(cluster2.getClusterCoord().x, cluster2.getClusterCoord().y-1);
+			bridge.cluster2 = &cluster2;
+			m_bridges.push_back(bridge);
 		}
 	}
 
@@ -232,11 +240,11 @@ namespace fdk { namespace game { namespace findpath
 				continue;
 			}
 
-			int entranceStart = y;
-			int entranceEnd;
+			int start = y;
+			int end;
 			while (1)
 			{
-				entranceEnd = y;
+				end = y;
 
 				++y;
 				if (y > yEnd)
@@ -253,13 +261,18 @@ namespace fdk { namespace game { namespace findpath
 			}
 
 			// 在中间创建入口
-			Bridge entrance;
-			entrance.lowLevelNode1ID = m_lowLevelMap.getNodeID( (VectorI(x, entranceStart)+VectorI(x, entranceEnd))/2 );
-			entrance.lowLevelNode2ID = m_lowLevelMap.getNodeID( (VectorI(x+1, entranceStart)+VectorI(x+1, entranceEnd))/2 );
-			entrance.cluster1 = m_clusters(cluster2.getClusterCoord().x-1, cluster2.getClusterCoord().y);
-			entrance.cluster2 = &cluster2;
-			m_bridges.push_back(entrance);
+			Bridge bridge;
+			bridge.lowLevelNode1ID = m_lowLevelMap.getNodeID( (VectorI(x, start)+VectorI(x, end))/2 );
+			bridge.lowLevelNode2ID = m_lowLevelMap.getNodeID( (VectorI(x+1, start)+VectorI(x+1, end))/2 );
+			bridge.cluster1 = m_clusters(cluster2.getClusterCoord().x-1, cluster2.getClusterCoord().y);
+			bridge.cluster2 = &cluster2;
+			m_bridges.push_back(bridge);
 		}
+	}
+
+	int HpaMap::getNodeSpaceSize() const
+	{
+		return m_abstractGraph.getNodes().size();
 	}
 
 	int HpaMap::getHeuristic(int startNodeID, int targetNodeID) const

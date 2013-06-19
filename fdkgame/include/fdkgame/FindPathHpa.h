@@ -53,17 +53,17 @@ namespace fdk { namespace game { namespace findpath
 		GridMap& getLowLevelMap() const;
 		const VectorI& getMaxClusterSize() const;
 		const Array2D<Cluster*>& getClusters() const;
-		AbstractGraph& getAbstractGraph();
 		const AbstractGraph& getAbstractGraph() const;
 		// Environment interfaces
-		virtual int getNodeSpaceSize() const { return m_abstractGraph.getNodes().size(); }
+		virtual int getNodeSpaceSize() const;
 		virtual int getHeuristic(int startNodeID, int targetNodeID) const;
 		virtual void getSuccessorNodes(int nodeID, std::vector<SuccessorNodeInfo>& result) const;
 		virtual bool isObstacle(int nodeID) const;
 	protected:
 		void clear();
-		void createClusterAndEntrances();
+		void createClusterAndBridges();
 		void buildAbstractGraph();
+		void buildAbstractGraph_addIntraEdges();
 		void createVerticalBridges(int xStart, int xEnd, int y, Cluster& cluster2);
 		void createHorizontalBridges(int yStart, int yEnd, int x, Cluster& cluster2);
 		std::pair<AbstractNode*, bool> addStartOrTargetNodeAfterBuildedAbstract(int lowLevelNodeID, bool bStart);
@@ -129,11 +129,6 @@ namespace fdk { namespace game { namespace findpath
 	inline const Array2D<HpaMap::Cluster*>& HpaMap::getClusters() const
 	{
 		return m_clusters;
-	}
-
-	inline HpaMap::AbstractGraph& HpaMap::getAbstractGraph()
-	{
-		return m_abstractGraph;
 	}
 
 	inline const HpaMap::AbstractGraph& HpaMap::getAbstractGraph() const
