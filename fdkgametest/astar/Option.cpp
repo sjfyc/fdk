@@ -20,7 +20,7 @@ void Option::onEvent(int eventType, void* params)
 			toggle(Toggle_ShowCellCoord);
 			util::output("%s cell coord", isOn(Toggle_ShowCellCoord) ? "show" : "hide");
 		}
-		if (key == HGEK_2)
+		else if (key == HGEK_2)
 		{
 			toggle(Toggle_ShowCellClearanceValue);
 			util::output("%s cell clearance value", isOn(Toggle_ShowCellClearanceValue) ? "show" : "hide");

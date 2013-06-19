@@ -53,7 +53,10 @@ void Game::update(float delta)
 
 void Game::render()
 {
-	g_Board.draw();
+	g_Board.draw();	
+	util::fillCell(m_startCoord, COLOR_CELL_FROM);
+	util::fillCell(m_targetCoord, COLOR_CELL_TO);
+	g_HpaMap.draw();
 	if (g_Option.isOn(Option::Toggle_ShowCellCoord))
 	{
 		g_Board.drawCellCoord();
@@ -62,9 +65,6 @@ void Game::render()
 	{
 		g_Board.drawCellClearanceValue();
 	}
-	util::fillCell(m_startCoord, COLOR_CELL_FROM);
-	util::fillCell(m_targetCoord, COLOR_CELL_TO);
-	g_HpaMap.draw();
 	m_mode->render(*this);
 }
 

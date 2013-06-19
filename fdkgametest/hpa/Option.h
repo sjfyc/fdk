@@ -13,10 +13,13 @@ public:
 	{
 		Toggle_ShowCellCoord,
 		Toggle_ShowCellClearanceValue,
+		Toggle_ShowClusterCoord,
+		Toggle_ShowTransitionPointID,
 	};
 	void start();
 	void stop();
 	bool isOn(Toggle tog) const;
+	int getUnitSize() const;
 private:
 	Option();
 	~Option();
@@ -24,6 +27,7 @@ private:
 	void toggle(Toggle tog);	
 	virtual void onEvent(int eventType, void* params);
 	int m_toggles;
+	int m_unitSize;
 };
 
 #define g_Option (Option::instance())

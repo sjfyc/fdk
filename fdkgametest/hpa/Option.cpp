@@ -3,6 +3,7 @@
 
 Option::Option()
 	: m_toggles(0)
+	, m_unitSize(1)
 {
 }
 
@@ -20,10 +21,33 @@ void Option::onEvent(int eventType, void* params)
 			toggle(Toggle_ShowCellCoord);
 			util::output("%s cell coord", isOn(Toggle_ShowCellCoord) ? "show" : "hide");
 		}
-		if (key == HGEK_2)
+		else if (key == HGEK_2)
 		{
 			toggle(Toggle_ShowCellClearanceValue);
 			util::output("%s cell clearance value", isOn(Toggle_ShowCellClearanceValue) ? "show" : "hide");
+		}
+		else if (key == HGEK_3)
+		{
+			toggle(Toggle_ShowClusterCoord);
+			util::output("%s cluster coord", isOn(Toggle_ShowClusterCoord) ? "show" : "hide");
+		}
+		else if (key == HGEK_4)
+		{
+			toggle(Toggle_ShowTransitionPointID);
+			util::output("%s transition point", isOn(Toggle_ShowTransitionPointID) ? "show" : "hide");
+		}
+		else if (key == HGEK_ADD)
+		{
+			++m_unitSize;
+			util::output("unit size: %d", m_unitSize);
+		}
+		else if (key == HGEK_SUBTRACT)
+		{
+			if (--m_unitSize < 1)
+			{
+				m_unitSize = 1;
+			}
+			util::output("unit size: %d", m_unitSize);
 		}
 	}
 }
@@ -49,6 +73,10 @@ void Option::outputUsage()
 {
 	util::output("1: show/hide cell coord");
 	util::output("2: show/hide cell clearance value");
+	util::output("3: show/hide cluster coord");
+	util::output("4: show/hide transition point");
+	util::output("+: increase unit size");
+	util::output("-: decrease unit size");
 }
 
 void Option::start()
@@ -61,4 +89,9 @@ void Option::start()
 void Option::stop()
 {
 	fdk::EventHook::unregist();
+}
+
+int Option::getUnitSize() const
+{
+	return m_unitSize;
 }

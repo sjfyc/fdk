@@ -1,5 +1,6 @@
 #include "HpaMap.h"
 #include "Util.h"
+#include "Option.h"
 #include "Board.h"
 #include "Game.h"
 #include "Font.h"
@@ -22,9 +23,6 @@ void HpaMap::draw()
 		g_HGE.FrameRect(topLeftCellCoord.x*CELL_SIZE_X, topLeftCellCoord.y*CELL_SIZE_Y,
 			(topLeftCellCoord.x+cluster.getRange().width())*CELL_SIZE_X, (topLeftCellCoord.y+cluster.getRange().height())*CELL_SIZE_Y, 
 			ARGB(255, 45, 151, 128), 2);
-		g_Font.printf(topLeftCellCoord.x*CELL_SIZE_X+2, topLeftCellCoord.y*CELL_SIZE_Y+2, HGETEXT_LEFT, "cluster(%d,%d)", 
-			cluster.getClusterCoord().x, 
-			cluster.getClusterCoord().y);		
 	}
 
 	const AbstractGraph::Nodes& nodes = getAbstractGraph().getNodes();	
@@ -39,8 +37,11 @@ void HpaMap::draw()
 		CellCoord cellCoord = getLowLevelMap().getNodeCoord(node->getInfo().lowLevelNodeID);
 		util::fillCell(cellCoord, ARGB(255, 210, 248, 207));
 
-		g_Font.printf(cellCoord.x*CELL_SIZE_X+2, cellCoord.y*CELL_SIZE_Y+2, HGETEXT_LEFT, "%d", 
-			node->getID());
+		if (g_Option.isOn(Option::Toggle_ShowTransitionPointID))
+		{
+			g_Font.printf(cellCoord.x*CELL_SIZE_X+2, cellCoord.y*CELL_SIZE_Y+2, HGETEXT_LEFT, "%d", 
+				node->getID());
+		}
 	}
 	const AbstractGraph::Edges& edges = getAbstractGraph().getEdges();
 	for (AbstractGraph::Edges::const_iterator it = edges.begin(); it != edges.end(); ++it)
@@ -60,6 +61,21 @@ void HpaMap::draw()
 			targetCellCoord.y*CELL_SIZE_X+CELL_SIZE_X/2,
 			ARGB(255, 57, 92, 145)
 			);
+	}
+
+	if (g_Option.isOn(Option::Toggle_ShowClusterCoord))
+	{
+		for (size_t i = 0; i < getClusters().count(); ++i)
+		{
+			const Cluster& cluster = *getClusters().raw_data()[i];
+			CellCoord topLeftCellCoord;
+			topLeftCellCoord.x = cluster.getClusterCoord().x*getMaxClusterSize().x;
+			topLeftCellCoord.y = cluster.getClusterCoord().y*getMaxClusterSize().y;
+		
+			g_Font.printf(topLeftCellCoord.x*CELL_SIZE_X+2, topLeftCellCoord.y*CELL_SIZE_Y+2, HGETEXT_LEFT, "%d,%d", 
+				cluster.getClusterCoord().x, 
+				cluster.getClusterCoord().y);			
+		}
 	}
 }
 
