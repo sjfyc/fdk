@@ -38,15 +38,15 @@ namespace fdk { namespace game { namespace findpath
 			friend class HpaMap;
 			friend class Hpa;
 		public:
-			typedef std::vector<AbstractNode*> Entrances;
+			typedef std::vector<AbstractNode*> TransitionPoints;
 			const ClusterCoord& getClusterCoord() const;
-			const Entrances& getEntrances() const;			
+			const TransitionPoints& getTransitionPoints() const;			
 		private:
-			AbstractNode* findEntranceWithLowLevelNodeID(int lowLevelNodeID) const;
+			AbstractNode* findTransitionPointWithLowLevelNodeID(int lowLevelNodeID) const;
 			void convertLocalToLowLevelPath(const std::vector<int>& local, std::vector<int>& lowLevel) const;
 			Cluster(GridMap& orignMap, const Range& range, const ClusterCoord& clusterCoord);
 			ClusterCoord m_clusterCoord;
-			Entrances m_entrances;
+			TransitionPoints m_transitionPoints;
 		};
 
 		HpaMap(GridMap& lowLevelMap, const VectorI& maxClusterSize);
@@ -114,9 +114,9 @@ namespace fdk { namespace game { namespace findpath
 		return m_clusterCoord;
 	}
 
-	inline const HpaMap::Cluster::Entrances& HpaMap::Cluster::getEntrances() const
+	inline const HpaMap::Cluster::TransitionPoints& HpaMap::Cluster::getTransitionPoints() const
 	{
-		return m_entrances;
+		return m_transitionPoints;
 	}
 
 	inline GridMap& HpaMap::getLowLevelMap() const
