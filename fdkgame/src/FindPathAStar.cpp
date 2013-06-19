@@ -2,10 +2,11 @@
 
 namespace fdk { namespace game { namespace findpath
 {
-	AStar::AStar(const Environment& env, int startNodeID, int targetNodeID)
+	AStar::AStar(const Environment& env, int startNodeID, int targetNodeID, int minClearanceValueRequired)
 		: m_env(env)
 		, m_startNodeID(startNodeID)
 		, m_targetNodeID(targetNodeID)
+		, m_minClearanceValueRequired(minClearanceValueRequired)
 		, m_nodeStates(0)
 		, m_nodeDatas(0)
 		, m_openList()
@@ -30,8 +31,13 @@ namespace fdk { namespace game { namespace findpath
 	{
 		FDK_DELETE_ARRAY(m_nodeStates);
 		FDK_DELETE_ARRAY(m_nodeDatas);
+	}	
+
+	int AStar::getMinClearanceValueRequired() const
+	{
+		return m_minClearanceValueRequired;
 	}
-	
+
 	AStar::SearchResult AStar::search(int step)
 	{
 		if (m_searchResult != SearchResult_Proceeding)
@@ -59,7 +65,7 @@ namespace fdk { namespace game { namespace findpath
 			}			
 
 			successors.clear();
-			m_env.getSuccessorNodes(current.nodeID, successors);
+			m_env.getSuccessorNodes(*this, current.nodeID, successors);
 			for (size_t i = 0; i < successors.size(); ++i)
 			{
 				SuccessorNodeInfo& successor = successors[i];

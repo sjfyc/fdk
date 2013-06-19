@@ -14,6 +14,12 @@ namespace fdk { namespace game { namespace findpath
 		int cost;
 	};
 
+	class FDKGAME_API PathFinder
+	{
+	public:
+		virtual int getMinClearanceValueRequired() const;
+	};
+
 	// 环境要求：所有节点ID必须从0开始并依次自增
 	class FDKGAME_API Environment
 	{
@@ -22,7 +28,7 @@ namespace fdk { namespace game { namespace findpath
 		virtual bool isValidNodeID(int nodeID) const;
 		virtual int getNodeSpaceSize() const = 0;
 		virtual int getHeuristic(int startNodeID, int targetNodeID) const = 0;
-		virtual void getSuccessorNodes(int nodeID, std::vector<SuccessorNodeInfo>& result) const = 0;
+		virtual void getSuccessorNodes(PathFinder& pathFinder, int nodeID, std::vector<SuccessorNodeInfo>& result) const = 0;
 		virtual bool isObstacle(int nodeID) const = 0;
 	};
 }}}

@@ -25,35 +25,35 @@ namespace fdk { namespace game { namespace findpath
 		return (abs(startToTarget.x) + abs(startToTarget.y)) * COST_STRAIGHT;
 	}
 
-	void GridMap::getSuccessorNodes(int nodeID, std::vector<SuccessorNodeInfo>& result) const
+	void GridMap::getSuccessorNodes(PathFinder& pathFinder, int nodeID, std::vector<SuccessorNodeInfo>& result) const
 	{
 		NodeCoord coord = getNodeCoord(nodeID);
 	
-		const bool bLeft = tryAddSuccessorNode(result, NodeCoord(coord.x-1,coord.y), COST_STRAIGHT);		
-		const bool bTop = tryAddSuccessorNode(result, NodeCoord(coord.x,coord.y-1), COST_STRAIGHT);
-		const bool bRight = tryAddSuccessorNode(result, NodeCoord(coord.x+1,coord.y), COST_STRAIGHT);
-		const bool bBottom = tryAddSuccessorNode(result, NodeCoord(coord.x,coord.y+1), COST_STRAIGHT);
+		const bool bLeft = tryAddSuccessorNode(pathFinder, result, NodeCoord(coord.x-1,coord.y), COST_STRAIGHT);		
+		const bool bTop = tryAddSuccessorNode(pathFinder, result, NodeCoord(coord.x,coord.y-1), COST_STRAIGHT);
+		const bool bRight = tryAddSuccessorNode(pathFinder, result, NodeCoord(coord.x+1,coord.y), COST_STRAIGHT);
+		const bool bBottom = tryAddSuccessorNode(pathFinder, result, NodeCoord(coord.x,coord.y+1), COST_STRAIGHT);
 		
 		// 横向纵向至少有一个可以展开才考虑斜向（两个都考虑就是别马脚算法）
 		if (bLeft || bTop)
 		{
-			tryAddSuccessorNode(result, NodeCoord(coord.x-1,coord.y-1), COST_DIAGONAL);
+			tryAddSuccessorNode(pathFinder, result, NodeCoord(coord.x-1,coord.y-1), COST_DIAGONAL);
 		}
 		if (bTop || bRight)
 		{
-			tryAddSuccessorNode(result, NodeCoord(coord.x+1,coord.y-1), COST_DIAGONAL);
+			tryAddSuccessorNode(pathFinder, result, NodeCoord(coord.x+1,coord.y-1), COST_DIAGONAL);
 		}
 		if (bRight || bBottom)
 		{
-			tryAddSuccessorNode(result, NodeCoord(coord.x+1,coord.y+1), COST_DIAGONAL);
+			tryAddSuccessorNode(pathFinder, result, NodeCoord(coord.x+1,coord.y+1), COST_DIAGONAL);
 		}
 		if (bBottom || bLeft)
 		{
-			tryAddSuccessorNode(result, NodeCoord(coord.x-1,coord.y+1), COST_DIAGONAL);
+			tryAddSuccessorNode(pathFinder, result, NodeCoord(coord.x-1,coord.y+1), COST_DIAGONAL);
 		}		
 	}
 	
-	bool GridMap::tryAddSuccessorNode(std::vector<SuccessorNodeInfo>& result, const NodeCoord& coord, int cost) const
+	bool GridMap::tryAddSuccessorNode(PathFinder& pathFinder, std::vector<SuccessorNodeInfo>& result, const NodeCoord& coord, int cost) const
 	{
 		const int nodeID = getNodeID(coord);
 		if (nodeID == INVALID_NODEID)
@@ -61,6 +61,10 @@ namespace fdk { namespace game { namespace findpath
 			return false;
 		}
 		if (isObstacle(nodeID))
+		{
+			return false;
+		}
+		if (getClearanceValue(nodeID) < pathFinder.getMinClearanceValueRequired())
 		{
 			return false;
 		}
@@ -164,11 +168,11 @@ namespace fdk { namespace game { namespace findpath
 		return m_orignMap.getHeuristic(toOrignNodeID(startNodeID), toOrignNodeID(targetNodeID));
 	}
 
-	void GridMapPart::getSuccessorNodes(int nodeID, std::vector<SuccessorNodeInfo>& result) const
+	void GridMapPart::getSuccessorNodes(PathFinder& pathFinder, int nodeID, std::vector<SuccessorNodeInfo>& result) const
 	{
 		int orignNodeID = toOrignNodeID(nodeID);
 		std::vector<SuccessorNodeInfo> temp;
-		m_orignMap.getSuccessorNodes(orignNodeID, temp);
+		m_orignMap.getSuccessorNodes(pathFinder, orignNodeID, temp);
 		for (size_t i = 0; i < temp.size(); ++i)
 		{
 			SuccessorNodeInfo info = temp[i];

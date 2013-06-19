@@ -60,7 +60,7 @@ namespace fdk { namespace game { namespace findpath
 		// Environment interfaces
 		virtual int getNodeSpaceSize() const;
 		virtual int getHeuristic(int startNodeID, int targetNodeID) const;
-		virtual void getSuccessorNodes(int nodeID, std::vector<SuccessorNodeInfo>& result) const;
+		virtual void getSuccessorNodes(PathFinder& pathFinder, int nodeID, std::vector<SuccessorNodeInfo>& result) const;
 		virtual bool isObstacle(int nodeID) const;
 	protected:		
 		void createClusterAndBridges();

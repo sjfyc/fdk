@@ -14,6 +14,7 @@ namespace fdk { namespace game { namespace findpath
 	};
 
 	class FDKGAME_API AStar
+		: public PathFinder
 	{
 	public:
 		enum SearchResult
@@ -22,13 +23,15 @@ namespace fdk { namespace game { namespace findpath
 			SearchResult_Completed,
 			SearchResult_PathUnexist,
 		};		
-		AStar(const Environment& env, int startNodeID, int targetNodeID);
+		AStar(const Environment& env, int startNodeID, int targetNodeID, int minClearanceValueRequired=1);
 		~AStar();
 		SearchResult search(int step=-1);
 		SearchResult getSearchResult() const;
 		const std::vector<int>& getPath() const;
 		int getPathCost() const;
 		AStarRecorder* setRecorder(AStarRecorder* recorder);
+		// PathFinder interface
+		virtual int getMinClearanceValueRequired() const;
 	private:
 		enum NodeStateEnum
 		{
@@ -56,6 +59,7 @@ namespace fdk { namespace game { namespace findpath
 		const Environment& m_env;
 		int m_startNodeID;
 		int m_targetNodeID;
+		int m_minClearanceValueRequired;
 		NodeState* m_nodeStates;
 		NodeData* m_nodeDatas;
 		OpenList m_openList;

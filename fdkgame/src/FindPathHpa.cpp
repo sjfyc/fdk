@@ -303,7 +303,7 @@ namespace fdk { namespace game { namespace findpath
 		return m_lowLevelMap.getHeuristic(startAbsNode.getInfo().lowLevelNodeID, targetAbsNode.getInfo().lowLevelNodeID);
 	}
 
-	void HpaMap::getSuccessorNodes(int nodeID, std::vector<SuccessorNodeInfo>& result) const
+	void HpaMap::getSuccessorNodes(PathFinder& pathFinder, int nodeID, std::vector<SuccessorNodeInfo>& result) const
 	{
 		const AbstractNode::OutEdges& outAbsEdges = m_abstractGraph.getNode(nodeID).getOutEdges();
 		for (AbstractNode::OutEdges::const_iterator it = outAbsEdges.begin(); 
