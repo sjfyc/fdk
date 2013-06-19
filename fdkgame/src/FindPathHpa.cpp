@@ -124,60 +124,59 @@ namespace fdk { namespace game { namespace findpath
 			m_abstractGraph.addEdge(*absNode2, *absNode1, absEdgeInfo);
 		}
 
-		buildAbstractGraph_addIntraEdges();
+		for (size_t i = 0; i < m_clusters.count(); ++i)
+		{
+			Cluster& cluster = *m_clusters.raw_data()[i];
+			buildAbstractGraph_addIntraEdgesInCluster(cluster);
+		}
 	}
 
-	void HpaMap::buildAbstractGraph_addIntraEdges()
+	void HpaMap::buildAbstractGraph_addIntraEdgesInCluster(Cluster& cluster)
 	{
 		std::map<std::pair<AbstractNode*, AbstractNode*>, int> computedCostMap;
 
-		for (size_t iCluster = 0; iCluster < m_clusters.count(); ++iCluster)
+		for (size_t iEntrance1 = 0; iEntrance1 < cluster.m_entrances.size(); ++iEntrance1)
 		{
-			Cluster& cluster = *m_clusters.raw_data()[iCluster];
-
-			for (size_t iEntrance1 = 0; iEntrance1 < cluster.m_entrances.size(); ++iEntrance1)
+			AbstractNode* entrance1 = cluster.m_entrances[iEntrance1];
+			for (size_t iEntrance2 = 0; iEntrance2 < cluster.m_entrances.size(); ++iEntrance2)
 			{
-				AbstractNode* entrance1 = cluster.m_entrances[iEntrance1];
-				for (size_t iEntrance2 = 0; iEntrance2 < cluster.m_entrances.size(); ++iEntrance2)
+				AbstractNode* entrance2 = cluster.m_entrances[iEntrance2];
+				if (entrance1 == entrance2)
 				{
-					AbstractNode* entrance2 = cluster.m_entrances[iEntrance2];
-					if (entrance1 == entrance2)
-					{
-						continue;
-					}
-					std::map<std::pair<AbstractNode*, AbstractNode*>, int>::iterator it = 
-						computedCostMap.find(std::make_pair(entrance1, entrance2) );
-					if (it != computedCostMap.end())
-					{
-						int cost = it->second;
-						if (cost != PATHUNEXIST_COST)
-						{
-							AbstractEdgeInfo absEdgeInfo;
-							absEdgeInfo.bIntra = true;
-							absEdgeInfo.cost = cost;
-							m_abstractGraph.addEdge(*entrance1, *entrance2, absEdgeInfo);
-						}
-						continue;
-					}
-
-					int cost = PATHUNEXIST_COST;
-					AStar astar(cluster, 
-						cluster.toPartNodeID(entrance1->getInfo().lowLevelNodeID), 
-						cluster.toPartNodeID(entrance2->getInfo().lowLevelNodeID));
-					if (astar.search() == AStar::SearchResult_Completed)
+					continue;
+				}
+				std::map<std::pair<AbstractNode*, AbstractNode*>, int>::iterator it = 
+					computedCostMap.find(std::make_pair(entrance1, entrance2) );
+				if (it != computedCostMap.end())
+				{
+					int cost = it->second;
+					if (cost != PATHUNEXIST_COST)
 					{
 						AbstractEdgeInfo absEdgeInfo;
 						absEdgeInfo.bIntra = true;
-						absEdgeInfo.cost = astar.getPathCost();
+						absEdgeInfo.cost = cost;
 						m_abstractGraph.addEdge(*entrance1, *entrance2, absEdgeInfo);
-						cost = absEdgeInfo.cost;
 					}
-
-					computedCostMap.insert(std::make_pair( 
-						std::make_pair(entrance2, entrance1),
-						cost
-						));
+					continue;
 				}
+
+				int cost = PATHUNEXIST_COST;
+				AStar astar(cluster, 
+					cluster.toPartNodeID(entrance1->getInfo().lowLevelNodeID), 
+					cluster.toPartNodeID(entrance2->getInfo().lowLevelNodeID));
+				if (astar.search() == AStar::SearchResult_Completed)
+				{
+					AbstractEdgeInfo absEdgeInfo;
+					absEdgeInfo.bIntra = true;
+					absEdgeInfo.cost = astar.getPathCost();
+					m_abstractGraph.addEdge(*entrance1, *entrance2, absEdgeInfo);
+					cost = absEdgeInfo.cost;
+				}
+
+				computedCostMap.insert(std::make_pair( 
+					std::make_pair(entrance2, entrance1),
+					cost
+					));
 			}
 		}
 	}

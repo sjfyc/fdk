@@ -63,7 +63,7 @@ namespace fdk { namespace game { namespace findpath
 		void clear();
 		void createClusterAndBridges();
 		void buildAbstractGraph();
-		void buildAbstractGraph_addIntraEdges();
+		void buildAbstractGraph_addIntraEdgesInCluster(Cluster& cluster);
 		void createVerticalBridges(int xStart, int xEnd, int y, Cluster& cluster2);
 		void createHorizontalBridges(int yStart, int yEnd, int x, Cluster& cluster2);
 		std::pair<AbstractNode*, bool> addStartOrTargetNodeAfterBuildedAbstract(int lowLevelNodeID, bool bStart);
