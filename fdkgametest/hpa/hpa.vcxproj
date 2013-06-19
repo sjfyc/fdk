@@ -15,6 +15,7 @@
     <ClCompile Include="HpaMap.cpp" />
     <ClCompile Include="Board.cpp" />
     <ClCompile Include="Game.cpp" />
+    <ClCompile Include="Option.cpp" />
     <ClCompile Include="Util.cpp" />
     <ClCompile Include="main.cpp" />
   </ItemGroup>
@@ -23,6 +24,7 @@
     <ClInclude Include="HpaMap.h" />
     <ClInclude Include="Board.h" />
     <ClInclude Include="Game.h" />
+    <ClInclude Include="Option.h" />
     <ClInclude Include="Types.h" />
     <ClInclude Include="Util.h" />
   </ItemGroup>

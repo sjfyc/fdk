@@ -2,6 +2,7 @@
 #include <iostream>
 #include <fdk/Module.h>
 #include "Util.h"
+#include "Option.h"
 #include "Board.h"
 #include "HpaMap.h"
 
@@ -24,6 +25,7 @@ bool Game::start()
 	}
 	
 	outputUsage();
+	g_Option.start();
 
 	fdk::EventHook::regist(GAME_SYSTEM_EVENT_KEYDOWN);
 	fdk::EventHook::regist(GAME_SYSTEM_EVENT_KEYUP);
@@ -52,6 +54,14 @@ void Game::update(float delta)
 void Game::render()
 {
 	g_Board.draw();
+	if (g_Option.isOn(Option::Toggle_ShowCellCoord))
+	{
+		g_Board.drawCellCoord();
+	}	
+	if (g_Option.isOn(Option::Toggle_ShowCellClearanceValue))
+	{
+		g_Board.drawCellClearanceValue();
+	}
 	util::fillCell(m_startCoord, COLOR_CELL_FROM);
 	util::fillCell(m_targetCoord, COLOR_CELL_TO);
 	g_HpaMap.draw();
@@ -187,6 +197,7 @@ void GameModeMapEdit::enter(Game& game)
 
 void GameModeMapEdit::leave(Game& game)
 {
+	g_Board.annotateMap();
 	g_HpaMap.rebuildAbstract();
 }
 

@@ -17,6 +17,7 @@
     <ClCompile Include="Font.cpp" />
     <ClCompile Include="Game.cpp" />
     <ClCompile Include="Actor.cpp" />
+    <ClCompile Include="Option.cpp" />
     <ClCompile Include="Util.cpp" />
     <ClCompile Include="main.cpp" />
   </ItemGroup>
@@ -27,6 +28,7 @@
     <ClInclude Include="Font.h" />
     <ClInclude Include="Game.h" />
     <ClInclude Include="Actor.h" />
+    <ClInclude Include="Option.h" />
     <ClInclude Include="Types.h" />
     <ClInclude Include="Util.h" />
   </ItemGroup>

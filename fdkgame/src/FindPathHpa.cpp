@@ -197,6 +197,14 @@ namespace fdk { namespace game { namespace findpath
 
 			int start = x;
 			int end;
+
+			int maxClearanceValue = maxOf(
+				m_lowLevelMap.getClearanceValue(node1ID),
+				m_lowLevelMap.getClearanceValue(node2ID)
+				);
+			int maxClearanceValueNode1ID = node1ID;
+			int maxClearanceValueNode2ID = node2ID;
+
 			while (1)
 			{
 				end = x;
@@ -213,12 +221,26 @@ namespace fdk { namespace game { namespace findpath
 				{
 					break;
 				}
+				
+				int temp = maxOf(
+					m_lowLevelMap.getClearanceValue(node1ID),
+					m_lowLevelMap.getClearanceValue(node2ID)
+					);
+				if (temp > maxClearanceValue)
+				{
+					maxClearanceValue = temp;
+					maxClearanceValueNode1ID = node1ID;
+					maxClearanceValueNode2ID = node2ID;
+				}				
 			}
 
-			// 在中间创建入口
 			Bridge bridge;
-			bridge.lowLevelNode1ID = m_lowLevelMap.getNodeID( (VectorI(start, y)+VectorI(end, y))/2 );
-			bridge.lowLevelNode2ID = m_lowLevelMap.getNodeID( (VectorI(start, y+1)+VectorI(end, y+1))/2 );
+			// 在中间创建入口
+			//bridge.lowLevelNode1ID = m_lowLevelMap.getNodeID( (VectorI(start, y)+VectorI(end, y))/2 );
+			//bridge.lowLevelNode2ID = m_lowLevelMap.getNodeID( (VectorI(start, y+1)+VectorI(end, y+1))/2 );
+			// 选择净空间最大的节点对创建入口
+			bridge.lowLevelNode1ID = maxClearanceValueNode1ID;
+			bridge.lowLevelNode2ID = maxClearanceValueNode2ID;
 			bridge.cluster1 = m_clusters(cluster2.getClusterCoord().x, cluster2.getClusterCoord().y-1);
 			bridge.cluster2 = &cluster2;
 			m_bridges.push_back(bridge);

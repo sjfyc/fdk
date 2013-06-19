@@ -2,6 +2,7 @@
 #include <iostream>
 #include <fdk/Module.h>
 #include "Util.h"
+#include "Option.h"
 #include "Board.h"
 #include "ActorBank.h"
 #include "AStar.h"
@@ -22,8 +23,9 @@ bool Game::start()
 		util::output(fdk::ModuleManager::instance().getErrorMessage().c_str());
 		return false;
 	}
-	
+		
 	outputUsage();
+	g_Option.start();
 
 	fdk::EventHook::regist(GAME_SYSTEM_EVENT_KEYDOWN);
 	fdk::EventHook::regist(GAME_SYSTEM_EVENT_KEYUP);
@@ -52,7 +54,14 @@ void Game::update(float delta)
 void Game::render()
 {
 	g_Board.draw();
-	g_Board.drawCellClearanceValue();
+	if (g_Option.isOn(Option::Toggle_ShowCellCoord))
+	{
+		g_Board.drawCellCoord();
+	}	
+	if (g_Option.isOn(Option::Toggle_ShowCellClearanceValue))
+	{
+		g_Board.drawCellClearanceValue();
+	}		
 	util::fillCell(m_startCoord, COLOR_CELL_FROM);
 	util::fillCell(m_targetCoord, COLOR_CELL_TO);
 	g_ActorBank.draw();
