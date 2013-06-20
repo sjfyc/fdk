@@ -102,7 +102,6 @@ namespace fdk { namespace game { namespace findpath
 		ErrorType m_error;
 		std::vector<int> m_roughPath;
 		std::vector<int> m_localRefinedPath;
-		int m_pathCost;
 	};
 
 	inline HpaMap::Cluster::Cluster(GridMap& orignMap, const Range& range, const ClusterCoord& clusterCoord)

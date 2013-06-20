@@ -1,5 +1,6 @@
 #include <fdkgame/FindPathGridMap.h>
 #include <math.h>
+#include <utility>
 
 namespace fdk { namespace game { namespace findpath
 {
@@ -33,21 +34,20 @@ namespace fdk { namespace game { namespace findpath
 		const bool bTop = tryAddSuccessorNode(result, NodeCoord(coord.x,coord.y-1), COST_STRAIGHT);
 		const bool bRight = tryAddSuccessorNode(result, NodeCoord(coord.x+1,coord.y), COST_STRAIGHT);
 		const bool bBottom = tryAddSuccessorNode(result, NodeCoord(coord.x,coord.y+1), COST_STRAIGHT);
-		
-		// 横向纵向至少有一个可以展开才考虑斜向（两个都考虑就是别马脚算法）
-		if (bLeft || bTop)
+				
+		if (bLeft && bTop)
 		{
 			tryAddSuccessorNode(result, NodeCoord(coord.x-1,coord.y-1), COST_DIAGONAL);
 		}
-		if (bTop || bRight)
+		if (bTop && bRight)
 		{
 			tryAddSuccessorNode(result, NodeCoord(coord.x+1,coord.y-1), COST_DIAGONAL);
 		}
-		if (bRight || bBottom)
+		if (bRight && bBottom)
 		{
 			tryAddSuccessorNode(result, NodeCoord(coord.x+1,coord.y+1), COST_DIAGONAL);
 		}
-		if (bBottom || bLeft)
+		if (bBottom && bLeft)
 		{
 			tryAddSuccessorNode(result, NodeCoord(coord.x-1,coord.y+1), COST_DIAGONAL);
 		}		
@@ -148,6 +148,195 @@ namespace fdk { namespace game { namespace findpath
 			temp, 
 			bottomRightNode.clearanceValue
 			) + 1;
+	}
+
+	#if 0
+	bool GridMap::isDirectlyReachable(int startNodeID, int targetNodeID) const
+	{		
+		NodeCoord startCoord = getNodeCoord(startNodeID);
+		NodeCoord targetCoord = getNodeCoord(targetNodeID);
+
+		int x1 = startCoord.x;
+		int y1 = startCoord.y;
+		int x2 = targetCoord.x;
+		int y2 = targetCoord.y;
+		
+		int dx = abs(x2 - x1);
+		int dy = abs(y2 - y1);
+		int yy = 0;
+
+		if (dx < dy) 
+		{
+			yy = 1;
+			std::swap(x1, y1);
+			std::swap(x2, y2);
+			std::swap(dx, dy);
+		}
+
+		int ix = (x2 - x1) > 0 ? 1 : -1;
+		int iy = (y2 - y1) > 0 ? 1 : -1;
+		int cx = x1;
+		int cy = y1;
+		int n2dy = dy * 2;
+		int n2dydx = (dy - dx) * 2;
+		int d = dy * 2 - dx;
+
+		if (yy) 
+		{ // 如果直线与 x 轴的夹角大于 45 度
+			while (cx != x2) 
+			{
+				if (d < 0)
+				{
+					d += n2dy;
+				}
+				else 
+				{
+					cy += iy;
+					d += n2dydx;
+				}
+				if (!meetMinClearanceValueRequired(getNodeID(NodeCoord(cy, cx)) ) )
+				{
+					return false;
+				}
+				cx += ix;
+			}
+		} 
+		else 
+		{ // 如果直线与 x 轴的夹角小于 45 度
+			while (cx != x2) 
+			{
+				if (d < 0) 
+				{
+					d += n2dy;
+				} 
+				else 
+				{
+					cy += iy;
+					d += n2dydx;
+				}
+				if (!meetMinClearanceValueRequired(getNodeID(NodeCoord(cx, cy)) ) )
+				{
+					return false;
+				}
+				cx += ix;
+			}
+		}
+		return true;
+	}
+	#endif
+
+	bool GridMap::isDirectlyReachable(int startNodeID, int targetNodeID) const
+	{
+		NodeCoord startCoord = getNodeCoord(startNodeID);
+		NodeCoord targetCoord = getNodeCoord(targetNodeID);
+
+		int startX = startCoord.x;
+		int startY = startCoord.y;
+		int targetX = targetCoord.x;
+		int targetY = targetCoord.y;
+
+		if (startX == targetX &&
+			startY == targetY)
+		{
+			return true;
+		}
+		
+		enum
+		{
+			DependOnX,
+			DependOnY,
+		} state;
+
+		int x = startX;
+		int y = startY;
+
+		int dx;
+		int sx;
+		if( targetX - startX > 0)
+		{
+			dx = targetX - startX;
+			sx = 1;
+		}
+		else if(targetX - startX < 0)
+		{
+			dx = startX - targetX;
+			sx = -1;
+		}
+		else
+		{
+			dx = 0;
+			sx = 0;
+		}
+		int dy;
+		int sy;
+		if( targetY - startY > 0)
+		{
+			dy = targetY - startY;
+			sy = 1;
+		}
+		else if(targetY - startY < 0)
+		{
+			dy = startY - targetY;
+			sy = -1;
+		}
+		else
+		{
+			dy = 0;
+			sy = 0;
+		}
+				
+		if(dy > dx)
+		{
+			std::swap(dy,dx);
+			state = DependOnY;
+		}
+		else
+		{
+			state = DependOnX;
+		}
+		//initialize the error term to compensate for a nonezero intercept
+		int NError = 2 * dy - dx;
+		for (int i = 1; i <= dx; ++i)
+		{
+			if (!meetMinClearanceValueRequired(getNodeID(NodeCoord(x, y)) ) )
+			{
+				return false;
+			}
+			if (NError >= 0)
+			{
+				if (state == DependOnY) 
+				{
+					if (!meetMinClearanceValueRequired(getNodeID(NodeCoord(x, y+sy)) ) )
+					{
+						return false;
+					}
+					x = x + sx;
+					if (!meetMinClearanceValueRequired(getNodeID(NodeCoord(x, y)) ) )
+					{
+						return false;
+					}
+				}
+				else
+				{
+					if (!meetMinClearanceValueRequired(getNodeID(NodeCoord(x+sx, y)) ) )
+					{
+						return false;
+					}
+					y = y + sy;
+					if (!meetMinClearanceValueRequired(getNodeID(NodeCoord(x, y)) ) )
+					{
+						return false;
+					}
+				}
+				NError = NError - 2 * dx;
+			}
+			if (state == DependOnY)     
+				y = y + sy;
+			else
+				x = x + sx;
+			NError = NError + 2 * dy;
+		}
+		return true;
 	}
 
 	GridMapPart::GridMapPart(GridMap& orignMap, const Range& range)

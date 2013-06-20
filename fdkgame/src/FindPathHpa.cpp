@@ -289,7 +289,8 @@ namespace fdk { namespace game { namespace findpath
 			bridge.cluster1 = m_clusters(cluster2.getClusterCoord().x-1, cluster2.getClusterCoord().y);
 			bridge.cluster2 = &cluster2;
 
-			if (end-start+1 > 6)
+			int length = end-start+1;
+			if (length > 6)
 			{// 在两边创建port
 				bridge.lowLevelNode1ID = m_lowLevelMap.getNodeID(VectorI(x, start));
 				bridge.lowLevelNode2ID = m_lowLevelMap.getNodeID(VectorI(x+1, start));
@@ -298,6 +299,12 @@ namespace fdk { namespace game { namespace findpath
 				bridge.lowLevelNode1ID = m_lowLevelMap.getNodeID(VectorI(x, end));
 				bridge.lowLevelNode2ID = m_lowLevelMap.getNodeID(VectorI(x+1, end));
 				m_bridges.push_back(bridge);
+				if (length > 12)
+				{// 在中间创建port
+					bridge.lowLevelNode1ID = m_lowLevelMap.getNodeID( (VectorI(x, start)+VectorI(x, end))/2 );
+					bridge.lowLevelNode2ID = m_lowLevelMap.getNodeID( (VectorI(x+1, start)+VectorI(x+1, end))/2 );
+					m_bridges.push_back(bridge);
+				}
 			}
 			else
 			{// 在中间创建port
@@ -428,7 +435,6 @@ namespace fdk { namespace game { namespace findpath
 		, m_minClearanceValueRequired(minClearanceValueRequired)
 		, m_error(Error_OK)
 		, m_roughPath()
-		, m_pathCost(PATHUNEXIST_COST)
 	{
 		FDK_ASSERT(startNodeID != targetNodeID);
 		FDK_ASSERT(m_env.getLowLevelMap().isValidNodeID(startNodeID));
@@ -442,6 +448,12 @@ namespace fdk { namespace game { namespace findpath
 
 	void Hpa::initSearch()
 	{
+		if (m_env.getLowLevelMap().isDirectlyReachable(m_lowLevelStartNodeID, m_lowLevelTargetNodeID))
+		{
+			m_localRefinedPath.push_back(m_lowLevelTargetNodeID);
+			return;
+		}
+
 		// 处于相同的cluster, 直接在局部搜索
 		HpaMap::Cluster& startCluster = m_env.getClusterOfLowLevelNode(m_lowLevelStartNodeID);
 		if (&startCluster == &m_env.getClusterOfLowLevelNode(m_lowLevelTargetNodeID))
@@ -453,7 +465,6 @@ namespace fdk { namespace game { namespace findpath
 			if (astar.search() == AStar::SearchResult_Completed)
 			{
 				startCluster.localToLowLevelPath(astar.getPath(), m_localRefinedPath);
-				m_pathCost = astar.getPathCost();
 				return;
 			}
 		}

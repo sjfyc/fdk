@@ -45,7 +45,7 @@ void Actor::tick(float delta)
 				Location location = util::cellCoordToLocation(coord) + 
 					Location((float)converNodes*CELL_SIZE_X/2, (float)converNodes*CELL_SIZE_Y/2);
 				move(location, 100);
-			}			
+			}
 		}
 	}
 	tickMove(delta);
@@ -80,6 +80,9 @@ void Actor::tickMove(float delta)
 
 void Actor::searchPath(const Location& targetLocation)
 {	
+	m_velocity.reset();
+	m_moveLocation = m_location;
+
 	const CellCoord& startCellCoord = util::locationToCellCoord(
 		Location(m_location.x-m_radius, m_location.y-m_radius)
 		);

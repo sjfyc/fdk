@@ -17,7 +17,6 @@ namespace fdk { namespace game { namespace findpath
 	class FDKGAME_API PathFinder
 	{
 	public:
-		virtual int getMinClearanceValueRequired() const;
 	};
 
 	// 环境要求：所有节点ID必须从0开始并依次自增

@@ -38,6 +38,8 @@ namespace fdk { namespace game { namespace findpath
 		int getNodeID(const NodeCoord& coord) const;
 		bool isValidNodeCoord(const NodeCoord& coord) const;
 		
+		bool isDirectlyReachable(int startNodeID, int targetNodeID) const;
+
 		// Environment interfaces
 		virtual int getNodeSpaceSize() const;
 		virtual int getHeuristic(int startNodeID, int targetNodeID) const;
