@@ -47,10 +47,10 @@ void HpaMap::draw()
 	for (AbstractGraph::Edges::const_iterator it = edges.begin(); it != edges.end(); ++it)
 	{
 		const AbstractEdge* edge = *it;	
-		if (edge->getInfo().bIntra)
+		if (edge->getInfo().bIntra && !g_Option.isOn(Option::Toggle_ShowIntraEdge))
 		{
 			continue;
-		}		
+		}
 		CellCoord startCellCoord = getLowLevelMap().getNodeCoord(edge->getStartNode().getInfo().lowLevelNodeID);
 		CellCoord targetCellCoord = getLowLevelMap().getNodeCoord(edge->getTargetNode().getInfo().lowLevelNodeID);
 
@@ -61,6 +61,11 @@ void HpaMap::draw()
 			targetCellCoord.y*CELL_SIZE_X+CELL_SIZE_X/2,
 			ARGB(255, 57, 92, 145)
 			);
+	}
+
+	if (g_Option.isOn(Option::Toggle_ShowIntraEdge))
+	{
+		g_Font.printf(20, 20, HGETEXT_LEFT, "total edges: %d", edges.size());
 	}
 
 	if (g_Option.isOn(Option::Toggle_ShowClusterCoord))

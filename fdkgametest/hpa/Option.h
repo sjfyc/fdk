@@ -15,6 +15,7 @@ public:
 		Toggle_ShowCellClearanceValue,
 		Toggle_ShowClusterCoord,
 		Toggle_ShowPortID,
+		Toggle_ShowIntraEdge,
 	};
 	void start();
 	void stop();

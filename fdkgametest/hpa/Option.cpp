@@ -38,6 +38,11 @@ void Option::onEvent(int eventType, void* params)
 			toggle(Toggle_ShowPortID);
 			util::output("%s port id", isOn(Toggle_ShowPortID) ? "show" : "hide");
 		}
+		else if (key == HGEK_5)
+		{
+			toggle(Toggle_ShowIntraEdge);
+			util::output("%s intra-edge", isOn(Toggle_ShowIntraEdge) ? "show" : "hide");
+		}		
 		else if (key == HGEK_ADD)
 		{
 			if (++m_unitSize > 4)
@@ -86,6 +91,7 @@ void Option::outputUsage()
 	util::output("2: show/hide cell clearance value");
 	util::output("3: show/hide cluster coord");
 	util::output("4: show/hide port id");
+	util::output("5: show/hide intra-edge");	
 	util::output("+: increase unit size");
 	util::output("-: decrease unit size");
 }
