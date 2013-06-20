@@ -6,7 +6,7 @@
 
 Board::Board()
 {
-	_Base::resetMap(CELL_COUNT_X, CELL_COUNT_Y, g_Option.getUnitSize());
+	_Base::resetMap(CELL_COUNT_X, CELL_COUNT_Y);
 	annotateMap();
 }
 
