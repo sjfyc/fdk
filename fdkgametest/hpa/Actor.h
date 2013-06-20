@@ -9,7 +9,7 @@ class Actor
 public:	
 	void tick(float delta);
 	void draw();
-	void move(Location& location, float speed);
+	void move(const Location& location, float speed);
 	const Location& getLocation() const;
 	const Velocity& getVelocity() const;
 	float getRadius() const;

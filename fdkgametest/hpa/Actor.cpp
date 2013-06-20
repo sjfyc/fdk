@@ -40,10 +40,11 @@ void Actor::tick(float delta)
 			}
 			else
 			{
+				const int converNodes = (int)(m_radius*2/CELL_SIZE_X)+1;
 				CellCoord coord = g_HpaMap.getLowLevelMap().getNodeCoord(nodeID);
 				Location location = util::cellCoordToLocation(coord) + 
-					Location(CELL_SIZE_X/2, CELL_SIZE_Y/2);
-				move(location, 500);
+					Location((float)converNodes*CELL_SIZE_X/2, (float)converNodes*CELL_SIZE_Y/2);
+				move(location, 100);
 			}			
 		}
 	}
@@ -55,7 +56,7 @@ void Actor::draw()
 	g_HGE.Rectangle(m_location.x-m_radius, m_location.y-m_radius, m_location.x+m_radius, m_location.y+m_radius, m_color);
 }
 
-void Actor::move(Location& location, float speed)
+void Actor::move(const Location& location, float speed)
 {
 	m_velocity = (location - m_location).normalize()*speed;
 	m_moveLocation = location;
@@ -78,11 +79,18 @@ void Actor::tickMove(float delta)
 }
 
 void Actor::searchPath(const Location& targetLocation)
-{
+{	
 	const CellCoord& startCellCoord = util::locationToCellCoord(
 		Location(m_location.x-m_radius, m_location.y-m_radius)
 		);
 	const CellCoord& targetCellCoord = util::locationToCellCoord(targetLocation);
+
+	if (startCellCoord == targetCellCoord)
+	{
+		move(targetLocation, 100);
+		return;
+	}
+
 	m_hpa = new Hpa(g_HpaMap, 
 		g_HpaMap.getLowLevelMap().getNodeID(startCellCoord),
 		g_HpaMap.getLowLevelMap().getNodeID(targetCellCoord));
