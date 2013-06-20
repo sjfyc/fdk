@@ -1,6 +1,6 @@
 #include "ActorBank.h"
 #include "Actor.h"
-
+#include "Option.h"
 ActorBank::ActorBank()
 	: m_currentActor(0)
 {
@@ -89,7 +89,7 @@ void ActorBank::onEvent(int eventType, void* params)
 		int key = (int)params;	
 		if (key == HGEK_P)
 		{
-			createActor(Location(CELL_SIZE_X+CELL_SIZE_X/2, CELL_SIZE_Y+CELL_SIZE_Y/2), CELL_SIZE_X/2);
+			createActor(Location(CELL_SIZE_X+CELL_SIZE_X/2, CELL_SIZE_Y+CELL_SIZE_Y/2), g_Option.getUnitSize()*CELL_SIZE_X/2*0.75f);
 		}
 		else if (key == HGEK_LBUTTON)
 		{
@@ -107,7 +107,8 @@ void ActorBank::onEvent(int eventType, void* params)
 			g_HGE->Input_GetMousePos(&mouseLocation.x, &mouseLocation.y);
 			if (m_currentActor)
 			{
-				m_currentActor->move(mouseLocation, 800);
+				//m_currentActor->move(mouseLocation, 800);
+				m_currentActor->searchPath(mouseLocation);
 			}
 		}
 	}
