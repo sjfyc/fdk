@@ -23,17 +23,21 @@ namespace fdk { namespace game { namespace findpath
 		static const int COST_DIAGONAL = 142;
 		GridMap();
 		void resetMap(size_t sizeX, size_t sizeY);
+		void clearObstacles();
+		void setObstacle(int nodeID, bool bSet=true);
 		void annotateMap();
+		
 		const MapData& getMapData() const;
+
 		void setMinClearanceValueRequired(int minClearanceValueRequired);
 		int getMinClearanceValueRequired() const;
 		bool meetMinClearanceValueRequired(int nodeID) const;
-		void clearObstacles();
-		void setObstacle(int nodeID, bool bSet=true);
-		int getClearanceValue(int nodeID) const;
+		int getClearanceValue(int nodeID) const;				
+		
 		NodeCoord getNodeCoord(int nodeID) const;
 		int getNodeID(const NodeCoord& coord) const;
 		bool isValidNodeCoord(const NodeCoord& coord) const;
+		
 		// Environment interfaces
 		virtual int getNodeSpaceSize() const;
 		virtual int getHeuristic(int startNodeID, int targetNodeID) const;

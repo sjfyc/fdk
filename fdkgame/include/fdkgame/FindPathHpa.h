@@ -50,15 +50,14 @@ namespace fdk { namespace game { namespace findpath
 		};
 
 		HpaMap(GridMap& lowLevelMap, const VectorI& maxClusterSize);
-		void clear();
-
-		// 需要lowLevelMap先annotateMap,因为transition point的建立依赖于clearanceValue
-		void rebuildAbstract();
+		void clearAbstract();		
+		void rebuildAbstract(); // 需要lowLevelMap先annotateMap,因为transition point的建立依赖于clearanceValue
 
 		GridMap& getLowLevelMap() const;
 		const VectorI& getMaxClusterSize() const;
 		const Array2D<Cluster*>& getClusters() const;
 		const AbstractGraph& getAbstractGraph() const;
+
 		// Environment interfaces
 		virtual int getNodeSpaceSize() const;
 		virtual int getHeuristic(int startNodeID, int targetNodeID) const;

@@ -192,7 +192,7 @@ GameModeMapEdit::GameModeMapEdit()
 void GameModeMapEdit::enter(Game& game)
 {
 	FDK_DELETE(game.m_hpa);
-	g_HpaMap.clear();
+	g_HpaMap.clearAbstract();
 }
 
 void GameModeMapEdit::leave(Game& game)

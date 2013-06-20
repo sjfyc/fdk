@@ -11,7 +11,7 @@ namespace fdk { namespace game { namespace findpath
 		FDK_ASSERT(maxClusterSize.x > 1 && maxClusterSize.y > 1);
 	}
 
-	void HpaMap::clear()
+	void HpaMap::clearAbstract()
 	{
 		for (size_t i = 0; i < m_clusters.count(); ++i)
 		{
@@ -25,7 +25,7 @@ namespace fdk { namespace game { namespace findpath
 
 	void HpaMap::rebuildAbstract()
 	{
-		clear();
+		clearAbstract();
 		createClusterAndBridges();
 		buildAbstractGraph();
 	}
