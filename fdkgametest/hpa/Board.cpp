@@ -1,11 +1,12 @@
 #include "Board.h"
 #include "Util.h"
 #include "Font.h"
+#include "Option.h"
 #pragma warning(disable:4244)
 
 Board::Board()
 {
-	_Base::resetMap(CELL_COUNT_X, CELL_COUNT_Y);
+	_Base::resetMap(CELL_COUNT_X, CELL_COUNT_Y, g_Option.getUnitSize());
 	annotateMap();
 }
 

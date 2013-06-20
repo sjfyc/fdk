@@ -190,20 +190,14 @@ namespace fdk { namespace game { namespace findpath
 			node1ID = m_lowLevelMap.getNodeID(VectorI(x, y));
 			node2ID = m_lowLevelMap.getNodeID(VectorI(x, y+1));
 
-			if (m_lowLevelMap.isObstacle(node1ID) || m_lowLevelMap.isObstacle(node2ID))
+			if (!m_lowLevelMap.meetMinClearanceValueRequired(node1ID) ||
+				!m_lowLevelMap.meetMinClearanceValueRequired(node2ID) )
 			{
 				continue;
 			}
 
 			int start = x;
 			int end;
-
-			int maxClearanceValue = maxOf(
-				m_lowLevelMap.getClearanceValue(node1ID),
-				m_lowLevelMap.getClearanceValue(node2ID)
-				);
-			int maxClearanceValueNode1ID = node1ID;
-			int maxClearanceValueNode2ID = node2ID;
 
 			while (1)
 			{
@@ -217,33 +211,33 @@ namespace fdk { namespace game { namespace findpath
 
 				node1ID = m_lowLevelMap.getNodeID(VectorI(x, y));
 				node2ID = m_lowLevelMap.getNodeID(VectorI(x, y+1));
-				if (m_lowLevelMap.isObstacle(node1ID) || m_lowLevelMap.isObstacle(node2ID))
+				if (!m_lowLevelMap.meetMinClearanceValueRequired(node1ID) ||
+					!m_lowLevelMap.meetMinClearanceValueRequired(node2ID) )
 				{
 					break;
 				}
-				
-				int temp = maxOf(
-					m_lowLevelMap.getClearanceValue(node1ID),
-					m_lowLevelMap.getClearanceValue(node2ID)
-					);
-				if (temp > maxClearanceValue)
-				{
-					maxClearanceValue = temp;
-					maxClearanceValueNode1ID = node1ID;
-					maxClearanceValueNode2ID = node2ID;
-				}				
 			}
 
 			Bridge bridge;
-			// 在中间创建入口
-			//bridge.lowLevelNode1ID = m_lowLevelMap.getNodeID( (VectorI(start, y)+VectorI(end, y))/2 );
-			//bridge.lowLevelNode2ID = m_lowLevelMap.getNodeID( (VectorI(start, y+1)+VectorI(end, y+1))/2 );
-			// 选择净空间最大的节点对创建入口
-			bridge.lowLevelNode1ID = maxClearanceValueNode1ID;
-			bridge.lowLevelNode2ID = maxClearanceValueNode2ID;
 			bridge.cluster1 = m_clusters(cluster2.getClusterCoord().x, cluster2.getClusterCoord().y-1);
 			bridge.cluster2 = &cluster2;
-			m_bridges.push_back(bridge);
+
+			if (end-start+1 > 6)
+			{// 在两边创建port
+				bridge.lowLevelNode1ID = m_lowLevelMap.getNodeID(VectorI(start, y));
+				bridge.lowLevelNode2ID = m_lowLevelMap.getNodeID(VectorI(start, y+1));
+				m_bridges.push_back(bridge);
+
+				bridge.lowLevelNode1ID = m_lowLevelMap.getNodeID(VectorI(end, y));
+				bridge.lowLevelNode2ID = m_lowLevelMap.getNodeID(VectorI(end, y+1));
+				m_bridges.push_back(bridge);
+			}
+			else
+			{// 在中间创建port
+				bridge.lowLevelNode1ID = m_lowLevelMap.getNodeID( (VectorI(start, y)+VectorI(end, y))/2 );
+				bridge.lowLevelNode2ID = m_lowLevelMap.getNodeID( (VectorI(start, y+1)+VectorI(end, y+1))/2 );
+				m_bridges.push_back(bridge);
+			}
 		}
 	}
 
@@ -256,7 +250,8 @@ namespace fdk { namespace game { namespace findpath
 			node1ID = m_lowLevelMap.getNodeID(VectorI(x, y));
 			node2ID = m_lowLevelMap.getNodeID(VectorI(x+1, y));
 
-			if (m_lowLevelMap.isObstacle(node1ID) || m_lowLevelMap.isObstacle(node2ID))
+			if (!m_lowLevelMap.meetMinClearanceValueRequired(node1ID) ||
+				!m_lowLevelMap.meetMinClearanceValueRequired(node2ID) )
 			{
 				continue;
 			}
@@ -283,33 +278,33 @@ namespace fdk { namespace game { namespace findpath
 
 				node1ID = m_lowLevelMap.getNodeID(VectorI(x, y));
 				node2ID = m_lowLevelMap.getNodeID(VectorI(x+1, y));
-				if (m_lowLevelMap.isObstacle(node1ID) || m_lowLevelMap.isObstacle(node2ID))
+				if (!m_lowLevelMap.meetMinClearanceValueRequired(node1ID) ||
+					!m_lowLevelMap.meetMinClearanceValueRequired(node2ID) )
 				{
 					break;
-				}
-
-				int temp = maxOf(
-					m_lowLevelMap.getClearanceValue(node1ID),
-					m_lowLevelMap.getClearanceValue(node2ID)
-					);
-				if (temp > maxClearanceValue)
-				{
-					maxClearanceValue = temp;
-					maxClearanceValueNode1ID = node1ID;
-					maxClearanceValueNode2ID = node2ID;
 				}
 			}
 						
 			Bridge bridge;
-			// 在中间创建入口
-			//bridge.lowLevelNode1ID = m_lowLevelMap.getNodeID( (VectorI(x, start)+VectorI(x, end))/2 );
-			//bridge.lowLevelNode2ID = m_lowLevelMap.getNodeID( (VectorI(x+1, start)+VectorI(x+1, end))/2 );
-			// 选择净空间最大的节点对创建入口
-			bridge.lowLevelNode1ID = maxClearanceValueNode1ID;
-			bridge.lowLevelNode2ID = maxClearanceValueNode2ID;
 			bridge.cluster1 = m_clusters(cluster2.getClusterCoord().x-1, cluster2.getClusterCoord().y);
 			bridge.cluster2 = &cluster2;
-			m_bridges.push_back(bridge);
+
+			if (end-start+1 > 6)
+			{// 在两边创建port
+				bridge.lowLevelNode1ID = m_lowLevelMap.getNodeID(VectorI(x, start));
+				bridge.lowLevelNode2ID = m_lowLevelMap.getNodeID(VectorI(x+1, start));
+				m_bridges.push_back(bridge);
+
+				bridge.lowLevelNode1ID = m_lowLevelMap.getNodeID(VectorI(x, end));
+				bridge.lowLevelNode2ID = m_lowLevelMap.getNodeID(VectorI(x+1, end));
+				m_bridges.push_back(bridge);
+			}
+			else
+			{// 在中间创建port
+				bridge.lowLevelNode1ID = m_lowLevelMap.getNodeID( (VectorI(x, start)+VectorI(x, end))/2 );
+				bridge.lowLevelNode2ID = m_lowLevelMap.getNodeID( (VectorI(x+1, start)+VectorI(x+1, end))/2 );
+				m_bridges.push_back(bridge);
+			}
 		}
 	}
 
@@ -327,14 +322,13 @@ namespace fdk { namespace game { namespace findpath
 
 	void HpaMap::getSuccessorNodes(PathFinder& pathFinder, int nodeID, std::vector<SuccessorNodeInfo>& result) const
 	{
-		const int minClearanceValueRequired = pathFinder.getMinClearanceValueRequired();
 		const AbstractNode::OutEdges& outAbsEdges = m_abstractGraph.getNode(nodeID).getOutEdges();
 		for (AbstractNode::OutEdges::const_iterator it = outAbsEdges.begin(); 
 			it != outAbsEdges.end(); ++it)
 		{
 			const AbstractEdge* absEdge = *it;
 			const AbstractNode& absTargetNode = absEdge->getTargetNode();
-			if (m_lowLevelMap.getClearanceValue(absTargetNode.getInfo().lowLevelNodeID) < minClearanceValueRequired)
+			if (!m_lowLevelMap.meetMinClearanceValueRequired(absTargetNode.getInfo().lowLevelNodeID))
 			{
 				continue;
 			}

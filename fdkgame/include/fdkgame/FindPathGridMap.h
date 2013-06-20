@@ -20,9 +20,11 @@ namespace fdk { namespace game { namespace findpath
 		typedef VectorI NodeCoord;
 		static const int COST_STRAIGHT = 100;	
 		static const int COST_DIAGONAL = 142;
-		void resetMap(size_t sizeX, size_t sizeY);
+		void resetMap(size_t sizeX, size_t sizeY, int minClearanceValueRequired=1);
 		void annotateMap();
 		const MapData& getMapData() const;
+		int getMinClearanceValueRequired() const;
+		bool meetMinClearanceValueRequired(int nodeID) const;
 		void clearObstacles();
 		void setObstacle(int nodeID, bool bSet=true);
 		int getClearanceValue(int nodeID) const;
@@ -36,8 +38,9 @@ namespace fdk { namespace game { namespace findpath
 		virtual bool isObstacle(int nodeID) const;
 	private:
 		void annotateNode(const NodeCoord& coord);
-		bool tryAddSuccessorNode(int minClearanceValueRequired, std::vector<SuccessorNodeInfo>& result, const NodeCoord& coord, int cost) const;
+		bool tryAddSuccessorNode(std::vector<SuccessorNodeInfo>& result, const NodeCoord& coord, int cost) const;
 		MapData m_nodes;
+		int m_minClearanceValueRequired;
 	};
 
 	class FDKGAME_API GridMapPart
@@ -73,9 +76,10 @@ namespace fdk { namespace game { namespace findpath
 	{
 	}
 
-	inline void GridMap::resetMap(size_t sizeX, size_t sizeY)
+	inline void GridMap::resetMap(size_t sizeX, size_t sizeY, int minClearanceValueRequired)
 	{
 		m_nodes.reset(sizeX, sizeY);
+		m_minClearanceValueRequired = minClearanceValueRequired;
 	}
 
 	inline const GridMap::MapData& GridMap::getMapData() const
@@ -83,6 +87,16 @@ namespace fdk { namespace game { namespace findpath
 		return m_nodes;
 	}
 	
+	inline int GridMap::getMinClearanceValueRequired() const
+	{
+		return m_minClearanceValueRequired;
+	}
+	
+	inline bool GridMap::meetMinClearanceValueRequired(int nodeID) const
+	{
+		return getClearanceValue(nodeID) >= m_minClearanceValueRequired;
+	}
+
 	inline void GridMap::setObstacle(int nodeID, bool bSet)
 	{
 		FDK_ASSERT(isValidNodeID(nodeID));

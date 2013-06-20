@@ -38,7 +38,10 @@ void Option::onEvent(int eventType, void* params)
 		}
 		else if (key == HGEK_ADD)
 		{
-			++m_unitSize;
+			if (++m_unitSize > 4)
+			{
+				m_unitSize = 4;
+			}
 			util::output("unit size: %d", m_unitSize);
 		}
 		else if (key == HGEK_SUBTRACT)
