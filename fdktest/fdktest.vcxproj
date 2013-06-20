@@ -16,6 +16,7 @@
     <ClCompile Include="testIterator.cpp" />
     <ClCompile Include="testMisc.cpp" />
     <ClCompile Include="testModule.cpp" />
+    <ClCompile Include="testRand.cpp" />
     <ClCompile Include="testString.cpp" />
   </ItemGroup>
   <PropertyGroup Label="Globals">

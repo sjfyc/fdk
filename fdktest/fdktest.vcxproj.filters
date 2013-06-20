@@ -7,5 +7,6 @@
     <ClCompile Include="testArray2D.cpp" />
     <ClCompile Include="testModule.cpp" />
     <ClCompile Include="testIterator.cpp" />
+    <ClCompile Include="testRand.cpp" />
   </ItemGroup>
 </Project>

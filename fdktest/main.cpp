@@ -3,6 +3,7 @@ extern void testString();
 extern void testArray2D();
 extern void testModule();
 extern void testIterator();
+extern void testRand();
 
 int main(int argc, char* argv[])
 {
@@ -11,5 +12,6 @@ int main(int argc, char* argv[])
 	testArray2D();
 	testModule();
 	testIterator();
+	testRand();
 	return 0;
 }
