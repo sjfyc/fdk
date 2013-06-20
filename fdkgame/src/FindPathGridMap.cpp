@@ -9,7 +9,7 @@ namespace fdk { namespace game { namespace findpath
 		{
 			for (size_t x = 0; x < m_nodes.size_x(); ++x)
 			{
-				m_nodes(x, y).bObstacle = false;
+				m_nodes(x, y).clearanceValue = -1;
 			}
 		}
 	}
@@ -77,7 +77,7 @@ namespace fdk { namespace game { namespace findpath
 		{
 			return false;
 		}
-		return m_nodes.raw_data()[nodeID].bObstacle;
+		return m_nodes.raw_data()[nodeID].clearanceValue == CLEARANCEVALUE_OBSTACLE;
 	}
 
 	GridMap::NodeCoord GridMap::getNodeCoord(int nodeID) const
@@ -115,7 +115,6 @@ namespace fdk { namespace game { namespace findpath
 	{
 		if (isObstacle(getNodeID(coord)))
 		{
-			m_nodes(coord.x, coord.y).clearanceValue = 0;
 			return;
 		}
 
@@ -133,9 +132,9 @@ namespace fdk { namespace game { namespace findpath
 		const Node& bottomNode = m_nodes(bottomNodeCoord.x, bottomNodeCoord.y);
 		const Node& rightNode = m_nodes(rightNodeCoord.x, rightNodeCoord.y);
 		const Node& bottomRightNode = m_nodes(bottomRightNodeCoord.x, bottomRightNodeCoord.y);
-		if (bottomNode.bObstacle ||
-			rightNode.bObstacle ||
-			bottomRightNode.bObstacle)
+		if (bottomNode.clearanceValue == CLEARANCEVALUE_OBSTACLE ||
+			rightNode.clearanceValue == CLEARANCEVALUE_OBSTACLE ||
+			bottomRightNode.clearanceValue == CLEARANCEVALUE_OBSTACLE)
 		{
 			m_nodes(coord.x, coord.y).clearanceValue = 1;
 			return;

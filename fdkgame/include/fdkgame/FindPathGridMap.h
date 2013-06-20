@@ -9,15 +9,16 @@ namespace fdk { namespace game { namespace findpath
 	class FDKGAME_API GridMap
 		: public Environment
 	{
-	public:
+	public:		
 		struct Node
 		{
 			Node();
-			bool bObstacle;
-			int clearanceValue;
+			int clearanceValue; // -1代表未初始化，0代表障碍，>=1代表正常值
 		};
 		typedef Array2D<Node> MapData;
 		typedef VectorI NodeCoord;
+		static const int CLEARANCEVALUE_UNINITED = -1;
+		static const int CLEARANCEVALUE_OBSTACLE = 0;
 		static const int COST_STRAIGHT = 100;	
 		static const int COST_DIAGONAL = 142;
 		GridMap();
@@ -73,8 +74,7 @@ namespace fdk { namespace game { namespace findpath
 	};
 	
 	inline GridMap::Node::Node()
-		: bObstacle(false)
-		, clearanceValue(0)
+		: clearanceValue(CLEARANCEVALUE_UNINITED)
 	{
 	}
 
@@ -111,7 +111,7 @@ namespace fdk { namespace game { namespace findpath
 	inline void GridMap::setObstacle(int nodeID, bool bSet)
 	{
 		FDK_ASSERT(isValidNodeID(nodeID));
-		m_nodes.raw_data()[nodeID].bObstacle = bSet;
+		m_nodes.raw_data()[nodeID].clearanceValue = bSet ? CLEARANCEVALUE_OBSTACLE : CLEARANCEVALUE_UNINITED;
 	}
 	
 	inline int GridMap::getClearanceValue(int nodeID) const
