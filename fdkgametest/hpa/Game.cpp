@@ -5,6 +5,7 @@
 #include "Option.h"
 #include "Board.h"
 #include "HpaMap.h"
+#include "ActorBank.h"
 
 Game::Game()
 	: m_mode(&g_GameModeGame)
@@ -137,7 +138,7 @@ void GameModeGame::update(Game& game, float delta)
 	if (hpa && hpa->getError() == Hpa::Error_OK && !m_bStepByStep)
 	{
 		search(*hpa);
-	}
+	}	
 }
 
 void GameModeGame::render(Game& game)
@@ -146,6 +147,7 @@ void GameModeGame::render(Game& game)
 	{
 		game.m_hpa->render();
 	}
+	g_ActorBank.draw();
 }
 
 void GameModeGame::handleEvent(Game& game, int eventType, void* params)

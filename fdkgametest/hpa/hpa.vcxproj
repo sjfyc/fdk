@@ -11,6 +11,8 @@
     </ProjectConfiguration>
   </ItemGroup>
   <ItemGroup>
+    <ClCompile Include="Actor.cpp" />
+    <ClCompile Include="ActorBank.cpp" />
     <ClCompile Include="Font.cpp" />
     <ClCompile Include="HpaMap.cpp" />
     <ClCompile Include="Board.cpp" />
@@ -20,6 +22,8 @@
     <ClCompile Include="main.cpp" />
   </ItemGroup>
   <ItemGroup>
+    <ClInclude Include="Actor.h" />
+    <ClInclude Include="ActorBank.h" />
     <ClInclude Include="Font.h" />
     <ClInclude Include="HpaMap.h" />
     <ClInclude Include="Board.h" />
