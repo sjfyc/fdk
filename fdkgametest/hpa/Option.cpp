@@ -1,6 +1,7 @@
 #include "Option.h"
 #include "Util.h"
 #include "Board.h"
+#include "HpaMap.h"
 
 Option::Option()
 	: m_toggles(0)
@@ -57,6 +58,7 @@ void Option::onEvent(int eventType, void* params)
 		if (key == HGEK_ADD || key == HGEK_SUBTRACT)
 		{
 			g_Board.setMinClearanceValueRequired(m_unitSize);
+			g_HpaMap.rebuildAbstract();
 		}
 	}
 }
