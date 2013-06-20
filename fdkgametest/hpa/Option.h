@@ -14,7 +14,7 @@ public:
 		Toggle_ShowCellCoord,
 		Toggle_ShowCellClearanceValue,
 		Toggle_ShowClusterCoord,
-		Toggle_ShowTransitionPointID,
+		Toggle_ShowPortID,
 	};
 	void start();
 	void stop();

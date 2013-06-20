@@ -33,8 +33,8 @@ void Option::onEvent(int eventType, void* params)
 		}
 		else if (key == HGEK_4)
 		{
-			toggle(Toggle_ShowTransitionPointID);
-			util::output("%s transition point", isOn(Toggle_ShowTransitionPointID) ? "show" : "hide");
+			toggle(Toggle_ShowPortID);
+			util::output("%s port id", isOn(Toggle_ShowPortID) ? "show" : "hide");
 		}
 		else if (key == HGEK_ADD)
 		{
@@ -74,7 +74,7 @@ void Option::outputUsage()
 	util::output("1: show/hide cell coord");
 	util::output("2: show/hide cell clearance value");
 	util::output("3: show/hide cluster coord");
-	util::output("4: show/hide transition point id");
+	util::output("4: show/hide port id");
 	util::output("+: increase unit size");
 	util::output("-: decrease unit size");
 }

@@ -74,21 +74,21 @@ namespace fdk { namespace game { namespace findpath
 		int absNodeID = 0;
 		for (size_t i = 0; i < m_bridges.size(); ++i)
 		{
-			Bridge& transitionPoint = m_bridges[i];			
+			Bridge& port = m_bridges[i];			
 			AbstractNode* absNode1;
 			AbstractNode* absNode2;			
 
 			{
-				std::map<int, int>::iterator it = lowLevelID_to_absID.find(transitionPoint.lowLevelNode1ID);
+				std::map<int, int>::iterator it = lowLevelID_to_absID.find(port.lowLevelNode1ID);
 				if (it == lowLevelID_to_absID.end())
 				{
-					lowLevelID_to_absID.insert(std::make_pair(transitionPoint.lowLevelNode1ID, absNodeID) );
+					lowLevelID_to_absID.insert(std::make_pair(port.lowLevelNode1ID, absNodeID) );
 
 					AbstractNodeInfo absNodeInfo;
-					absNodeInfo.lowLevelNodeID = transitionPoint.lowLevelNode1ID;
+					absNodeInfo.lowLevelNodeID = port.lowLevelNode1ID;
 
 					absNode1 = &m_abstractGraph.addNode(absNodeID, absNodeInfo);
-					transitionPoint.cluster1->m_transitionPoints.push_back(absNode1);
+					port.cluster1->m_ports.push_back(absNode1);
 
 					++absNodeID;
 				}
@@ -98,16 +98,16 @@ namespace fdk { namespace game { namespace findpath
 				}
 			}			
 			{
-				std::map<int, int>::iterator it = lowLevelID_to_absID.find(transitionPoint.lowLevelNode2ID);
+				std::map<int, int>::iterator it = lowLevelID_to_absID.find(port.lowLevelNode2ID);
 				if (it == lowLevelID_to_absID.end())
 				{
-					lowLevelID_to_absID.insert(std::make_pair(transitionPoint.lowLevelNode2ID, absNodeID) );
+					lowLevelID_to_absID.insert(std::make_pair(port.lowLevelNode2ID, absNodeID) );
 
 					AbstractNodeInfo absNodeInfo;
-					absNodeInfo.lowLevelNodeID = transitionPoint.lowLevelNode2ID;
+					absNodeInfo.lowLevelNodeID = port.lowLevelNode2ID;
 
 					absNode2 = &m_abstractGraph.addNode(absNodeID, absNodeInfo);
-					transitionPoint.cluster2->m_transitionPoints.push_back(absNode2);
+					port.cluster2->m_ports.push_back(absNode2);
 
 					++absNodeID;
 				}
@@ -135,18 +135,18 @@ namespace fdk { namespace game { namespace findpath
 	{
 		std::map<std::pair<AbstractNode*, AbstractNode*>, int> computedCostMap;
 
-		for (size_t iTransitionPoint1 = 0; iTransitionPoint1 < cluster.m_transitionPoints.size(); ++iTransitionPoint1)
+		for (size_t iPort1 = 0; iPort1 < cluster.m_ports.size(); ++iPort1)
 		{
-			AbstractNode* transitionPoint1 = cluster.m_transitionPoints[iTransitionPoint1];
-			for (size_t iTransitionPoint2 = 0; iTransitionPoint2 < cluster.m_transitionPoints.size(); ++iTransitionPoint2)
+			AbstractNode* port1 = cluster.m_ports[iPort1];
+			for (size_t iPort2 = 0; iPort2 < cluster.m_ports.size(); ++iPort2)
 			{
-				AbstractNode* transitionPoint2 = cluster.m_transitionPoints[iTransitionPoint2];
-				if (transitionPoint1 == transitionPoint2)
+				AbstractNode* port2 = cluster.m_ports[iPort2];
+				if (port1 == port2)
 				{
 					continue;
 				}
 				std::map<std::pair<AbstractNode*, AbstractNode*>, int>::iterator it = 
-					computedCostMap.find(std::make_pair(transitionPoint1, transitionPoint2) );
+					computedCostMap.find(std::make_pair(port1, port2) );
 				if (it != computedCostMap.end())
 				{
 					int cost = it->second;
@@ -155,26 +155,26 @@ namespace fdk { namespace game { namespace findpath
 						AbstractEdgeInfo absEdgeInfo;
 						absEdgeInfo.bIntra = true;
 						absEdgeInfo.cost = cost;
-						m_abstractGraph.addEdge(*transitionPoint1, *transitionPoint2, absEdgeInfo);
+						m_abstractGraph.addEdge(*port1, *port2, absEdgeInfo);
 					}
 					continue;
 				}
 
 				int cost = PATHUNEXIST_COST;
 				AStar astar(cluster, 
-					cluster.toPartNodeID(transitionPoint1->getInfo().lowLevelNodeID), 
-					cluster.toPartNodeID(transitionPoint2->getInfo().lowLevelNodeID));
+					cluster.toPartNodeID(port1->getInfo().lowLevelNodeID), 
+					cluster.toPartNodeID(port2->getInfo().lowLevelNodeID));
 				if (astar.search() == AStar::SearchResult_Completed)
 				{
 					AbstractEdgeInfo absEdgeInfo;
 					absEdgeInfo.bIntra = true;
 					absEdgeInfo.cost = astar.getPathCost();
-					m_abstractGraph.addEdge(*transitionPoint1, *transitionPoint2, absEdgeInfo);
+					m_abstractGraph.addEdge(*port1, *port2, absEdgeInfo);
 					cost = absEdgeInfo.cost;
 				}
 
 				computedCostMap.insert(std::make_pair( 
-					std::make_pair(transitionPoint2, transitionPoint1),
+					std::make_pair(port2, port1),
 					cost
 					));
 			}
@@ -353,7 +353,7 @@ namespace fdk { namespace game { namespace findpath
 	std::pair<HpaMap::AbstractNode*, bool> HpaMap::addStartOrTargetNodeForHpa(int lowLevelNodeID, bool bStart)
 	{
 		Cluster& cluster = getClusterOfLowLevelNode(lowLevelNodeID);
-		AbstractNode* abstractNode = cluster.findTransitionPointWithLowLevelNodeID(lowLevelNodeID);
+		AbstractNode* abstractNode = cluster.findPortWithLowLevelNodeID(lowLevelNodeID);
 		if (abstractNode)
 		{
 			return std::make_pair(abstractNode, false);
@@ -364,16 +364,16 @@ namespace fdk { namespace game { namespace findpath
 
 		AbstractNode* startAbsNode = bStart ? abstractNode : 0;
 		AbstractNode* targetAbsNode = bStart ? 0 : abstractNode;
-		for (size_t i = 0; i < cluster.m_transitionPoints.size(); ++i)
+		for (size_t i = 0; i < cluster.m_ports.size(); ++i)
 		{
-			AbstractNode* transitionPoint = cluster.m_transitionPoints[i];
+			AbstractNode* port = cluster.m_ports[i];
 			if (bStart)
 			{
-				targetAbsNode = transitionPoint;
+				targetAbsNode = port;
 			}
 			else
 			{
-				startAbsNode = transitionPoint;
+				startAbsNode = port;
 			}
 
 			AStar astar(cluster, 
@@ -406,11 +406,11 @@ namespace fdk { namespace game { namespace findpath
 		}
 	}
 
-	HpaMap::AbstractNode* HpaMap::Cluster::findTransitionPointWithLowLevelNodeID(int lowLevelNodeID) const
+	HpaMap::AbstractNode* HpaMap::Cluster::findPortWithLowLevelNodeID(int lowLevelNodeID) const
 	{
-		for (size_t i = 0; i < m_transitionPoints.size(); ++i)
+		for (size_t i = 0; i < m_ports.size(); ++i)
 		{
-			AbstractNode* abstractNode = m_transitionPoints[i];
+			AbstractNode* abstractNode = m_ports[i];
 			if (abstractNode->getInfo().lowLevelNodeID == lowLevelNodeID)
 			{
 				return abstractNode;

@@ -37,7 +37,7 @@ void HpaMap::draw()
 		CellCoord cellCoord = getLowLevelMap().getNodeCoord(node->getInfo().lowLevelNodeID);
 		util::fillCell(cellCoord, ARGB(255, 210, 248, 207));
 
-		if (g_Option.isOn(Option::Toggle_ShowTransitionPointID))
+		if (g_Option.isOn(Option::Toggle_ShowPortID))
 		{
 			g_Font.printf(cellCoord.x*CELL_SIZE_X+2, cellCoord.y*CELL_SIZE_Y+2, HGETEXT_LEFT, "%d", 
 				node->getID());
