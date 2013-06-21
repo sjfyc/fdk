@@ -1,7 +1,7 @@
 #ifndef __FDKGAME_FINDPATHASTAR_H_INCLUDE__
 #define __FDKGAME_FINDPATHASTAR_H_INCLUDE__
 #include "FindPathBase.h"
-#include <queue>
+#include <fdk/BinaryHeap.h>
 
 namespace fdk { namespace game { namespace findpath
 {
@@ -53,7 +53,7 @@ namespace fdk { namespace game { namespace findpath
 			int fValue;
 			bool operator<(const OpenListItem& other) const;
 		};
-		typedef std::priority_queue<OpenListItem> OpenList;
+		typedef fdk::BinaryHeap<OpenListItem> OpenList;
 		void inspectNode(int nodeID, int parentNodeID, int gValue);
 		void buildPath();
 		const Environment& m_env;
@@ -76,7 +76,7 @@ namespace fdk { namespace game { namespace findpath
 
 	inline bool AStar::OpenListItem::operator<(const OpenListItem& other) const
 	{
-		return fValue > other.fValue;
+		return fValue < other.fValue;
 	}
 
 	inline AStar::SearchResult AStar::getSearchResult() const

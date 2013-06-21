@@ -39,6 +39,9 @@
     <ClInclude Include="include\fdk\Iterator.h">
       <Filter>include</Filter>
     </ClInclude>
+    <ClInclude Include="include\fdk\BinaryHeap.h">
+      <Filter>include</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="src\Misc.cpp">

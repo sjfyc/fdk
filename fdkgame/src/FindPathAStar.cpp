@@ -48,8 +48,8 @@ namespace fdk { namespace game { namespace findpath
 		std::vector<SuccessorNodeInfo> successors;
 		while (!m_openList.empty())
 		{
-			OpenListItem current = m_openList.top();			
-			m_openList.pop();
+			OpenListItem current = m_openList.front();			
+			m_openList.pop_front();
 			m_nodeStates[current.nodeID] = NodeState_Closed;
 			if (m_recorder)
 			{
@@ -94,7 +94,7 @@ namespace fdk { namespace game { namespace findpath
 				m_nodeDatas[nodeID].gValue = gValue;
 				m_nodeDatas[nodeID].hValue = m_env.getHeuristic(nodeID, m_targetNodeID);			
 				OpenListItem openListItem = { nodeID, m_nodeDatas[nodeID].fValue() };
-				m_openList.push(openListItem);
+				m_openList.insert(openListItem);
 				if (m_recorder)
 				{
 					m_recorder->onOpenNode(nodeID, parentNodeID, false);
@@ -107,7 +107,7 @@ namespace fdk { namespace game { namespace findpath
 				m_nodeDatas[nodeID].parentNodeID = parentNodeID;
 				m_nodeDatas[nodeID].gValue = gValue;
 				OpenListItem openListItem = { nodeID, m_nodeDatas[nodeID].fValue() };				
-				m_openList.push(openListItem); // 不需要删除旧项，新项必将被先从Open变Close，而旧项由于Close将被跳过
+				m_openList.insert(openListItem); // 不需要删除旧项，新项必将被先从Open变Close，而旧项由于Close将被跳过
 				if (m_recorder)
 				{
 					m_recorder->onOpenNode(nodeID, parentNodeID, true);

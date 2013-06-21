@@ -75,6 +75,7 @@
   <ItemGroup>
     <ClInclude Include="include\fdk\Array2D.h" />
     <ClInclude Include="include\fdk\Base.h" />
+    <ClInclude Include="include\fdk\BinaryHeap.h" />
     <ClInclude Include="include\fdk\EventHook.h" />
     <ClInclude Include="include\fdk\Iterator.h" />
     <ClInclude Include="include\fdk\Memory.h" />
