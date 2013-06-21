@@ -58,14 +58,7 @@ void Game::render()
 	util::fillCell(m_startCoord, COLOR_CELL_FROM);
 	util::fillCell(m_targetCoord, COLOR_CELL_TO);
 	g_HpaMap.draw();
-	if (g_Option.isOn(Option::Toggle_ShowCellCoord))
-	{
-		g_Board.drawCellCoord();
-	}	
-	if (g_Option.isOn(Option::Toggle_ShowCellClearanceValue))
-	{
-		g_Board.drawCellClearanceValue();
-	}
+	g_Board.drawCellInfo();
 	m_mode->render(*this);
 }
 
@@ -91,7 +84,7 @@ void Game::onEvent(int eventType, void* params)
 			if (!m_hpa || m_hpa->getError() != Hpa::Error_OK)
 			{				
 				delete m_hpa;
-				m_hpa = new Hpa(g_HpaMap, 
+				m_hpa = new Hpa(0, g_HpaMap, 
 					g_Board.getNodeID(m_startCoord),
 					g_Board.getNodeID(m_targetCoord));
 				if (m_hpa->getError() == Hpa::Error_PathUnexist)

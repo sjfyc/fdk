@@ -38,7 +38,7 @@ namespace fdk { namespace game { namespace findpath
 		int getNodeID(const NodeCoord& coord) const;
 		bool isValidNodeCoord(const NodeCoord& coord) const;
 		
-		bool isDirectlyReachable(int startNodeID, int targetNodeID) const;
+		bool isDirectlyReachable(int startNodeID, int targetNodeID, EnvironmentChecker* envChecker=0) const;
 
 		// Environment interfaces
 		virtual int getNodeSpaceSize() const;
@@ -46,8 +46,9 @@ namespace fdk { namespace game { namespace findpath
 		virtual void getSuccessorNodes(PathFinder& pathFinder, int nodeID, std::vector<SuccessorNodeInfo>& result) const;
 		virtual bool isObstacle(int nodeID) const;
 	private:
+		bool _isDirectlyReachable(int startNodeID, int targetNodeID, EnvironmentChecker* envChecker) const;
 		void annotateNode(const NodeCoord& coord);
-		bool tryAddSuccessorNode(std::vector<SuccessorNodeInfo>& result, const NodeCoord& coord, int cost) const;
+		bool tryAddSuccessorNode(PathFinder& pathFinder, std::vector<SuccessorNodeInfo>& result, const NodeCoord& coord, int cost, int parentNodeID) const;
 		MapData m_nodes;
 		int m_minClearanceValueRequired;
 	};

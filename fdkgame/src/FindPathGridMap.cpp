@@ -30,30 +30,30 @@ namespace fdk { namespace game { namespace findpath
 	{
 		NodeCoord coord = getNodeCoord(nodeID);
 	
-		const bool bLeft = tryAddSuccessorNode(result, NodeCoord(coord.x-1,coord.y), COST_STRAIGHT);		
-		const bool bTop = tryAddSuccessorNode(result, NodeCoord(coord.x,coord.y-1), COST_STRAIGHT);
-		const bool bRight = tryAddSuccessorNode(result, NodeCoord(coord.x+1,coord.y), COST_STRAIGHT);
-		const bool bBottom = tryAddSuccessorNode(result, NodeCoord(coord.x,coord.y+1), COST_STRAIGHT);
+		const bool bLeft = tryAddSuccessorNode(pathFinder, result, NodeCoord(coord.x-1,coord.y), COST_STRAIGHT, nodeID);		
+		const bool bTop = tryAddSuccessorNode(pathFinder, result, NodeCoord(coord.x,coord.y-1), COST_STRAIGHT, nodeID);
+		const bool bRight = tryAddSuccessorNode(pathFinder, result, NodeCoord(coord.x+1,coord.y), COST_STRAIGHT, nodeID);
+		const bool bBottom = tryAddSuccessorNode(pathFinder, result, NodeCoord(coord.x,coord.y+1), COST_STRAIGHT, nodeID);
 				
 		if (bLeft && bTop)
 		{
-			tryAddSuccessorNode(result, NodeCoord(coord.x-1,coord.y-1), COST_DIAGONAL);
+			tryAddSuccessorNode(pathFinder, result, NodeCoord(coord.x-1,coord.y-1), COST_DIAGONAL, nodeID);
 		}
 		if (bTop && bRight)
 		{
-			tryAddSuccessorNode(result, NodeCoord(coord.x+1,coord.y-1), COST_DIAGONAL);
+			tryAddSuccessorNode(pathFinder, result, NodeCoord(coord.x+1,coord.y-1), COST_DIAGONAL, nodeID);
 		}
 		if (bRight && bBottom)
 		{
-			tryAddSuccessorNode(result, NodeCoord(coord.x+1,coord.y+1), COST_DIAGONAL);
+			tryAddSuccessorNode(pathFinder, result, NodeCoord(coord.x+1,coord.y+1), COST_DIAGONAL, nodeID);
 		}
 		if (bBottom && bLeft)
 		{
-			tryAddSuccessorNode(result, NodeCoord(coord.x-1,coord.y+1), COST_DIAGONAL);
+			tryAddSuccessorNode(pathFinder, result, NodeCoord(coord.x-1,coord.y+1), COST_DIAGONAL, nodeID);
 		}		
 	}
 	
-	bool GridMap::tryAddSuccessorNode(std::vector<SuccessorNodeInfo>& result, const NodeCoord& coord, int cost) const
+	bool GridMap::tryAddSuccessorNode(PathFinder& pathFinder, std::vector<SuccessorNodeInfo>& result, const NodeCoord& coord, int cost, int parentNodeID) const
 	{
 		const int nodeID = getNodeID(coord);
 		if (nodeID == INVALID_NODEID)
@@ -61,6 +61,11 @@ namespace fdk { namespace game { namespace findpath
 			return false;
 		}
 		if (!meetMinClearanceValueRequired(nodeID))
+		{
+			return false;
+		}
+		if (pathFinder.getEnvironmentChecker() &&
+			!pathFinder.getEnvironmentChecker()->checkSuccessorNode(*this, nodeID, parentNodeID))
 		{
 			return false;
 		}
@@ -225,7 +230,21 @@ namespace fdk { namespace game { namespace findpath
 	}
 	#endif
 
-	bool GridMap::isDirectlyReachable(int startNodeID, int targetNodeID) const
+	bool GridMap::isDirectlyReachable(int startNodeID, int targetNodeID, EnvironmentChecker* envChecker) const
+	{
+		if (envChecker)
+		{
+			envChecker->onSearchBegining(*this, startNodeID, targetNodeID);
+		}
+		bool result = _isDirectlyReachable(startNodeID, targetNodeID, envChecker);
+		if (envChecker)
+		{
+			envChecker->onSearchEnded(*this, startNodeID, targetNodeID);
+		}
+		return result;
+	}
+
+	bool GridMap::_isDirectlyReachable(int startNodeID, int targetNodeID, EnvironmentChecker* envChecker) const
 	{
 		NodeCoord startCoord = getNodeCoord(startNodeID);
 		NodeCoord targetCoord = getNodeCoord(targetNodeID);
@@ -240,7 +259,7 @@ namespace fdk { namespace game { namespace findpath
 		{
 			return true;
 		}
-		
+
 		enum
 		{
 			DependOnX,
@@ -284,7 +303,7 @@ namespace fdk { namespace game { namespace findpath
 			dy = 0;
 			sy = 0;
 		}
-				
+
 		if(dy > dx)
 		{
 			std::swap(dy,dx);
@@ -296,9 +315,15 @@ namespace fdk { namespace game { namespace findpath
 		}
 		//initialize the error term to compensate for a nonezero intercept
 		int NError = 2 * dy - dx;
+		int nodeID;
 		for (int i = 1; i <= dx; ++i)
 		{
-			if (!meetMinClearanceValueRequired(getNodeID(NodeCoord(x, y)) ) )
+			nodeID = getNodeID(NodeCoord(x, y));
+			if (!meetMinClearanceValueRequired(nodeID) )
+			{
+				return false;
+			}
+			if (envChecker && !envChecker->checkSuccessorNode(*this, nodeID, INVALID_NODEID))
 			{
 				return false;
 			}
@@ -306,34 +331,58 @@ namespace fdk { namespace game { namespace findpath
 			{
 				if (state == DependOnY) 
 				{
-					if (!meetMinClearanceValueRequired(getNodeID(NodeCoord(x, y+sy)) ) )
+					nodeID = getNodeID(NodeCoord(x, y+sy));
+					if (!meetMinClearanceValueRequired(nodeID ) )
+					{
+						return false;
+					}
+					if (envChecker && !envChecker->checkSuccessorNode(*this, nodeID, INVALID_NODEID))
 					{
 						return false;
 					}
 					x = x + sx;
-					if (!meetMinClearanceValueRequired(getNodeID(NodeCoord(x, y)) ) )
+					nodeID = getNodeID(NodeCoord(x, y));
+					if (!meetMinClearanceValueRequired(nodeID ) )
+					{
+						return false;
+					}
+					if (envChecker && !envChecker->checkSuccessorNode(*this, nodeID, INVALID_NODEID))
 					{
 						return false;
 					}
 				}
 				else
 				{
-					if (!meetMinClearanceValueRequired(getNodeID(NodeCoord(x+sx, y)) ) )
+					nodeID = getNodeID(NodeCoord(x+sx, y));
+					if (!meetMinClearanceValueRequired(nodeID ) )
+					{
+						return false;
+					}
+					if (envChecker && !envChecker->checkSuccessorNode(*this, nodeID, INVALID_NODEID))
 					{
 						return false;
 					}
 					y = y + sy;
-					if (!meetMinClearanceValueRequired(getNodeID(NodeCoord(x, y)) ) )
+					nodeID = getNodeID(NodeCoord(x, y));
+					if (!meetMinClearanceValueRequired(nodeID ) )
+					{
+						return false;
+					}
+					if (envChecker && !envChecker->checkSuccessorNode(*this, nodeID, INVALID_NODEID))
 					{
 						return false;
 					}
 				}
 				NError = NError - 2 * dx;
 			}
-			if (state == DependOnY)     
+			if (state == DependOnY)
+			{
 				y = y + sy;
+			}
 			else
+			{
 				x = x + sx;
+			}
 			NError = NError + 2 * dy;
 		}
 		return true;

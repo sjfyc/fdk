@@ -19,6 +19,7 @@ public:
 	Actor* createActor(const Location& location, float radius);
 	void destroyActor(Actor& actor);
 	Actor* findFirstActorConverLocation(const Location& location) const;
+	const Actors& getActors() const;
 private:
 	ActorBank();
 	~ActorBank();
@@ -28,6 +29,11 @@ private:
 	Actors m_actors;
 	Actor* m_currentActor;
 };
+
+inline const ActorBank::Actors& ActorBank::getActors() const
+{
+	return m_actors;
+}
 
 #define g_ActorBank (ActorBank::instance())
 #endif

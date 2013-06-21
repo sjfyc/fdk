@@ -1,6 +1,7 @@
 #ifndef __ACTOR_H_INCLUDE__
 #define __ACTOR_H_INCLUDE__
 #include "Types.h"
+#include <fdkgame/Math.h>
 class Hpa;
 
 class Actor
@@ -14,6 +15,7 @@ public:
 	const Velocity& getVelocity() const;
 	float getRadius() const;
 	void searchPath(const Location& targetLocation);
+	BoundingBox getBoundingBox() const;
 private:
 	Actor(const Location& location, float radius);
 	~Actor();

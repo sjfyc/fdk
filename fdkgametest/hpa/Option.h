@@ -12,6 +12,7 @@ public:
 	enum Toggle
 	{
 		Toggle_ShowCellCoord,
+		Toggle_ShowCellID,
 		Toggle_ShowCellClearanceValue,
 		Toggle_ShowClusterCoord,
 		Toggle_ShowPortID,

@@ -56,24 +56,24 @@ void Board::draw()
 	}
 }
 
-void Board::drawCellCoord()
+void Board::drawCellInfo()
 {
 	for (int y = 0; y < CELL_COUNT_Y; ++y)
 	{	
 		for (int x = 0; x < CELL_COUNT_X; ++x)
 		{
-			g_Font.printf(x*CELL_SIZE_X+2, y*CELL_SIZE_Y+2, HGETEXT_LEFT, "%d,%d", x, y);
-		}
-	}
-}
-
-void Board::drawCellClearanceValue()
-{
-	for (int y = 0; y < CELL_COUNT_Y; ++y)
-	{	
-		for (int x = 0; x < CELL_COUNT_X; ++x)
-		{
-			g_Font.printf(x*CELL_SIZE_X+2, y*CELL_SIZE_Y+2, HGETEXT_LEFT, "%d", getClearanceValue(getNodeID(CellCoord(x, y)) ) );
+			if (g_Option.isOn(Option::Toggle_ShowCellCoord))
+			{
+				g_Font.printf(x*CELL_SIZE_X+2, y*CELL_SIZE_Y+2, HGETEXT_LEFT, "%d,%d", x, y);
+			}
+			if (g_Option.isOn(Option::Toggle_ShowCellID))
+			{
+				g_Font.printf(x*CELL_SIZE_X+2, y*CELL_SIZE_Y+2, HGETEXT_LEFT, "%d", getNodeID(CellCoord(x, y) ) );
+			}			
+			if (g_Option.isOn(Option::Toggle_ShowCellClearanceValue))
+			{
+				g_Font.printf(x*CELL_SIZE_X+2, y*CELL_SIZE_Y+2, HGETEXT_LEFT, "%d", getClearanceValue(getNodeID(CellCoord(x, y)) ) );
+			}
 		}
 	}
 }

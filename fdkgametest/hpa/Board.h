@@ -14,8 +14,7 @@ public:
 	void setBlock(const CellCoord& coord, bool bBlock);
 	void clearBlocks();
 	void draw();
-	void drawCellCoord();
-	void drawCellClearanceValue();
+	void drawCellInfo();
 private:
 	Board();
 	~Board();

@@ -94,7 +94,7 @@ void Actor::searchPath(const Location& targetLocation)
 		return;
 	}
 
-	m_hpa = new Hpa(g_HpaMap, 
+	m_hpa = new Hpa(this, g_HpaMap, 
 		g_HpaMap.getLowLevelMap().getNodeID(startCellCoord),
 		g_HpaMap.getLowLevelMap().getNodeID(targetCellCoord));
 	if (m_hpa->getError() == Hpa::Error_PathUnexist)
@@ -103,4 +103,10 @@ void Actor::searchPath(const Location& targetLocation)
 		FDK_DELETE(m_hpa);
 		return;
 	}
+}
+
+BoundingBox Actor::getBoundingBox() const
+{
+	return BoundingBox(m_location.x-m_radius,m_location.y-m_radius,
+		m_location.x+m_radius+1,m_location.y+m_radius+1);
 }

@@ -4,6 +4,8 @@
 #include "Board.h"
 #include "Game.h"
 #include "Font.h"
+#include "ActorBank.h"
+#include "Actor.h"
 #pragma warning(disable:4244)
 
 HpaMap::HpaMap()
@@ -16,7 +18,7 @@ void HpaMap::draw()
 {
 	for (size_t i = 0; i < getClusters().count(); ++i)
 	{
-		const Cluster& cluster = *getClusters().raw_data()[i];
+		const fdkgame::findpath::HpaCluster& cluster = *getClusters().raw_data()[i];
 		CellCoord topLeftCellCoord;
 		topLeftCellCoord.x = cluster.getClusterCoord().x*getMaxClusterSize().x;
 		topLeftCellCoord.y = cluster.getClusterCoord().y*getMaxClusterSize().y;
@@ -72,7 +74,7 @@ void HpaMap::draw()
 	{
 		for (size_t i = 0; i < getClusters().count(); ++i)
 		{
-			const Cluster& cluster = *getClusters().raw_data()[i];
+			const fdkgame::findpath::HpaCluster& cluster = *getClusters().raw_data()[i];
 			CellCoord topLeftCellCoord;
 			topLeftCellCoord.x = cluster.getClusterCoord().x*getMaxClusterSize().x;
 			topLeftCellCoord.y = cluster.getClusterCoord().y*getMaxClusterSize().y;
@@ -84,9 +86,12 @@ void HpaMap::draw()
 	}
 }
 
-Hpa::Hpa(fdkgame::findpath::HpaMap& env, int startNodeID, int targetNodeID)
+Hpa::Hpa(Actor* initiator, fdkgame::findpath::HpaMap& env, int startNodeID, int targetNodeID)
 	: _Base(env, startNodeID, targetNodeID, g_Option.getUnitSize())
+	, m_actor(initiator)
 {
+	setEnvironmentChecker(this);
+	search();
 	m_roughPath = getRoughPath();
 }
 
@@ -148,3 +153,95 @@ int Hpa::popNextPathNode()
 	m_path.push_back(node);
 	return node;
 }
+
+void Hpa::onSearchBegining(const fdkgame::findpath::HpaMap& env, int startNodeID, int endNodeID)
+{
+	CellCoord cellCoord = env.getLowLevelMap().getNodeCoord(
+		env.getAbstractGraph().getNode(startNodeID).getInfo().lowLevelNodeID
+		);
+	ignoreAroundActors(env.getLowLevelMap(), util::cellCoordToLocation(cellCoord), CELL_SIZE_X*8);
+}
+
+void Hpa::onSearchEnded(const fdkgame::findpath::HpaMap& env, int startNodeID, int endNodeID)
+{
+	m_ignoredNodes.clear();
+}
+
+bool Hpa::checkSuccessorNode(const fdkgame::findpath::HpaMap& env, int nodeID, int parentNodeID) const
+{
+	const int lowLevelNodeID = env.getAbstractGraph().getNode(nodeID).getInfo().lowLevelNodeID;
+	if (m_ignoredNodes.find(lowLevelNodeID) != m_ignoredNodes.end())
+	{
+		return false;
+	}
+	return true;
+}
+
+void Hpa::onSearchBegining(const fdkgame::findpath::HpaCluster& env, int startNodeID, int endNodeID)
+{
+	CellCoord cellCoord = env.getOrignMap().getNodeCoord(env.toOrignNodeID(startNodeID));
+	ignoreAroundActors(env.getOrignMap(), util::cellCoordToLocation(cellCoord), CELL_SIZE_X*8);
+}
+
+void Hpa::onSearchEnded(const fdkgame::findpath::HpaCluster& env, int startNodeID, int endNodeID)
+{
+	m_ignoredNodes.clear();
+}
+
+bool Hpa::checkSuccessorNode(const fdkgame::findpath::HpaCluster& env, int nodeID, int parentNodeID) const
+{
+	if (m_ignoredNodes.find(nodeID) != m_ignoredNodes.end())
+	{
+		return false;
+	}
+	return true;
+}
+
+void Hpa::onSearchBegining(const fdkgame::findpath::GridMap& env, int startNodeID, int endNodeID)
+{
+	ignoreAroundActors(env, util::cellCoordToLocation(env.getNodeCoord(startNodeID))+Location(CELL_SIZE_X/2,CELL_SIZE_Y/2), CELL_SIZE_X*8);
+}
+
+void Hpa::onSearchEnded(const fdkgame::findpath::GridMap& env, int startNodeID, int endNodeID)
+{
+	m_ignoredNodes.clear();
+}
+
+bool Hpa::checkSuccessorNode(const fdkgame::findpath::GridMap& env, int nodeID, int parentNodeID) const
+{
+	if (m_ignoredNodes.find(nodeID) != m_ignoredNodes.end())
+	{
+		return false;
+	}
+	return true;
+}
+
+void Hpa::ignoreAroundActors(const fdkgame::findpath::GridMap& env, const Location& center, float radius)
+{
+	BoundingBox bb(center-Location(radius,radius), center+Location(radius,radius));
+	for (ActorBank::Actors::const_iterator it = g_ActorBank.getActors().begin(); it != g_ActorBank.getActors().end(); ++it)
+	{
+		Actor* actor = *it;
+		if (actor == m_actor)
+		{
+			continue;
+		}
+		if (!actor->getBoundingBox().intersect(bb))
+		{
+			continue;
+		}
+		const short mlvr = env.getMinClearanceValueRequired();
+		CellCoord tl = util::locationToCellCoord(actor->getBoundingBox().topLeft);
+		CellCoord br = util::locationToCellCoord(Location(actor->getBoundingBox().bottomRight.x-1, actor->getBoundingBox().bottomRight.y-1));
+		tl.x -= (mlvr-1);
+		tl.y -= (mlvr-1);
+		for (int y = tl.y; y <= br.y; ++y)
+		{
+			for (int x = tl.x; x <= br.x; ++x)
+			{
+				m_ignoredNodes.insert(env.getNodeID(CellCoord(x, y)));
+			}
+		}
+	}
+}
+

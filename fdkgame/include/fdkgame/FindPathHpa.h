@@ -6,6 +6,8 @@
 
 namespace fdk { namespace game { namespace findpath
 {
+	class HpaCluster;
+
 	class FDKGAME_API HpaMap
 		: public Environment
 	{
@@ -23,39 +25,21 @@ namespace fdk { namespace game { namespace findpath
 		typedef Graph<AbstractNodeInfo, AbstractEdgeInfo> AbstractGraph;
 		typedef GraphNode<AbstractNodeInfo, AbstractEdgeInfo> AbstractNode;
 		typedef GraphEdge<AbstractNodeInfo, AbstractEdgeInfo> AbstractEdge;
-		typedef VectorI ClusterCoord;
-		class Cluster;
 		struct Bridge
 		{
 			int lowLevelNode1ID;
 			int lowLevelNode2ID;
-			Cluster* cluster1;
-			Cluster* cluster2;
+			HpaCluster* cluster1;
+			HpaCluster* cluster2;
 		};
-		class Cluster
-			: public GridMapPart
-		{
-			friend class HpaMap;
-			friend class Hpa;
-		public:
-			typedef std::vector<AbstractNode*> Ports;
-			const ClusterCoord& getClusterCoord() const;
-			const Ports& getPorts() const;			
-		private:
-			AbstractNode* findPortWithLowLevelNodeID(int lowLevelNodeID) const;
-			void localToLowLevelPath(const std::vector<int>& local, std::vector<int>& lowLevel) const;
-			Cluster(GridMap& orignMap, const Range& range, const ClusterCoord& clusterCoord);
-			ClusterCoord m_clusterCoord;
-			Ports m_ports;
-		};
-
+		typedef VectorI ClusterCoord;
 		HpaMap(GridMap& lowLevelMap, const VectorI& maxClusterSize);
 		void clearAbstract();
 		void rebuildAbstract(); // 需要在lowLevelMap重新annotateMap(比如布局发生了变化)或者改变了minClearanceValueRequired后调用
 
 		GridMap& getLowLevelMap() const;
 		const VectorI& getMaxClusterSize() const;
-		const Array2D<Cluster*>& getClusters() const;
+		const Array2D<HpaCluster*>& getClusters() const;
 		const AbstractGraph& getAbstractGraph() const;
 
 		// Environment interfaces
@@ -66,20 +50,39 @@ namespace fdk { namespace game { namespace findpath
 	protected:		
 		void createClusterAndBridges();
 		void buildAbstractGraph();
-		void buildAbstractGraph_addIntraEdgesInCluster(Cluster& cluster);
-		void createVerticalBridges(int xStart, int xEnd, int y, Cluster& cluster2);
-		void createHorizontalBridges(int yStart, int yEnd, int x, Cluster& cluster2);
+		void buildAbstractGraph_addIntraEdgesInCluster(HpaCluster& cluster);
+		void createVerticalBridges(int xStart, int xEnd, int y, HpaCluster& cluster2);
+		void createHorizontalBridges(int yStart, int yEnd, int x, HpaCluster& cluster2);
 		std::pair<AbstractNode*, bool> addStartOrTargetNodeForHpa(int lowLevelNodeID, bool bStart);
-		Cluster& getClusterOfLowLevelNode(int lowLevelNodeID) const;
+		HpaCluster& getClusterOfLowLevelNode(int lowLevelNodeID) const;
 		void abstractToLowLevelPath(const std::vector<int>& abstract, std::vector<int>& lowLevel) const;
 		GridMap& m_lowLevelMap;
 		const VectorI m_maxClusterSize;
-		Array2D<Cluster*> m_clusters;		
+		Array2D<HpaCluster*> m_clusters;		
 		AbstractGraph m_abstractGraph;
 		std::vector<Bridge> m_bridges;
 	};
 
+	class HpaCluster
+		: public GridMapPart
+	{
+		friend class HpaMap;
+		friend class Hpa;
+	public:
+		typedef VectorI ClusterCoord;
+		typedef std::vector<HpaMap::AbstractNode*> Ports;
+		const ClusterCoord& getClusterCoord() const;
+		const Ports& getPorts() const;			
+	private:
+		HpaMap::AbstractNode* findPortWithLowLevelNodeID(int lowLevelNodeID) const;
+		void localToLowLevelPath(const std::vector<int>& local, std::vector<int>& lowLevel) const;
+		HpaCluster(GridMap& orignMap, const Range& range, const ClusterCoord& clusterCoord);
+		ClusterCoord m_clusterCoord;
+		Ports m_ports;
+	};
+
 	class Hpa
+		: public PathFinder
 	{
 	public:
 		enum ErrorType
@@ -89,33 +92,35 @@ namespace fdk { namespace game { namespace findpath
 			Error_PathUnexist,
 		};
 		Hpa(HpaMap& env, int startNodeID, int targetNodeID, int minClearanceValueRequired=1);
-		~Hpa();		
+		~Hpa();
+		ErrorType search();
 		int popNextPathNode();
 		ErrorType getError() const;
 		const std::vector<int>& getRoughPath() const;
-	protected:
-		void initSearch();
-		HpaMap& m_env;
+	protected:		
+		void _search();
+		HpaMap& m_env;		
 		int m_lowLevelStartNodeID;
 		int m_lowLevelTargetNodeID;
 		int m_minClearanceValueRequired;
+		bool m_bInited;
 		ErrorType m_error;
 		std::vector<int> m_roughPath;
 		std::vector<int> m_localRefinedPath;
 	};
 
-	inline HpaMap::Cluster::Cluster(GridMap& orignMap, const Range& range, const ClusterCoord& clusterCoord)
+	inline HpaCluster::HpaCluster(GridMap& orignMap, const Range& range, const ClusterCoord& clusterCoord)
 		: GridMapPart(orignMap, range)
 		, m_clusterCoord(clusterCoord)
 	{
 	}
 
-	inline const HpaMap::ClusterCoord& HpaMap::Cluster::getClusterCoord() const
+	inline const HpaCluster::ClusterCoord& HpaCluster::getClusterCoord() const
 	{
 		return m_clusterCoord;
 	}
 
-	inline const HpaMap::Cluster::Ports& HpaMap::Cluster::getPorts() const
+	inline const HpaCluster::Ports& HpaCluster::getPorts() const
 	{
 		return m_ports;
 	}
@@ -130,7 +135,7 @@ namespace fdk { namespace game { namespace findpath
 		return m_maxClusterSize;
 	}
 
-	inline const Array2D<HpaMap::Cluster*>& HpaMap::getClusters() const
+	inline const Array2D<HpaCluster*>& HpaMap::getClusters() const
 	{
 		return m_clusters;
 	}

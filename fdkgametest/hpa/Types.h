@@ -7,6 +7,7 @@
 typedef fdkgame::Vector2D<short> CellCoord;
 typedef fdkgame::Vector2D<float> Location;
 typedef fdkgame::Vector2D<float> Velocity;
+typedef fdkgame::Rect<float> BoundingBox;
 
 enum 
 {
