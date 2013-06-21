@@ -15,6 +15,7 @@ class HpaMap
 public:	
 	HpaMap();
 	void draw();
+	bool reloadFromFile(const char* fileName);
 private:
 };
 

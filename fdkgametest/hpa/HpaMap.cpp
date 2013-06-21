@@ -1,4 +1,5 @@
 #include "HpaMap.h"
+#include <fstream>
 #include "Util.h"
 #include "Option.h"
 #include "Board.h"
@@ -84,6 +85,34 @@ void HpaMap::draw()
 				cluster.getClusterCoord().y);			
 		}
 	}
+}
+
+bool HpaMap::reloadFromFile(const char* fileName)
+{
+	std::ifstream ifs(fileName);
+	if (!ifs)
+	{
+		util::output("can't load hpa map from file '%s'", fileName);
+		return false;
+	}
+	g_Board.clearBlocks();
+	size_t width, height;
+	ifs >> width >> height;
+	for (size_t y = 0; y < height; ++y)
+	{
+		for (size_t x = 0; x < width; ++x)
+		{
+			int i;
+			ifs >> i; 
+			if (i)
+			{
+				g_Board.setBlock(CellCoord(x, y), true);
+			}
+		}
+	}
+	g_Board.annotateMap();
+	rebuildAbstract();
+	return true;
 }
 
 Hpa::Hpa(Actor* initiator, fdkgame::findpath::HpaMap& env, int startNodeID, int targetNodeID)
