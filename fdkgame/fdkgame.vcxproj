@@ -21,6 +21,7 @@
     <ClInclude Include="include\fdkgame\NaviBlockMap.h" />
     <ClInclude Include="include\fdkgame\NaviTypes.h" />
     <ClInclude Include="include\fdkgame\NaviTileMap.h" />
+    <ClInclude Include="include\fdkgame\NaviVertexMap.h" />
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="src\Base.cpp" />
@@ -31,6 +32,7 @@
     <ClCompile Include="src\Math.cpp" />
     <ClCompile Include="src\NaviBlockMap.cpp" />
     <ClCompile Include="src\NaviTileMap.cpp" />
+    <ClCompile Include="src\NaviVertexMap.cpp" />
   </ItemGroup>
   <PropertyGroup Label="Globals">
     <ProjectGuid>{70F93995-2B78-4819-8B5F-4C9C902D5392}</ProjectGuid>
