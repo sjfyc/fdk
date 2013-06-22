@@ -10,8 +10,8 @@ namespace fdk { namespace game { namespace navi
 		return a->getMoveCapability() < b->getMoveCapability();
 	}
 
-	MapManager::MapManager(UnitSize minUnitSize, UnitSize maxUnitSize, const std::set<MoveCapability>& moveCapabilities)
-		: m_tileMap(*new TileMap)		
+	MapManager::MapManager(TileMap& tileMap, UnitSize minUnitSize, UnitSize maxUnitSize, const std::set<MoveCapability>& moveCapabilities)
+		: m_tileMap(tileMap)
 	{
 		FDK_ASSERT(minUnitSize >= 1 && maxUnitSize >= minUnitSize);
 	
@@ -41,13 +41,28 @@ namespace fdk { namespace game { namespace navi
 	{
 		for (VertexMaps::iterator it = m_vertexMaps.begin(); it != m_vertexMaps.end(); ++it)
 		{
-			delete it->second;
+			VertexMap* vertexMap = it->second;
+			delete vertexMap;
 		}
 		for (BlockMaps::iterator it = m_blockMaps.begin(); it != m_blockMaps.end(); ++it)
 		{
-			delete *it;
+			BlockMap* blockMap = *it;
+			delete blockMap;
 		}
-		delete &m_tileMap;
+	}
+
+	void MapManager::rebuildAfterTileMapReset()
+	{
+		for (BlockMaps::iterator it = m_blockMaps.begin(); it != m_blockMaps.end(); ++it)
+		{
+			BlockMap* blockMap = *it;
+			blockMap->rebuildFromTileMap();
+		}
+		for (VertexMaps::iterator it = m_vertexMaps.begin(); it != m_vertexMaps.end(); ++it)
+		{
+			VertexMap* vertexMap = it->second;
+			vertexMap->rebuildFromBlockMap();
+		}
 	}
 
 	const VertexMap& MapManager::getVertexMap(int unitSize, int moveCapability) const

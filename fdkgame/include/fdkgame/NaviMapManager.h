@@ -13,10 +13,11 @@ namespace fdk { namespace game { namespace navi
 	class FDKGAME_API MapManager
 	{
 	public:
-		MapManager(UnitSize minUnitSize, UnitSize maxUnitSize, const std::set<MoveCapability>& moveCapabilities);
+		MapManager(TileMap& tileMap, UnitSize minUnitSize, UnitSize maxUnitSize, const std::set<MoveCapability>& moveCapabilities);
 		~MapManager();
 		const VertexMap& getVertexMap(UnitSize unitSize, MoveCapability moveCapability) const;
 		void changeTileType(const CellCoord& cellCoord, TileType tileType);
+		void rebuildAfterTileMapReset();
 	private:
 		struct CmpBlockMap
 		{
