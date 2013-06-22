@@ -8,5 +8,6 @@
     <ClCompile Include="testModule.cpp" />
     <ClCompile Include="testIterator.cpp" />
     <ClCompile Include="testRand.cpp" />
+    <ClCompile Include="testBase.cpp" />
   </ItemGroup>
 </Project>

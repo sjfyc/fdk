@@ -225,6 +225,24 @@ namespace fdk
 		return (value < minValue) ? minValue : ( (value > maxValue) ? maxValue : value );
 	}
 		
+	template <class T, class U>
+	inline void setEnumMask(T& maskValue, U enumValue)
+	{
+		maskValue |= (1<<enumValue);
+	}
+
+	template <class T, class U>
+	inline void clearEnumMask(T& maskValue, U enumValue)
+	{
+		maskValue &= ~(1<<enumValue);
+	}
+
+	template <class T, class U>
+	inline bool hasEnumMask(T maskValue, U enumValue)
+	{
+		return (maskValue & (1<<enumValue) ) ? true : false;
+	}
+
 	FDK_API std::string format(const char* fmt, ...);
 	FDK_API void format(std::string& output, const char* fmt, ...);
 }

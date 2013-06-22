@@ -13,6 +13,7 @@
   <ItemGroup>
     <ClCompile Include="main.cpp" />
     <ClCompile Include="testArray2D.cpp" />
+    <ClCompile Include="testBase.cpp" />
     <ClCompile Include="testIterator.cpp" />
     <ClCompile Include="testMisc.cpp" />
     <ClCompile Include="testModule.cpp" />
