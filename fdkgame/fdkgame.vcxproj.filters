@@ -30,6 +30,15 @@
     <ClInclude Include="include\fdkgame\Graph.h">
       <Filter>include</Filter>
     </ClInclude>
+    <ClInclude Include="include\fdkgame\NaviTileMap.h">
+      <Filter>include</Filter>
+    </ClInclude>
+    <ClInclude Include="include\fdkgame\NaviBlockMap.h">
+      <Filter>include</Filter>
+    </ClInclude>
+    <ClInclude Include="include\fdkgame\NaviTypes.h">
+      <Filter>include</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="src\Base.cpp">
@@ -48,6 +57,12 @@
       <Filter>src</Filter>
     </ClCompile>
     <ClCompile Include="src\FindPathHpa.cpp">
+      <Filter>src</Filter>
+    </ClCompile>
+    <ClCompile Include="src\NaviTileMap.cpp">
+      <Filter>src</Filter>
+    </ClCompile>
+    <ClCompile Include="src\NaviBlockMap.cpp">
       <Filter>src</Filter>
     </ClCompile>
   </ItemGroup>

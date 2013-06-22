@@ -18,6 +18,9 @@
     <ClInclude Include="include\fdkgame\FindPathHpa.h" />
     <ClInclude Include="include\fdkgame\Graph.h" />
     <ClInclude Include="include\fdkgame\Math.h" />
+    <ClInclude Include="include\fdkgame\NaviBlockMap.h" />
+    <ClInclude Include="include\fdkgame\NaviTypes.h" />
+    <ClInclude Include="include\fdkgame\NaviTileMap.h" />
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="src\Base.cpp" />
@@ -26,6 +29,8 @@
     <ClCompile Include="src\FindPathGridMap.cpp" />
     <ClCompile Include="src\FindPathHpa.cpp" />
     <ClCompile Include="src\Math.cpp" />
+    <ClCompile Include="src\NaviBlockMap.cpp" />
+    <ClCompile Include="src\NaviTileMap.cpp" />
   </ItemGroup>
   <PropertyGroup Label="Globals">
     <ProjectGuid>{70F93995-2B78-4819-8B5F-4C9C902D5392}</ProjectGuid>
