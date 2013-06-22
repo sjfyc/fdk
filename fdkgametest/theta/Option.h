@@ -13,11 +13,13 @@ public:
 	{
 		Toggle_ShowCellCoord,
 		Toggle_ShowCellID,
+		Toggle_Brush,
 	};
 	void start();
 	void stop();
 	bool isOn(Toggle tog) const;
 	int getUnitSize() const;
+	TileType getBrush() const; 
 private:
 	Option();
 	~Option();
@@ -26,6 +28,7 @@ private:
 	virtual void onEvent(int eventType, void* params);
 	int m_toggles;
 	int m_unitSize;
+	TileType m_brush;
 };
 
 #define g_Option (Option::instance())

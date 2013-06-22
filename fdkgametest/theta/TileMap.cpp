@@ -28,7 +28,7 @@ void TileMap::draw()
 	{
 		for (short y = 0; y < CELL_COUNT_Y; ++y)
 		{
-			util::fillCell(CellCoord(x, y), getColorOfTile(getTileType(fdkgame::navi::CellCoord(x, y))) );
+			util::fillCell(CellCoord(x, y), getTileColor(getTileType(fdkgame::navi::CellCoord(x, y))) );
 		}
 	}
 }

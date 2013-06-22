@@ -4,6 +4,7 @@
 Option::Option()
 	: m_toggles(0)
 	, m_unitSize(1)
+	, m_brush(Tile_None)
 {
 }
 
@@ -25,6 +26,15 @@ void Option::onEvent(int eventType, void* params)
 		{
 			toggle(Toggle_ShowCellID);
 			util::output("%s cell id", isOn(Toggle_ShowCellID) ? "show" : "hide");
+		}
+		else if (key == HGEK_F1)
+		{
+			++m_brush;
+			if (m_brush >= Tile__Count)
+			{
+				m_brush = Tile_None;
+			}
+			util::output("brush change to %s", getTileName(m_brush));
 		}
 		else if (key == HGEK_ADD)
 		{
@@ -66,6 +76,7 @@ void Option::outputUsage()
 {
 	util::output("1: show/hide cell coord");
 	util::output("2: show/hide cell id");
+	util::output("F1: change brush");
 	util::output("+: increase unit size");
 	util::output("-: decrease unit size");
 }
@@ -85,4 +96,9 @@ void Option::stop()
 int Option::getUnitSize() const
 {
 	return m_unitSize;
+}
+
+TileType Option::getBrush() const
+{
+	return m_brush;
 }

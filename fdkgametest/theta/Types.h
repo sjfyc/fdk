@@ -22,9 +22,10 @@ enum EunmTile
 	Tile_None,
 	Tile_Block,
 	Tile_Water,
+	Tile__Count,
 };
 typedef unsigned char TileType;
-inline DWORD getColorOfTile(TileType tile)
+inline DWORD getTileColor(TileType tile)
 {
 	DWORD colors[] =
 	{
@@ -33,6 +34,17 @@ inline DWORD getColorOfTile(TileType tile)
 		ARGB(255, 0, 128, 255),
 	};
 	return colors[tile];
+}
+
+inline const char* getTileName(TileType tile)
+{
+	const char* names[] =
+	{
+		"none",
+		"block",
+		"water",
+	};
+	return names[tile];
 }
 
 #endif
