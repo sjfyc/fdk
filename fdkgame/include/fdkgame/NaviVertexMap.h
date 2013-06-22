@@ -5,20 +5,19 @@
 
 namespace fdk { namespace game { namespace navi
 {
-	class BlockMap;
-
-	typedef Vector2D<int> VertexCoord;
+	class BlockMap;	
 
 	// 对应某种尺寸单位的顶点地图：每个顶点存储对于该尺寸单位的碰撞数量
 	class FDKGAME_API VertexMap
 	{
 	public:
-		VertexMap(int unitSize);
+		VertexMap(BlockMap& blockMap, UnitSize unitSize);
 		~VertexMap();
-		void rebuildFromBlockMap(const BlockMap& blockMap);
+		void rebuildFromBlockMap();
 		void onSetBlock(const CellCoord& cellCoord, bool bSet);
 	private:
-		int m_unitSize;
+		BlockMap& m_blockMap;			
+		UnitSize m_unitSize;
 		Array2D<int> m_data;
 	};
 }}}

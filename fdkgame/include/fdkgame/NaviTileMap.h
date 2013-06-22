@@ -5,8 +5,6 @@
 
 namespace fdk { namespace game { namespace navi
 {
-	typedef unsigned char TileType;
-
 	// 格子地图：每个格子只存储地形信息
 	class FDKGAME_API TileMap
 	{

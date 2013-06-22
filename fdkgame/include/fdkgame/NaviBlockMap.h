@@ -10,17 +10,18 @@ namespace fdk { namespace game { namespace navi
 	// 对应某一种移动能力的障碍地图：每个格子只存储是否为障碍
 	class FDKGAME_API BlockMap
 	{
+		friend class MapManager;
 	public:
-		BlockMap(int moveCapability);
+		BlockMap(TileMap& tileMap, MoveCapability moveCapability);
 		~BlockMap();
-		void rebuildFromTileMap(const TileMap& tileMap);	
-		
+		void rebuildFromTileMap();		
 		size_t getSizeX() const;
 		size_t getSizeY() const;
-
+		MoveCapability getMoveCapability() const;
 		bool isBlock(const CellCoord& cellCoord) const;
 	private:
-		int m_moveCapability;
+		TileMap& m_tileMap;
+		MoveCapability m_moveCapability;
 		Array2D<bool> m_data;
 	};
 }}}

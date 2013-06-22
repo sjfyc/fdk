@@ -42,6 +42,9 @@
     <ClInclude Include="include\fdkgame\NaviVertexMap.h">
       <Filter>include</Filter>
     </ClInclude>
+    <ClInclude Include="include\fdkgame\NaviMapManager.h">
+      <Filter>include</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="src\Base.cpp">
@@ -69,6 +72,9 @@
       <Filter>src</Filter>
     </ClCompile>
     <ClCompile Include="src\NaviVertexMap.cpp">
+      <Filter>src</Filter>
+    </ClCompile>
+    <ClCompile Include="src\NaviMapManager.cpp">
       <Filter>src</Filter>
     </ClCompile>
   </ItemGroup>

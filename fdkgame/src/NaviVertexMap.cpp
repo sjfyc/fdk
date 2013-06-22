@@ -3,8 +3,9 @@
 
 namespace fdk { namespace game { namespace navi
 {
-	VertexMap::VertexMap(int unitSize)
-		: m_unitSize(unitSize)
+	VertexMap::VertexMap(BlockMap& blockMap, UnitSize unitSize)
+		: m_blockMap(blockMap)
+		, m_unitSize(unitSize)
 	{
 		FDK_ASSERT(unitSize >= 1);
 	}
@@ -13,15 +14,15 @@ namespace fdk { namespace game { namespace navi
 	{
 	}
 
-	void VertexMap::rebuildFromBlockMap(const BlockMap& blockMap)
+	void VertexMap::rebuildFromBlockMap()
 	{
-		m_data.reset(blockMap.getSizeX()*2-1, blockMap.getSizeY()*2-1);
-		for (int y = 0; y < (int)blockMap.getSizeY(); ++y)
+		m_data.reset(m_blockMap.getSizeX()*2-1, m_blockMap.getSizeY()*2-1);
+		for (int y = 0; y < (int)m_blockMap.getSizeY(); ++y)
 		{
-			for (int x = 0; x < (int)blockMap.getSizeX(); ++x)
+			for (int x = 0; x < (int)m_blockMap.getSizeX(); ++x)
 			{
 				CellCoord cellCoord = CellCoord(x, y);
-				if (blockMap.isBlock(cellCoord))
+				if (m_blockMap.isBlock(cellCoord))
 				{
 					onSetBlock(cellCoord, true);
 				}
@@ -31,9 +32,9 @@ namespace fdk { namespace game { namespace navi
 
 	void VertexMap::onSetBlock(const CellCoord& cellCoord, bool bSet)
 	{
-		for (int y = -m_unitSize; y <= m_unitSize; ++y)
+		for (UnitSize y = -m_unitSize; y <= m_unitSize; ++y)
 		{
-			for (int x = -m_unitSize; x <= m_unitSize; ++x)
+			for (UnitSize x = -m_unitSize; x <= m_unitSize; ++x)
 			{				
 				VertexCoord vertexCoord(cellCoord.x*2+x, cellCoord.y*2+y);
 				if (m_data.is_valid_index(vertexCoord.x, vertexCoord.y))
