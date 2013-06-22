@@ -171,10 +171,15 @@ namespace fdk
 		static T& instance() 
 		{
 			static T inst;
+			m_instance = &inst;
 			return inst;
 		}
+	private:
+		static T* m_instance;
 	};
-	
+	template <class T>
+	T* Singleton<T>::m_instance = 0;
+
 	template <class T>
 	T& constCast(const T& value)
 	{

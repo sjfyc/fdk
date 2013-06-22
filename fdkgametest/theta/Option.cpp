@@ -3,9 +3,11 @@
 
 Option::Option()
 	: m_toggles(0)
+	, m_moveCapability(0)
 	, m_unitSize(1)
 	, m_brush(Tile_Block)
 {
+	fdk::setEnumMask(m_moveCapability, Tile_None);
 }
 
 Option::~Option()
@@ -35,6 +37,28 @@ void Option::onEvent(int eventType, void* params)
 				m_brush = Tile_None;
 			}
 			util::output("brush change to %s", getTileName(m_brush));
+		}
+		else if (key == HGEK_F1)
+		{
+			++m_brush;
+			if (m_brush >= Tile__Count)
+			{
+				m_brush = Tile_None;
+			}
+			util::output("brush change to %s", getTileName(m_brush));
+		}
+		else if (key == HGEK_F2)
+		{			
+			if (fdk::hasEnumMask(m_moveCapability, Tile_Water))
+			{
+				fdk::clearEnumMask(m_moveCapability, Tile_Water);
+				util::output("can't move to water");
+			}
+			else
+			{
+				fdk::setEnumMask(m_moveCapability, Tile_Water);
+				util::output("can move to water");
+			}
 		}
 		else if (key == HGEK_ADD)
 		{
@@ -77,6 +101,7 @@ void Option::outputUsage()
 	util::output("1: show/hide cell coord");
 	util::output("2: show/hide cell id");
 	util::output("F1: change brush");
+	util::output("F2: change move capability");
 	util::output("+: increase unit size");
 	util::output("-: decrease unit size");
 }
@@ -91,6 +116,11 @@ void Option::start()
 void Option::stop()
 {
 	fdk::EventHook::unregist();
+}
+
+int Option::getMoveCapability() const
+{
+	return m_moveCapability;
 }
 
 int Option::getUnitSize() const

@@ -4,6 +4,7 @@
 #include "Util.h"
 #include "Option.h"
 #include "TileMap.h"
+#include "MapManager.h"
 #include "ActorBank.h"
 
 Game::Game()
@@ -51,8 +52,10 @@ void Game::update(float delta)
 void Game::render()
 {
 	g_TileMap.draw();
-	g_TileMap.drawCellInfo();
+	g_MapManager.draw();
+		
 	m_mode->render(*this);	
+	g_TileMap.drawCellInfo();
 }
 
 void Game::onEvent(int eventType, void* params)
@@ -129,6 +132,7 @@ void GameModeMapEdit::enter(Game& game)
 
 void GameModeMapEdit::leave(Game& game)
 {
+	g_MapManager.rebuildAfterTileMapReset();
 }
 
 void GameModeMapEdit::handleEvent(Game& game, int eventType, void* params)

@@ -13,9 +13,11 @@ namespace fdk { namespace game { namespace navi
 	class FDKGAME_API MapManager
 	{
 	public:
-		MapManager(TileMap& tileMap, UnitSize minUnitSize, UnitSize maxUnitSize, const std::set<MoveCapability>& moveCapabilities);
+		MapManager(TileMap& tileMap, 
+			const std::set<MoveCapability>& moveCapabilities, 
+			UnitSize minUnitSize, UnitSize maxUnitSize);
 		~MapManager();
-		const VertexMap& getVertexMap(UnitSize unitSize, MoveCapability moveCapability) const;
+		const VertexMap& getVertexMap(MoveCapability moveCapability, UnitSize unitSize) const;
 		void changeTileType(const CellCoord& cellCoord, TileType tileType);
 		void rebuildAfterTileMapReset();
 	private:
@@ -26,7 +28,7 @@ namespace fdk { namespace game { namespace navi
 		typedef std::set<BlockMap*, CmpBlockMap> BlockMaps;
 		typedef std::pair<MoveCapability, UnitSize> VertexMapType;
 		typedef std::map<VertexMapType, VertexMap*> VertexMaps;		
-		const VertexMap* findVertexMap(UnitSize unitSize, MoveCapability moveCapability) const;
+		const VertexMap* findVertexMap(MoveCapability moveCapability, UnitSize unitSize) const;
 		TileMap& m_tileMap;
 		BlockMaps m_blockMaps; // key by unit size
 		VertexMaps m_vertexMaps;

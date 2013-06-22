@@ -10,11 +10,11 @@ typedef fdkgame::Rect<float> BoundingBox;
 
 enum 
 {
-	CELL_COUNT_X = 26,
+	CELL_COUNT_X = 40,
 	CELL_COUNT_Y = 20,
 
-	CELL_SIZE_X = 20,
-	CELL_SIZE_Y = 20,
+	CELL_SIZE_X = 30,
+	CELL_SIZE_Y = 30,
 };
 
 enum EunmTile

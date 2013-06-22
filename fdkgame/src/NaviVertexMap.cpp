@@ -14,6 +14,16 @@ namespace fdk { namespace game { namespace navi
 	{
 	}
 
+	size_t VertexMap::getSizeX() const
+	{
+		return m_data.size_x();
+	}
+
+	size_t VertexMap::getSizeY() const
+	{
+		return m_data.size_y();
+	}
+
 	void VertexMap::rebuildFromBlockMap()
 	{
 		m_data.reset(m_blockMap.getSizeX()*2-1, m_blockMap.getSizeY()*2-1);
@@ -45,4 +55,10 @@ namespace fdk { namespace game { namespace navi
 			}
 		}		
 	}
+
+	int VertexMap::getBlockValue(const CellCoord& cellCoord) const
+	{
+		return m_data(cellCoord.x, cellCoord.y);
+	}
+
 }}}

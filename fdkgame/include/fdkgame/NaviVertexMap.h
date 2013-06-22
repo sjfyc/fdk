@@ -12,9 +12,12 @@ namespace fdk { namespace game { namespace navi
 	{
 	public:
 		VertexMap(BlockMap& blockMap, UnitSize unitSize);
-		~VertexMap();
-		void rebuildFromBlockMap();
+		~VertexMap();		
+		void rebuildFromBlockMap();		
 		void onSetBlock(const CellCoord& cellCoord, bool bSet);
+		size_t getSizeX() const;
+		size_t getSizeY() const;
+		int getBlockValue(const CellCoord& cellCoord) const;
 	private:
 		BlockMap& m_blockMap;			
 		UnitSize m_unitSize;

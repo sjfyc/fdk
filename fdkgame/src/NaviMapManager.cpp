@@ -10,7 +10,7 @@ namespace fdk { namespace game { namespace navi
 		return a->getMoveCapability() < b->getMoveCapability();
 	}
 
-	MapManager::MapManager(TileMap& tileMap, UnitSize minUnitSize, UnitSize maxUnitSize, const std::set<MoveCapability>& moveCapabilities)
+	MapManager::MapManager(TileMap& tileMap, const std::set<MoveCapability>& moveCapabilities, UnitSize minUnitSize, UnitSize maxUnitSize)
 		: m_tileMap(tileMap)
 	{
 		FDK_ASSERT(minUnitSize >= 1 && maxUnitSize >= minUnitSize);
@@ -65,14 +65,14 @@ namespace fdk { namespace game { namespace navi
 		}
 	}
 
-	const VertexMap& MapManager::getVertexMap(int unitSize, int moveCapability) const
+	const VertexMap& MapManager::getVertexMap(MoveCapability moveCapability, UnitSize unitSize) const
 	{
-		return *findVertexMap(unitSize, moveCapability);
+		return *findVertexMap(moveCapability, unitSize);
 	}
 
-	const VertexMap* MapManager::findVertexMap(int unitSize, int moveCapability) const
+	const VertexMap* MapManager::findVertexMap(MoveCapability moveCapability, UnitSize unitSize) const
 	{
-		VertexMaps::const_iterator it = m_vertexMaps.find(std::make_pair(unitSize, moveCapability) );
+		VertexMaps::const_iterator it = m_vertexMaps.find(std::make_pair(moveCapability, unitSize) );
 		if (it == m_vertexMaps.end())
 		{
 			return 0;

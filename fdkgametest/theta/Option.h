@@ -18,6 +18,7 @@ public:
 	void start();
 	void stop();
 	bool isOn(Toggle tog) const;
+	int getMoveCapability() const;
 	int getUnitSize() const;
 	TileType getBrush() const; 
 private:
@@ -27,7 +28,8 @@ private:
 	void toggle(Toggle tog);	
 	virtual void onEvent(int eventType, void* params);
 	int m_toggles;
-	int m_unitSize;
+	int m_moveCapability;
+	int m_unitSize;	
 	TileType m_brush;
 };
 
