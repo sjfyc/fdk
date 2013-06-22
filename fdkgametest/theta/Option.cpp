@@ -4,7 +4,7 @@
 Option::Option()
 	: m_toggles(0)
 	, m_unitSize(1)
-	, m_brush(Tile_None)
+	, m_brush(Tile_Block)
 {
 }
 

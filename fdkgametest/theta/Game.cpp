@@ -4,6 +4,7 @@
 #include "Util.h"
 #include "Option.h"
 #include "TileMap.h"
+#include "ActorBank.h"
 
 Game::Game()
 	: m_mode(&g_GameModeGame)
@@ -51,7 +52,7 @@ void Game::render()
 {
 	g_TileMap.draw();
 	g_TileMap.drawCellInfo();
-	m_mode->render(*this);
+	m_mode->render(*this);	
 }
 
 void Game::onEvent(int eventType, void* params)
@@ -88,10 +89,15 @@ void Game::toggleMode()
 
 void Game::outputUsage()
 {
-	//util::output("T: toggle between game & map edit mode");
-	//util::output("C: clear obstacles in map edit mode");
+	util::output("T: toggle between game & map edit mode");
+	util::output("C: clear obstacles in map edit mode");
 	//util::output("SPACE: restart/continue path finding");
 	//util::output("S: restart/continue path finding step by step");
+}
+
+bool Game::isInGameMode() const
+{
+	return m_mode == &g_GameModeGame;
 }
 
 GameModeGame::GameModeGame()
@@ -104,6 +110,7 @@ void GameModeGame::update(Game& game, float delta)
 
 void GameModeGame::render(Game& game)
 {
+	g_ActorBank.draw();
 }
 
 void GameModeGame::handleEvent(Game& game, int eventType, void* params)
@@ -150,7 +157,7 @@ void GameModeMapEdit::handleEvent(Game& game, int eventType, void* params)
 		}
 		else if (key == HGEK_C)
 		{
-			//g_Board.clearBlocks();
+			g_TileMap.reset(g_TileMap.getSizeX(), g_TileMap.getSizeY(), Tile_None);
 		}
 	}
 }
@@ -172,42 +179,4 @@ void GameModeMapEdit::update(Game& game, float delta)
 	m_lastMouseCoord = mouseCoord;
 
 	g_TileMap.setTileType(mouseCoord, g_Option.getBrush());
-	//if (m_brush == Brush_Block)
-	//{
-	//	if (mouseCoord == game.m_startCoord || mouseCoord == game.m_targetCoord || g_Board.isBlock(mouseCoord) )
-	//	{
-	//		return;
-	//	}
-	//	else
-	//	{
-	//		g_Board.setBlock(mouseCoord, true);
-	//	}
-	//}
-	//else if (m_brush == Brush_Erase)
-	//{
-	//	if (mouseCoord == game.m_startCoord || mouseCoord == game.m_targetCoord || !g_Board.isBlock(mouseCoord) )
-	//	{
-	//		return;
-	//	}
-	//	else
-	//	{
-	//		g_Board.setBlock(mouseCoord, false);
-	//	}
-	//}
-	//else if (m_brush == Brush_Start)
-	//{
-	//	if (mouseCoord == game.m_targetCoord)
-	//	{
-	//		return;
-	//	}
-	//	game.m_startCoord = mouseCoord;
-	//}
-	//else if (m_brush == Brush_Target)
-	//{
-	//	if (mouseCoord == game.m_startCoord)
-	//	{
-	//		return;
-	//	}
-	//	game.m_targetCoord = mouseCoord;
-	//}
 }

@@ -16,7 +16,8 @@ public:
 	void stop();
 	void update(float delta);
 	void render();
-	bool IsRunning;
+	bool isInGameMode() const;
+	bool IsRunning;	
 private:
 	Game();
 	~Game();
@@ -59,18 +60,10 @@ public:
 	virtual void leave(Game& game);
 	virtual void update(Game& game, float delta);
 	virtual void handleEvent(Game& game, int eventType, void* params);
-private:	
-	enum EBrush
-	{
-		Brush_Block,
-		Brush_Erase,		
-		Brush_Start,
-		Brush_Target,		
-	};
+private:
 	GameModeMapEdit();
 	bool m_bMouseTracking;
 	CellCoord m_lastMouseCoord;
-	EBrush m_brush;
 };
 
 #define g_Game (Game::instance())
