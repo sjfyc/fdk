@@ -9,10 +9,11 @@ namespace fdk
 	template <class T, class AllocatorT=std::allocator<T> >
 	class Array2D
 	{
-	public:
+	public:		
 		typedef AllocatorT allocator_type;
 		typedef typename AllocatorT::size_type size_type;
 		typedef T value_type;
+		static const size_type INVALID_INDEX = -1;
 		Array2D();
 		Array2D(size_type sizeX, size_type sizeY);
 		Array2D(size_type sizeX, size_type sizeY, const T& value);
@@ -30,6 +31,9 @@ namespace fdk
 		size_type size_y() const;
 		T* raw_data() const;
 		bool is_valid_index(size_type x, size_type y) const;
+		bool is_valid_index(size_type index) const;
+		size_type to_index(size_type x, size_type y) const;
+		void to_index(size_t index, size_type& x, size_type& y) const;
 	private:
 		AllocatorT m_allocator;
 		size_type m_sizeX;
@@ -203,6 +207,35 @@ namespace fdk
 	inline bool Array2D<T, AllocatorT>::is_valid_index(size_type x, size_type y) const
 	{
 		return x >= 0 && x < m_sizeX && y >= 0 && y < m_sizeY;
+	}
+
+	template <class T, class AllocatorT>
+	inline bool Array2D<T, AllocatorT>::is_valid_index(size_type index) const
+	{
+		return index >= 0 && index < count();
+	}
+
+	template <class T, class AllocatorT>
+	inline typename Array2D<T, AllocatorT>::size_type Array2D<T, AllocatorT>::to_index(size_type x, size_type y) const
+	{
+		if (!is_valid_index(x, y))
+		{
+			return INVALID_INDEX;
+		}
+		return y * size_x() + x;
+	}
+
+	template <class T, class AllocatorT>
+	inline void Array2D<T, AllocatorT>::to_index(size_t index, size_type& x, size_type& y) const
+	{
+		if (!is_valid_index(index))
+		{
+			x = INVALID_INDEX;
+			y = INVALID_INDEX;
+			return;
+		}
+		x = index % size_x();
+		y = index / size_x();
 	}
 }
 
