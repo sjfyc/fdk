@@ -32,7 +32,7 @@ namespace fdk
 		bool is_valid_index(size_type x, size_type y) const;
 		bool is_valid_index(size_type index) const;
 		size_type to_index(size_type x, size_type y) const;
-		void to_index(size_t index, size_type& x, size_type& y) const;
+		void to_index(size_type index, size_type& x, size_type& y) const;
 	private:
 		AllocatorT m_allocator;
 		size_type m_sizeX;
@@ -222,7 +222,7 @@ namespace fdk
 	}
 
 	template <class T, class AllocatorT>
-	inline void Array2D<T, AllocatorT>::to_index(size_t index, size_type& x, size_type& y) const
+	inline void Array2D<T, AllocatorT>::to_index(size_type index, size_type& x, size_type& y) const
 	{
 		FDK_ASSERT(is_valid_index(index));
 		x = index % size_x();
