@@ -13,6 +13,7 @@ public:
 	{
 		Toggle_ShowCellCoord,
 		Toggle_ShowCellID,
+		Toggle_ShowVertex,
 		Toggle_Brush,
 	};
 	void start();

@@ -87,8 +87,8 @@ namespace fdk { namespace game { namespace navi
 				}
 			}
 		}		
-	}	
-		
+	}
+
 	int VertexMap::getNodeSpaceSize() const
 	{
 		return m_data.count();

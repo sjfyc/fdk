@@ -34,6 +34,7 @@
     <ClCompile Include="src\FindPathHpa.cpp" />
     <ClCompile Include="src\Math.cpp" />
     <ClCompile Include="src\NaviAStar.cpp" />
+    <ClCompile Include="src\NaviBase.cpp" />
     <ClCompile Include="src\NaviBlockMap.cpp" />
     <ClCompile Include="src\NaviMapManager.cpp" />
     <ClCompile Include="src\NaviTileMap.cpp" />

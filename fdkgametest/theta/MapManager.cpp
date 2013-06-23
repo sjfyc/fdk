@@ -35,18 +35,21 @@ MapManager::~MapManager()
 
 void MapManager::draw()
 {
-	const fdkgame::navi::VertexMap& vertexMap = getVertexMap(g_Option.getMoveCapability(), g_Option.getUnitSize());
-	for (size_t y = 0; y < vertexMap.getSizeY(); ++y)
+	if (g_Option.isOn(Option::Toggle_ShowVertex))
 	{
-		for (size_t x = 0; x < vertexMap.getSizeX(); ++x)
+		const fdkgame::navi::VertexMap& vertexMap = getVertexMap(g_Option.getMoveCapability(), g_Option.getUnitSize());
+		for (size_t y = 0; y < vertexMap.getSizeY(); ++y)
 		{
-			g_HGE.FrameRect(
-				(x+1)*CELL_SIZE_X/2-2, 
-				(y+1)*CELL_SIZE_Y/2-2, 
-				(x+1)*CELL_SIZE_X/2+2, 
-				(y+1)*CELL_SIZE_Y/2+2, 
-				(vertexMap.getBlockValue(CellCoord(x, y)) > 0) ? ARGB(255, 226, 98, 29) : MyColor_Green
-				);
+			for (size_t x = 0; x < vertexMap.getSizeX(); ++x)
+			{
+				g_HGE.FrameRect(
+					(x+1)*CELL_SIZE_X/2-2, 
+					(y+1)*CELL_SIZE_Y/2-2, 
+					(x+1)*CELL_SIZE_X/2+2, 
+					(y+1)*CELL_SIZE_Y/2+2, 
+					(vertexMap.getBlockValue(CellCoord(x, y)) > 0) ? ARGB(255, 226, 98, 29) : MyColor_Green
+					);
+			}
 		}
-	}
+	}	
 }

@@ -29,6 +29,11 @@ void Option::onEvent(int eventType, void* params)
 			toggle(Toggle_ShowCellID);
 			util::output("%s cell id", isOn(Toggle_ShowCellID) ? "show" : "hide");
 		}
+		else if (key == HGEK_3)
+		{
+			toggle(Toggle_ShowVertex);
+			util::output("%s vertex", isOn(Toggle_ShowVertex) ? "show" : "hide");
+		}	
 		else if (key == HGEK_F1)
 		{
 			++m_brush;
@@ -100,6 +105,7 @@ void Option::outputUsage()
 {
 	util::output("1: show/hide cell coord");
 	util::output("2: show/hide cell id");
+	util::output("3: show/hide vertex");
 	util::output("F1: change brush");
 	util::output("F2: change move capability");
 	util::output("+: increase unit size");
