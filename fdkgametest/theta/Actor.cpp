@@ -82,10 +82,9 @@ void Actor::tickMove(float delta)
 		hasReached = true;
 	}
 
-	Location radiusOffset(m_radius, m_radius);
 	CellRange nextCellRange = util::locationRangeToCellRange(
-		LocationRange( nextLocation-radiusOffset
-			, nextLocation+radiusOffset )
+		LocationRange( nextLocation-Location( (m_unitSize*CELL_SIZE_X-1)/2, (m_unitSize*CELL_SIZE_Y-1)/2 ), 
+		nextLocation+Location( (m_unitSize*CELL_SIZE_X)/2, (m_unitSize*CELL_SIZE_Y)/2 ) )
 		);
 	
 	const fdkgame::navi::BlockMap& blockMap = g_MapManager.getBlockMap(m_moveCapability);

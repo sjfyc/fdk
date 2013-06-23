@@ -15,6 +15,7 @@ namespace fdk { namespace game { namespace navi
 		, m_recorder(0)
 	{
 		FDK_ASSERT(m_env.isValidNodeID(targetNodeID));
+		FDK_ASSERT(!startNodeIDs.empty());
 		FDK_ASSERT(startNodeIDs.find(targetNodeID) == startNodeIDs.end());
 
 		const int nodeCount = m_env.getNodeSpaceSize();

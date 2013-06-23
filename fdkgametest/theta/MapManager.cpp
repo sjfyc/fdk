@@ -48,7 +48,7 @@ void MapManager::draw()
 					location.y-2, 
 					location.x+2, 
 					location.y+2, 
-					(vertexMap.getBlockValue(VertexCoord(x, y)) > 0) ? ARGB(255, 226, 98, 29) : MyColor_Green
+					(vertexMap.getBlockValue(VertexCoord(x, y)) > 0) ? ARGB(255, 226, 98, 29) : ARGB(255, 131, 164, 108)
 					);
 			}
 		}

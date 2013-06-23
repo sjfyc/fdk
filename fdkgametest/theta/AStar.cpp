@@ -11,24 +11,38 @@ AStar::AStar(Actor& actor, const Location& targetLocation)
 	, m_navigator(0)
 	, m_needSearch(true)
 {
-	const Location& startLocation = actor.getLocation();
-	m_locationPath.push_back(targetLocation);	
+	util::output("start path finding..");
+
+	const Location& startLocation = actor.getLocation();		
 	
 	const VertexCoord& startVertexCoord = util::locationToVertexCoord(startLocation);
 	const VertexCoord& targetVertexCoord = util::locationToVertexCoord(targetLocation);
 	
 	const fdkgame::navi::VertexMap& vertexMap = g_MapManager.getVertexMap(actor.getMoveCapability(), actor.getUnitSize());
-	int targetVertexID = vertexMap.toVertexID(targetVertexCoord);
+	
 
 	std::set<int> startVertexIDs;
-	VertexCoord  startRightVertexCoord = startVertexCoord + VertexCoord(1, 0);
-	VertexCoord  startBottomVertexCoord = startVertexCoord + VertexCoord(0, 1);
-	VertexCoord  startBottomRightVertexCoord = startVertexCoord + VertexCoord(1, 1);
+	for (int yOffSet = 0; yOffSet <= 0; ++yOffSet)
+	{
+		for (int xOffSet = 0; xOffSet <= 0; ++xOffSet)
+		{
+			VertexCoord v = startVertexCoord+VertexCoord(xOffSet, yOffSet);
+			if (!vertexMap.isValidVertexCoord(v) || vertexMap.isBlock(v))
+			{
+				continue;
+			}
+			startVertexIDs.insert(vertexMap.toVertexID(v));
+		}
+	}	
+	if (startVertexIDs.empty())
+	{
+		m_needSearch = false;
+		return;
+	}
 	
-	startVertexIDs.insert(vertexMap.toVertexID(startRightVertexCoord));
-	startVertexIDs.insert(vertexMap.toVertexID(startBottomVertexCoord));
-	startVertexIDs.insert(vertexMap.toVertexID(startBottomRightVertexCoord));
+	m_locationPath.push_back(targetLocation);
 	
+	const int targetVertexID = vertexMap.toVertexID(targetVertexCoord);
 	if (startVertexIDs.find(targetVertexID) != startVertexIDs.end())
 	{
 		m_needSearch = false;
@@ -46,7 +60,7 @@ AStar::~AStar()
 void AStar::render()
 {
 	// 绘制路径
-	if (hasNextPathLocation())
+	if (!m_locationPath.empty())
 	{
 		Location prevLocation = m_actor.getLocation();
 		for (int i = (int)m_locationPath.size()-1; i >= 0; --i)
@@ -60,10 +74,23 @@ void AStar::render()
 			prevLocation = currentCenterLocation;
 		}
 	}
+	// 绘制路径上的顶点
+	for (size_t i = 0; i < m_vertexCoordPath.size(); ++i)
+	{
+		const VertexCoord& vertexCoord = m_vertexCoordPath[i];
+		Location location = util::vertexCoordToLocation(vertexCoord);
+		g_HGE.FrameRect(
+			location.x-2, 
+			location.y-2, 
+			location.x+2, 
+			location.y+2, 
+			ARGB(255, 95, 26, 223)
+			);
+	}
 }
 
 bool AStar::search()
-{
+{	
 	if (!m_needSearch)
 	{
 		return true;
@@ -81,7 +108,7 @@ bool AStar::search()
 	{
 		VertexCoord vertexCoord = vertexMap.toVertexCoord(path[i]);
 		m_vertexCoordPath.push_back(vertexCoord);
-		if (i > 0)
+		if (i >= 0)
 		{
 			Location location = util::vertexCoordToLocation(vertexCoord);
 			m_locationPath.push_back(location);

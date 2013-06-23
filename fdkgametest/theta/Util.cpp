@@ -57,16 +57,16 @@ namespace util
 	VertexCoord locationToVertexCoord(const Location& location)
 	{
 		return VertexCoord(
-			static_cast<CellCoord::ValueType>( (location.x-HALF_CELL_SIZE_X)/HALF_CELL_SIZE_X ), 
-			static_cast<CellCoord::ValueType>( (location.y-HALF_CELL_SIZE_Y)/HALF_CELL_SIZE_Y )
+			static_cast<CellCoord::ValueType>( (location.x-HALF_CELL_SIZE_X+1)/HALF_CELL_SIZE_X ), 
+			static_cast<CellCoord::ValueType>( (location.y-HALF_CELL_SIZE_Y+1)/HALF_CELL_SIZE_Y )
 			);
 	}
 
 	Location vertexCoordToLocation(const VertexCoord& vertexCoord)
 	{
 		return Location(
-			static_cast<Location::ValueType>(vertexCoord.x+1)*HALF_CELL_SIZE_X, 
-			static_cast<Location::ValueType>(vertexCoord.y+1)*HALF_CELL_SIZE_Y
+			static_cast<Location::ValueType>(vertexCoord.x+1)*HALF_CELL_SIZE_X-1, 
+			static_cast<Location::ValueType>(vertexCoord.y+1)*HALF_CELL_SIZE_Y-1
 			);
 	}
 }
