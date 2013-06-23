@@ -48,6 +48,7 @@ public:
 	virtual void handleEvent(Game& game, int eventType, void* params);	
 private:
 	GameModeGame();
+	bool m_canDynamicChangeTile;
 };
 
 class GameModeMapEdit

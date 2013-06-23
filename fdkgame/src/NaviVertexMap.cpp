@@ -40,7 +40,7 @@ namespace fdk { namespace game { namespace navi
 		return m_data.size_y();
 	}
 
-	VertexID VertexMap::toVertexID(const VertexCoord vertexCoord) const
+	VertexID VertexMap::toVertexID(const VertexCoord& vertexCoord) const
 	{
 		FDK_ASSERT(isValidVertexCoord(vertexCoord));
 		return m_data.to_index(vertexCoord.x, vertexCoord.y);
@@ -59,19 +59,19 @@ namespace fdk { namespace game { namespace navi
 		return vertexID >= 0 && m_data.is_valid_index(vertexID);	
 	}
 	
-	bool VertexMap::isValidVertexCoord(const VertexCoord vertexCoord) const
+	bool VertexMap::isValidVertexCoord(const VertexCoord& vertexCoord) const
 	{
 		return vertexCoord.x >= 0 && vertexCoord.y >= 0 && m_data.is_valid_index(vertexCoord.x, vertexCoord.y);
 	}
 
-	int VertexMap::getBlockValue(const CellCoord& cellCoord) const
+	int VertexMap::getBlockValue(const VertexCoord& vertexCoord) const
 	{
-		return m_data(cellCoord.x, cellCoord.y);
+		return m_data(vertexCoord.x, vertexCoord.y);
 	}
 	
-	bool VertexMap::isBlock(const CellCoord& cellCoord) const
+	bool VertexMap::isBlock(const VertexCoord& vertexCoord) const
 	{
-		return getBlockValue(cellCoord) > 0;
+		return getBlockValue(vertexCoord) > 0;
 	}
 
 	void VertexMap::onSetBlock(const CellCoord& cellCoord, bool bSet)
@@ -134,7 +134,7 @@ namespace fdk { namespace game { namespace navi
 		{
 			return false;
 		}
-		if (!isBlock(vertexCoord))
+		if (isBlock(vertexCoord))
 		{
 			return false;
 		}

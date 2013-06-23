@@ -37,4 +37,36 @@ namespace util
 			static_cast<Location::ValueType>(cellCoord.y)*CELL_SIZE_Y
 			);
 	}
+
+	CellRange locationRangeToCellRange(const LocationRange& locationRange)
+	{
+		return CellRange(
+			locationToCellCoord(locationRange.topLeft),
+			locationToCellCoord(locationRange.bottomRight)
+			);
+	}
+
+	LocationRange cellRangeToLocationRange(const CellRange& cellRange)
+	{
+		return LocationRange(
+			cellCoordToLocation(cellRange.topLeft),
+			cellCoordToLocation(cellRange.bottomRight)
+			);
+	}
+
+	VertexCoord locationToVertexCoord(const Location& location)
+	{
+		return VertexCoord(
+			static_cast<CellCoord::ValueType>( (location.x-HALF_CELL_SIZE_X)/HALF_CELL_SIZE_X ), 
+			static_cast<CellCoord::ValueType>( (location.y-HALF_CELL_SIZE_Y)/HALF_CELL_SIZE_Y )
+			);
+	}
+
+	Location vertexCoordToLocation(const VertexCoord& vertexCoord)
+	{
+		return Location(
+			static_cast<Location::ValueType>(vertexCoord.x+1)*HALF_CELL_SIZE_X, 
+			static_cast<Location::ValueType>(vertexCoord.y+1)*HALF_CELL_SIZE_Y
+			);
+	}
 }

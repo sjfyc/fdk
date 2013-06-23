@@ -47,7 +47,7 @@ namespace fdk { namespace game { namespace navi
 			m_nodeStates[current.nodeID] = NodeState_Closed;
 			if (m_recorder)
 			{
-				m_recorder->onCloseNode(current.nodeID);
+				m_recorder->onCloseNode(m_env, current.nodeID);
 			}
 
 			if (current.nodeID == m_targetNodeID)
@@ -91,7 +91,7 @@ namespace fdk { namespace game { namespace navi
 				m_openList.insert(openListItem);
 				if (m_recorder)
 				{
-					m_recorder->onOpenNode(nodeID, parentNodeID, false);
+					m_recorder->onOpenNode(m_env, nodeID, parentNodeID, false);
 				}
 			}			
 			break;
@@ -104,7 +104,7 @@ namespace fdk { namespace game { namespace navi
 				m_openList.insert(openListItem); // 不需要删除旧项，新项必将被先从Open变Close，而旧项由于Close将被跳过
 				if (m_recorder)
 				{
-					m_recorder->onOpenNode(nodeID, parentNodeID, true);
+					m_recorder->onOpenNode(m_env, nodeID, parentNodeID, true);
 				}
 			}
 			break;

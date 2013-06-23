@@ -9,8 +9,8 @@ namespace fdk { namespace game { namespace navi
 	{
 	public:
 		virtual ~AStarRecorder() {}
-		virtual void onOpenNode(int nodeID, int parentNodeID, bool bReopen) = 0;
-		virtual void onCloseNode(int nodeID) = 0;
+		virtual void onOpenNode(const Environment& env, int nodeID, int parentNodeID, bool bReopen) = 0;
+		virtual void onCloseNode(const Environment& env, int nodeID) = 0;
 	};
 
 	class FDKGAME_API AStar
@@ -29,6 +29,9 @@ namespace fdk { namespace game { namespace navi
 		SearchResult getSearchResult() const;
 		const std::vector<int>& getPath() const;
 		int getPathCost() const;
+		const Environment& getEnvironment() const;
+		int getStartNodeID() const;
+		int getTargetNodeID() const;
 		AStarRecorder* setRecorder(AStarRecorder* recorder);
 	private:
 		enum NodeStateEnum
@@ -89,6 +92,21 @@ namespace fdk { namespace game { namespace navi
 	inline int AStar::getPathCost() const
 	{
 		return m_pathCost;
+	}
+
+	inline const Environment& AStar::getEnvironment() const
+	{
+		return m_env;
+	}
+
+	inline int AStar::getStartNodeID() const
+	{
+		return m_startNodeID;
+	}
+
+	inline  int AStar::getTargetNodeID() const	
+	{
+		return m_targetNodeID;
 	}
 
 	inline AStarRecorder* AStar::setRecorder(AStarRecorder* recorder)

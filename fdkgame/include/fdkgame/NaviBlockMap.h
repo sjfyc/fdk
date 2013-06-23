@@ -18,6 +18,7 @@ namespace fdk { namespace game { namespace navi
 		size_t getSizeX() const;
 		size_t getSizeY() const;
 		MoveCapability getMoveCapability() const;
+		void setBlock(const CellCoord& cellCoord, bool bSet=true);
 		bool isBlock(const CellCoord& cellCoord) const;
 	private:
 		TileMap& m_tileMap;

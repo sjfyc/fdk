@@ -20,13 +20,13 @@ namespace fdk { namespace game { namespace navi
 		size_t getSizeX() const;
 		size_t getSizeY() const;
 
-		VertexID toVertexID(const VertexCoord vertexCoord) const;
+		VertexID toVertexID(const VertexCoord& vertexCoord) const;
 		VertexCoord toVertexCoord(VertexID vertexID) const;		
 		bool isValidVertexID(VertexID vertexID) const;
-		bool isValidVertexCoord(const VertexCoord vertexCoord) const;
+		bool isValidVertexCoord(const VertexCoord& vertexCoord) const;
 
-		int getBlockValue(const CellCoord& cellCoord) const;
-		bool isBlock(const CellCoord& cellCoord) const;
+		int getBlockValue(const VertexCoord& vertexCoord) const;
+		bool isBlock(const VertexCoord& vertexCoord) const;
 		void onSetBlock(const CellCoord& cellCoord, bool bSet);
 
 		// Environment interfaces

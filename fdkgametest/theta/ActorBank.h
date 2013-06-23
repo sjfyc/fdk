@@ -16,7 +16,7 @@ public:
 	static const char* NAME() { return "ActorBank"; }
 	bool tick(float delta);
 	void draw();
-	Actor* createActor(const Location& location, float radius);
+	Actor* createActor(const Location& location);
 	void destroyActor(Actor& actor);
 	Actor* findFirstActorConverLocation(const Location& location) const;
 	const Actors& getActors() const;

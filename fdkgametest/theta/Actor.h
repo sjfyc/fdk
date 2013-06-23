@@ -2,7 +2,7 @@
 #define __ACTOR_H_INCLUDE__
 #include "Types.h"
 #include <fdkgame/Math.h>
-class Hpa;
+class AStar;
 
 class Actor
 {
@@ -10,21 +10,46 @@ class Actor
 public:	
 	void tick(float delta);
 	void draw();
+	void stopMove();
 	void move(const Location& location, float speed);
-	const Location& getLocation() const;
-	const Velocity& getVelocity() const;
 	float getRadius() const;
+	int getMoveCapability() const;
+	int getUnitSize() const;
+	const Location& getLocation() const;
+	const Velocity& getVelocity() const;	
 	BoundingBox getBoundingBox() const;
+	bool searchPath(const Location& targetLocation);
+	const Location& getLastAstarTargetLocation() const;
 private:
-	Actor(const Location& location, float radius);
+	Actor(const Location& location, int moveCapability, int unitSize);
 	~Actor();
 	void tickMove(float delta);
 	DWORD m_color;
-	Location m_location;	
-	Velocity m_velocity;
+	int m_moveCapability;
+	int m_unitSize;	
 	float m_radius;
-	Location m_moveLocation;
+	float m_moveSpeed;
+	Location m_location;	
+	Velocity m_velocity;	
+	Location m_moveLocation;	
+	AStar* m_astar;
+	Location m_lastAstarTargetLocation;
 };
+
+inline int Actor::getMoveCapability() const
+{
+	return m_moveCapability;
+}
+
+inline int Actor::getUnitSize() const
+{
+	return  m_unitSize;
+}
+
+inline float Actor::getRadius() const
+{
+	return m_radius;
+}
 
 inline const Location& Actor::getLocation() const
 {
@@ -36,9 +61,9 @@ inline const Velocity& Actor::getVelocity() const
 	return m_velocity;
 }
 
-inline float Actor::getRadius() const
+inline const Location& Actor::getLastAstarTargetLocation() const
 {
-	return m_radius;
+	return m_lastAstarTargetLocation;
 }
 
 #endif

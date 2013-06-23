@@ -1,13 +1,21 @@
 #include "Actor.h"
-#include "Util.h"
 #include <fdk/Rand.h>
+#include <fdkgame/NaviBlockMap.h>
+#include <fdkgame/NaviVertexMap.h>
+#include "Util.h"
+#include "AStar.h"
+#include "MapManager.h"
 
-Actor::Actor(const Location& location, float radius)
-	: m_location(location)
-	, m_color(ARGB(200, (int)fdk::rand(100, 255), (int)fdk::rand(100, 255), (int)fdk::rand(100, 255)))
+Actor::Actor(const Location& location, int moveCapability, int unitSize)
+	: m_color(ARGB(180, (int)fdk::rand(100, 255), (int)fdk::rand(100, 255), (int)fdk::rand(100, 255)))
+	, m_moveSpeed(100)
+	, m_moveCapability(moveCapability)
+	, m_unitSize(unitSize)
+	, m_radius(unitSize*CELL_SIZE_X/2*0.75f)
+	, m_location(location)	
 	, m_velocity()
-	, m_radius(radius)
 	, m_moveLocation()
+	, m_astar(0)
 {
 }
 
@@ -17,40 +25,40 @@ Actor::~Actor()
 
 void Actor::tick(float delta)
 {	
-	//if (m_velocity == Velocity::ZERO)
-	//{
-	//	if (m_hpa)
-	//	{
-	//		int nodeID = m_hpa->popNextPathNode();
-	//		if (nodeID == fdkgame::findpath::INVALID_NODEID)
-	//		{
-	//			fdkgame::findpath::Hpa::ErrorType error = m_hpa->getError();
-	//			if (error == fdkgame::findpath::Hpa::Error_PathCompleted)
-	//			{
-	//				util::output("actor reached");
-	//			}
-	//			else
-	//			{
-	//				util::output("actor can't find path");
-	//			}
-	//			FDK_DELETE(m_hpa);
-	//		}
-	//		else
-	//		{
-	//			const int converNodes = (int)(m_radius*2/CELL_SIZE_X)+1;
-	//			CellCoord coord = g_HpaMap.getLowLevelMap().getNodeCoord(nodeID);
-	//			Location location = util::cellCoordToLocation(coord) + 
-	//				Location((float)converNodes*CELL_SIZE_X/2, (float)converNodes*CELL_SIZE_Y/2);
-	//			move(location, 100);
-	//		}
-	//	}
-	//}
+	if (m_velocity == Velocity::ZERO)
+	{
+		if (m_astar)
+		{
+			if (!m_astar->hasNextPathLocation())
+			{
+				util::output("actor reached");				
+				FDK_DELETE(m_astar);
+			}
+			else
+			{
+				Location location = m_astar->popNextPathLocation();
+				move(location, m_moveSpeed);
+			}
+		}
+	}
 	tickMove(delta);
 }
 
 void Actor::draw()
 {
 	g_HGE.Rectangle(m_location.x-m_radius, m_location.y-m_radius, m_location.x+m_radius, m_location.y+m_radius, m_color);
+	if (m_astar)
+	{
+		m_astar->render();
+	}
+}
+
+void Actor::stopMove()
+{
+	m_moveLocation.reset();
+	m_velocity.reset();
+	FDK_DELETE(m_astar);
+	m_lastAstarTargetLocation.reset();
 }
 
 void Actor::move(const Location& location, float speed)
@@ -72,35 +80,50 @@ void Actor::tickMove(float delta)
 		m_velocity.reset();
 		return;
 	}
+
+	Location nextLocation = m_location + m_velocity*delta;
+	CellRange nextCellRange = util::locationRangeToCellRange(
+		LocationRange( nextLocation-Location(m_radius, m_radius)
+			, nextLocation+Location(m_radius, m_radius) )
+		);
+	
+	const fdkgame::navi::BlockMap& blockMap = g_MapManager.getBlockMap(m_moveCapability);
+	for (short y = nextCellRange.topLeft.y; y <= nextCellRange.bottomRight.y; ++y)
+	{
+		for (short x = nextCellRange.topLeft.x; x <= nextCellRange.bottomRight.x; ++x)
+		{
+			if (blockMap.isBlock(CellCoord(x, y)) )
+			{			
+				if (searchPath(m_lastAstarTargetLocation))
+				{
+					if (m_astar->getPathLocationCount() == 1)
+					{
+						stopMove();
+					}
+				}
+				return;
+			}
+		}
+	}
+
 	m_location += m_velocity*delta;
 }
 
-//void Actor::searchPath(const Location& targetLocation)
-//{	
-//	m_velocity.reset();
-//	m_moveLocation = m_location;
-//
-//	const CellCoord& startCellCoord = util::locationToCellCoord(
-//		Location(m_location.x-m_radius, m_location.y-m_radius)
-//		);
-//	const CellCoord& targetCellCoord = util::locationToCellCoord(targetLocation);
-//
-//	if (startCellCoord == targetCellCoord)
-//	{
-//		move(targetLocation, 100);
-//		return;
-//	}
-//
-//	m_hpa = new Hpa(this, g_HpaMap, 
-//		g_HpaMap.getLowLevelMap().getNodeID(startCellCoord),
-//		g_HpaMap.getLowLevelMap().getNodeID(targetCellCoord));
-//	if (m_hpa->getError() == Hpa::Error_PathUnexist)
-//	{
-//		util::output("actor can't find path");
-//		FDK_DELETE(m_hpa);
-//		return;
-//	}
-//}
+bool Actor::searchPath(const Location& targetLocation)
+{
+	m_velocity.reset();
+	m_moveLocation = m_location;
+
+	m_astar = new AStar(*this, targetLocation);
+	if (!m_astar->search())
+	{
+		util::output("actor can't find path");
+		FDK_DELETE(m_astar);
+		return false;
+	}
+	m_lastAstarTargetLocation = targetLocation;	
+	return true;
+}
 
 BoundingBox Actor::getBoundingBox() const
 {

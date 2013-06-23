@@ -4,9 +4,14 @@
 #include <fdkgame/Math.h>
 
 typedef fdkgame::Vector2D<short> CellCoord;
+typedef fdkgame::Vector2D<int> VertexCoord;
 typedef fdkgame::Vector2D<float> Location;
-typedef fdkgame::Vector2D<float> Velocity;
+
 typedef fdkgame::Rect<float> BoundingBox;
+typedef fdkgame::Rect<short> CellRange;
+typedef fdkgame::Rect<float> LocationRange;
+
+typedef fdkgame::Vector2D<float> Velocity;
 
 enum 
 {
@@ -15,6 +20,14 @@ enum
 
 	CELL_SIZE_X = 30,
 	CELL_SIZE_Y = 30,
+
+	HALF_CELL_SIZE_X = CELL_SIZE_X/2,
+	HALF_CELL_SIZE_Y = CELL_SIZE_Y/2,
+};
+
+enum 
+{
+	Event_OnActorSelected = GAME_USER_EVENT,
 };
 
 enum EunmTile

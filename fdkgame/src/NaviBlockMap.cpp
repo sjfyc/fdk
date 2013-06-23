@@ -43,6 +43,11 @@ namespace fdk { namespace game { namespace navi
 		return m_moveCapability;
 	}
 
+	void BlockMap::setBlock(const CellCoord& cellCoord, bool bSet)
+	{
+		m_data(cellCoord.x, cellCoord.y) = bSet;
+	}
+
 	bool BlockMap::isBlock(const CellCoord& cellCoord) const
 	{
 		return m_data(cellCoord.x, cellCoord.y);

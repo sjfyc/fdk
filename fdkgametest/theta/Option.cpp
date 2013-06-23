@@ -1,5 +1,6 @@
 #include "Option.h"
 #include "Util.h"
+#include "Actor.h"
 
 Option::Option()
 	: m_toggles(0)
@@ -82,6 +83,14 @@ void Option::onEvent(int eventType, void* params)
 			util::output("unit size: %d", m_unitSize);
 		}
 	}
+	else if (eventType == Event_OnActorSelected)
+	{
+		Actor* actor = static_cast<Actor*>(params);
+		m_moveCapability = actor->getMoveCapability();
+		util::output("%s move to water", fdk::hasEnumMask(m_moveCapability, Tile_Water) ? "can" : "can't");
+		m_unitSize = actor->getUnitSize();
+		util::output("unit size: %d", m_unitSize);
+	}
 }
 
 void Option::toggle(Toggle tog)
@@ -117,6 +126,7 @@ void Option::start()
 	outputUsage();
 	fdk::EventHook::regist(GAME_SYSTEM_EVENT_KEYDOWN);
 	fdk::EventHook::regist(GAME_SYSTEM_EVENT_KEYUP);
+	fdk::EventHook::regist(Event_OnActorSelected);
 }
 
 void Option::stop()

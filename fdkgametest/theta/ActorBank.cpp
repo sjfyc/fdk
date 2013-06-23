@@ -17,6 +17,10 @@ ActorBank::~ActorBank()
 
 bool ActorBank::tick(float delta)
 {
+	if (!g_Game.isInGameMode())
+	{
+		return true;
+	}
 	for (Actors::const_iterator it = m_actors.begin(); it != m_actors.end(); ++it)
 	{
 		Actor* actor = *it;
@@ -29,8 +33,8 @@ void ActorBank::draw()
 {
 	if (m_currentActor)
 	{
-		float offset = 2.0f;
-		g_HGE.Rectangle(
+		float offset = 0.f;
+		g_HGE.FrameRect(
 			m_currentActor->getLocation().x-m_currentActor->getRadius()-offset, 
 			m_currentActor->getLocation().y-m_currentActor->getRadius()-offset,
 			m_currentActor->getLocation().x+m_currentActor->getRadius()+offset, 
@@ -44,9 +48,9 @@ void ActorBank::draw()
 	}
 }
 
-Actor* ActorBank::createActor(const Location& location, float radius)
+Actor* ActorBank::createActor(const Location& location)
 {
-	Actor* actor = new Actor(location, radius);
+	Actor* actor = new Actor(location, g_Option.getMoveCapability(), g_Option.getUnitSize());
 	insertActor(*actor);
 	return actor;
 }
@@ -95,16 +99,17 @@ void ActorBank::onEvent(int eventType, void* params)
 		int key = (int)params;	
 		if (key == HGEK_P)
 		{
-			createActor(Location(CELL_SIZE_X+CELL_SIZE_X/2, CELL_SIZE_Y+CELL_SIZE_Y/2), g_Option.getUnitSize()*CELL_SIZE_X/2*0.75f);
+			createActor(Location(CELL_SIZE_X+CELL_SIZE_X/2, CELL_SIZE_Y+CELL_SIZE_Y/2));
 		}
 		else if (key == HGEK_LBUTTON)
 		{
 			Location mouseLocation;
 			g_HGE->Input_GetMousePos(&mouseLocation.x, &mouseLocation.y);
 			Actor* actor = findFirstActorConverLocation(mouseLocation);
-			if (actor)
+			if (actor && m_currentActor != actor)
 			{
 				m_currentActor = actor;
+				fdk::EventCenter::instance().send(Event_OnActorSelected, actor);
 			}
 		}
 		else if (key == HGEK_RBUTTON)
@@ -113,8 +118,7 @@ void ActorBank::onEvent(int eventType, void* params)
 			g_HGE->Input_GetMousePos(&mouseLocation.x, &mouseLocation.y);
 			if (m_currentActor)
 			{
-				//m_currentActor->move(mouseLocation, 800);
-				//m_currentActor->searchPath(mouseLocation);
+				m_currentActor->searchPath(mouseLocation);
 			}
 		}
 	}

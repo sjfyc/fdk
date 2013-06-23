@@ -42,12 +42,13 @@ void MapManager::draw()
 		{
 			for (size_t x = 0; x < vertexMap.getSizeX(); ++x)
 			{
+				Location location = util::vertexCoordToLocation(VertexCoord(x, y));
 				g_HGE.FrameRect(
-					(x+1)*CELL_SIZE_X/2-2, 
-					(y+1)*CELL_SIZE_Y/2-2, 
-					(x+1)*CELL_SIZE_X/2+2, 
-					(y+1)*CELL_SIZE_Y/2+2, 
-					(vertexMap.getBlockValue(CellCoord(x, y)) > 0) ? ARGB(255, 226, 98, 29) : MyColor_Green
+					location.x-2, 
+					location.y-2, 
+					location.x+2, 
+					location.y+2, 
+					(vertexMap.getBlockValue(VertexCoord(x, y)) > 0) ? ARGB(255, 226, 98, 29) : MyColor_Green
 					);
 			}
 		}

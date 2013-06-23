@@ -55,6 +55,7 @@ void Game::render()
 	g_MapManager.draw();
 		
 	m_mode->render(*this);	
+	g_ActorBank.draw();
 	g_TileMap.drawCellInfo();
 }
 
@@ -94,6 +95,7 @@ void Game::outputUsage()
 {
 	util::output("T: toggle between game & map edit mode");
 	util::output("C: clear obstacles in map edit mode");
+	util::output("D: dynamic change tile type in game mode");
 	//util::output("SPACE: restart/continue path finding");
 	//util::output("S: restart/continue path finding step by step");
 }
@@ -104,6 +106,7 @@ bool Game::isInGameMode() const
 }
 
 GameModeGame::GameModeGame()
+	: m_canDynamicChangeTile(false)
 {
 }
 
@@ -112,12 +115,35 @@ void GameModeGame::update(Game& game, float delta)
 }
 
 void GameModeGame::render(Game& game)
-{
-	g_ActorBank.draw();
+{	
 }
 
 void GameModeGame::handleEvent(Game& game, int eventType, void* params)
 {
+	if (eventType == GAME_SYSTEM_EVENT_KEYUP)
+	{
+		int key = (int)params;
+		if (key == HGEK_D)
+		{
+			m_canDynamicChangeTile = !m_canDynamicChangeTile;
+		}
+	}
+
+	Location mouseLocation;
+	g_HGE->Input_GetMousePos(&mouseLocation.x, &mouseLocation.y);
+	CellCoord mouseCoord = util::locationToCellCoord(mouseLocation);
+
+	if (eventType == GAME_SYSTEM_EVENT_KEYDOWN)
+	{
+		int key = (int)params;
+		if (key == HGEK_LBUTTON)
+		{
+			if (m_canDynamicChangeTile)
+			{
+				g_MapManager.changeTileType(mouseCoord, g_Option.getBrush());
+			}			
+		}
+	}
 }
 
 GameModeMapEdit::GameModeMapEdit()
