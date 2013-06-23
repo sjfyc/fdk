@@ -58,6 +58,7 @@ namespace fdk { namespace game { namespace navi
 	{
 		return vertexID >= 0 && m_data.is_valid_index(vertexID);	
 	}
+	
 	bool VertexMap::isValidVertexCoord(const VertexCoord vertexCoord) const
 	{
 		return vertexCoord.x >= 0 && vertexCoord.y >= 0 && m_data.is_valid_index(vertexCoord.x, vertexCoord.y);
