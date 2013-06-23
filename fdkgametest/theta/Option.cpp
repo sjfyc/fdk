@@ -68,17 +68,17 @@ void Option::onEvent(int eventType, void* params)
 		}
 		else if (key == HGEK_ADD)
 		{
-			if (++m_unitSize > 2)
+			if (++m_unitSize > MAX_UNIT_SIZE)
 			{
-				m_unitSize = 2;
+				m_unitSize = MAX_UNIT_SIZE;
 			}
 			util::output("unit size: %d", m_unitSize);
 		}
 		else if (key == HGEK_SUBTRACT)
 		{
-			if (--m_unitSize < 1)
+			if (--m_unitSize < MIN_UNIT_SIZE)
 			{
-				m_unitSize = 1;
+				m_unitSize = MIN_UNIT_SIZE;
 			}
 			util::output("unit size: %d", m_unitSize);
 		}

@@ -23,6 +23,9 @@ enum
 
 	HALF_CELL_SIZE_X = CELL_SIZE_X/2,
 	HALF_CELL_SIZE_Y = CELL_SIZE_Y/2,
+
+	MIN_UNIT_SIZE  = 1,
+	MAX_UNIT_SIZE  = 3, 
 };
 
 enum 

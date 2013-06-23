@@ -24,7 +24,7 @@ namespace
 }
 
 MapManager::MapManager()
-	: _Base(g_TileMap, getSupportedMoveCapabilities(), 1, 2)
+	: _Base(g_TileMap, getSupportedMoveCapabilities(), MIN_UNIT_SIZE, MAX_UNIT_SIZE)
 {
 	rebuildAfterTileMapReset();
 }
