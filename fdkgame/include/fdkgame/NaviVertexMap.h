@@ -2,6 +2,7 @@
 #define __FDKGAME_NAVIVERTEXMAP_H_INCLUDE__
 #include <fdk/Array2D.h>
 #include "NaviTypes.h"
+#include "NaviBase.h"
 
 namespace fdk { namespace game { namespace navi
 {
@@ -9,19 +10,35 @@ namespace fdk { namespace game { namespace navi
 
 	// 对应某种尺寸单位的顶点地图：每个顶点存储对于该尺寸单位的碰撞数量
 	class FDKGAME_API VertexMap
+		: public Environment
 	{
 	public:
 		VertexMap(BlockMap& blockMap, UnitSize unitSize);
 		~VertexMap();		
 		void rebuildFromBlockMap();		
-		void onSetBlock(const CellCoord& cellCoord, bool bSet);
+		
 		size_t getSizeX() const;
 		size_t getSizeY() const;
+
+		VertexID toVertexID(const VertexCoord vertexCoord) const;
+		VertexCoord toVertexCoord(VertexID vertexID) const;		
+		bool isValidVertexID(VertexID vertexID) const;
+		bool isValidVertexCoord(const VertexCoord vertexCoord) const;
+
 		int getBlockValue(const CellCoord& cellCoord) const;
+		bool isBlock(const CellCoord& cellCoord) const;
+		void onSetBlock(const CellCoord& cellCoord, bool bSet);
+
+		// Environment interfaces
+		virtual int getNodeSpaceSize() const;
+		virtual int getHeuristic(int startNodeID, int targetNodeID) const;
+		virtual void getSuccessorNodes(Navigator& navigator, int nodeID, std::vector<SuccessorNodeInfo>& result) const;
 	private:
+		typedef Array2D<int> MapData;
+		bool tryAddSuccessorNode(Navigator& navigator, std::vector<SuccessorNodeInfo>& result, const VertexCoord& vertexCoord, int cost, int parentNodeID) const;
 		BlockMap& m_blockMap;			
 		UnitSize m_unitSize;
-		Array2D<int> m_data;
+		MapData m_data;
 	};
 }}}
 
