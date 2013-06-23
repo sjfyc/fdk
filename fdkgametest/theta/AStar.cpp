@@ -11,23 +11,31 @@ AStar::AStar(Actor& actor, const Location& targetLocation)
 	, m_navigator(0)
 	, m_needSearch(true)
 {
-	m_locationPath.push_back(targetLocation);
-
 	const Location& startLocation = actor.getLocation();
-
+	m_locationPath.push_back(targetLocation);	
+	
 	const VertexCoord& startVertexCoord = util::locationToVertexCoord(startLocation);
-	const VertexCoord& targetVertexCoord = util::locationToVertexCoord(targetLocation);	
+	const VertexCoord& targetVertexCoord = util::locationToVertexCoord(targetLocation);
+	
+	const fdkgame::navi::VertexMap& vertexMap = g_MapManager.getVertexMap(actor.getMoveCapability(), actor.getUnitSize());
+	int targetVertexID = vertexMap.toVertexID(targetVertexCoord);
 
-	if (startVertexCoord == targetVertexCoord)
-	{		
+	std::set<int> startVertexIDs;
+	VertexCoord  startRightVertexCoord = startVertexCoord + VertexCoord(1, 0);
+	VertexCoord  startBottomVertexCoord = startVertexCoord + VertexCoord(0, 1);
+	VertexCoord  startBottomRightVertexCoord = startVertexCoord + VertexCoord(1, 1);
+	
+	startVertexIDs.insert(vertexMap.toVertexID(startRightVertexCoord));
+	startVertexIDs.insert(vertexMap.toVertexID(startBottomVertexCoord));
+	startVertexIDs.insert(vertexMap.toVertexID(startBottomRightVertexCoord));
+	
+	if (startVertexIDs.find(targetVertexID) != startVertexIDs.end())
+	{
 		m_needSearch = false;
 		return;
 	}
 
-	const fdkgame::navi::VertexMap& vertexMap = g_MapManager.getVertexMap(actor.getMoveCapability(), actor.getUnitSize());
-	m_navigator = new fdkgame::navi::AStar(vertexMap, 
-		vertexMap.toVertexID(startVertexCoord),
-		vertexMap.toVertexID(targetVertexCoord));
+	m_navigator = new fdkgame::navi::AStar(vertexMap, startVertexIDs, targetVertexID);
 }
 
 AStar::~AStar()

@@ -23,14 +23,13 @@ namespace fdk { namespace game { namespace navi
 			SearchResult_Completed,
 			SearchResult_PathUnexist,
 		};		
-		AStar(const Environment& env, int startNodeID, int targetNodeID);
+		AStar(const Environment& env, const std::set<int>& startNodeIDs, int targetNodeID);
 		~AStar();
 		SearchResult search(int step=-1);
 		SearchResult getSearchResult() const;
 		const std::vector<int>& getPath() const;
 		int getPathCost() const;
 		const Environment& getEnvironment() const;
-		int getStartNodeID() const;
 		int getTargetNodeID() const;
 		AStarRecorder* setRecorder(AStarRecorder* recorder);
 	private:
@@ -58,7 +57,7 @@ namespace fdk { namespace game { namespace navi
 		void inspectNode(int nodeID, int parentNodeID, int gValue);
 		void buildPath();
 		const Environment& m_env;
-		int m_startNodeID;
+		std::set<int> m_startNodeIDs;
 		int m_targetNodeID;
 		NodeState* m_nodeStates;
 		NodeData* m_nodeDatas;
@@ -98,12 +97,7 @@ namespace fdk { namespace game { namespace navi
 	{
 		return m_env;
 	}
-
-	inline int AStar::getStartNodeID() const
-	{
-		return m_startNodeID;
-	}
-
+	
 	inline  int AStar::getTargetNodeID() const	
 	{
 		return m_targetNodeID;

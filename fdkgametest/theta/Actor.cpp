@@ -11,7 +11,7 @@ Actor::Actor(const Location& location, int moveCapability, int unitSize)
 	, m_moveSpeed(100)
 	, m_moveCapability(moveCapability)
 	, m_unitSize(unitSize)
-	, m_radius(unitSize*CELL_SIZE_X/2*0.75f)
+	, m_radius(unitSize*HALF_CELL_SIZE_X*1.f)
 	, m_location(location)	
 	, m_velocity()
 	, m_moveLocation()
@@ -73,18 +73,19 @@ void Actor::tickMove(float delta)
 	{
 		return;
 	}
+	
+	bool hasReached = false;
+	Location nextLocation = m_location + m_velocity*delta;
 	if ((m_moveLocation - m_location).length() <=  m_velocity.length()*delta)
 	{
-		m_location = m_moveLocation;
-		m_moveLocation.reset();
-		m_velocity.reset();
-		return;
+		nextLocation = m_moveLocation;
+		hasReached = true;
 	}
 
-	Location nextLocation = m_location + m_velocity*delta;
+	Location radiusOffset(m_radius, m_radius);
 	CellRange nextCellRange = util::locationRangeToCellRange(
-		LocationRange( nextLocation-Location(m_radius, m_radius)
-			, nextLocation+Location(m_radius, m_radius) )
+		LocationRange( nextLocation-radiusOffset
+			, nextLocation+radiusOffset )
 		);
 	
 	const fdkgame::navi::BlockMap& blockMap = g_MapManager.getBlockMap(m_moveCapability);
@@ -106,7 +107,13 @@ void Actor::tickMove(float delta)
 		}
 	}
 
-	m_location += m_velocity*delta;
+	m_location = nextLocation;
+	if (hasReached)
+	{
+		m_moveLocation.reset();
+		m_velocity.reset();
+		return;
+	}
 }
 
 bool Actor::searchPath(const Location& targetLocation)

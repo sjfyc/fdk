@@ -2,9 +2,9 @@
 
 namespace fdk { namespace game { namespace navi
 {
-	AStar::AStar(const Environment& env, int startNodeID, int targetNodeID)
+	AStar::AStar(const Environment& env, const std::set<int>& startNodeIDs, int targetNodeID)
 		: m_env(env)
-		, m_startNodeID(startNodeID)
+		, m_startNodeIDs(startNodeIDs)
 		, m_targetNodeID(targetNodeID)
 		, m_nodeStates(0)
 		, m_nodeDatas(0)
@@ -14,16 +14,20 @@ namespace fdk { namespace game { namespace navi
 		, m_pathCost(PATHUNEXIST_COST)
 		, m_recorder(0)
 	{
-		FDK_ASSERT(startNodeID != targetNodeID);
-		FDK_ASSERT(m_env.isValidNodeID(startNodeID));
 		FDK_ASSERT(m_env.isValidNodeID(targetNodeID));
+		FDK_ASSERT(startNodeIDs.find(targetNodeID) == startNodeIDs.end());
 
 		const int nodeCount = m_env.getNodeSpaceSize();
 		m_nodeStates = new NodeState[nodeCount];
 		m_nodeDatas = new NodeData[nodeCount];
 		memset(m_nodeStates, 0, sizeof(NodeState)*nodeCount);
 
-		inspectNode(m_startNodeID, INVALID_NODEID, 0);
+		for (std::set<int>::const_iterator it = m_startNodeIDs.begin(); it != m_startNodeIDs.end(); ++it)
+		{
+			const int startNodeID = *it;
+			FDK_ASSERT(m_env.isValidNodeID(startNodeID));
+			inspectNode(startNodeID, INVALID_NODEID, 0);
+		}		
 	}
 
 	AStar::~AStar()
@@ -121,10 +125,13 @@ namespace fdk { namespace game { namespace navi
 		int nodeId = m_targetNodeID;
 		while (1)
 		{
-			if (nodeId == m_startNodeID)
+			m_path.push_back(nodeId);
+			const int parentNodeID = m_nodeDatas[nodeId].parentNodeID;
+			if (parentNodeID == INVALID_NODEID)
+			{
 				break;
-			m_path.push_back(nodeId);			
-			nodeId = m_nodeDatas[nodeId].parentNodeID;
+			}
+			nodeId = parentNodeID;
 		}
 	}
 
