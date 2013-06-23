@@ -18,12 +18,14 @@ public:
 private:
 	typedef fdkgame::navi::AStar Navigator;
 	typedef std::set<VertexCoord> Vertexs;
-	std::vector<VertexCoord> m_vertexCoordPath;
-	std::vector<Location> m_locationPath; 
+
 	Actor& m_actor;
+	Location m_targetLocation;
+
+	std::vector<VertexCoord> m_vertexCoordPath;
+	std::vector<Location> m_locationPath; 	
 
 	fdkgame::navi::AStar* m_navigator;
-	bool m_needSearch;
 };
 
 #endif

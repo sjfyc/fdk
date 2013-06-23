@@ -14,7 +14,8 @@ public:
 		Toggle_ShowCellCoord,
 		Toggle_ShowCellID,
 		Toggle_ShowVertex,
-		Toggle_Brush,
+		Toggle_ShowCurrentActorVertex,
+		Toggle_Brush,		
 	};
 	void start();
 	void stop();

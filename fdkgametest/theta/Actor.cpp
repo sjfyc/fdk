@@ -5,6 +5,7 @@
 #include "Util.h"
 #include "AStar.h"
 #include "MapManager.h"
+#include "ActorBank.h"
 
 Actor::Actor(const Location& location, int moveCapability, int unitSize)
 	: m_color(ARGB(180, (int)fdk::rand(100, 255), (int)fdk::rand(100, 255), (int)fdk::rand(100, 255)))
@@ -111,6 +112,7 @@ void Actor::tickMove(float delta)
 
 bool Actor::isLocationBlocked(const Location& location) const
 {
+	// ¿¼ÂÇÖÜÎ§µÄ¾²Ì¬×èµ²
 	CellRange cellRange = util::locationRangeToCellRange(
 		LocationRange( location-Location( float( (m_unitSize*CELL_SIZE_X-1)/2 ), float( (m_unitSize*CELL_SIZE_Y-1)/2 ) ), 
 		location+Location( float( (m_unitSize*CELL_SIZE_X)/2 ), float((m_unitSize*CELL_SIZE_Y)/2 ) ) )
@@ -127,6 +129,13 @@ bool Actor::isLocationBlocked(const Location& location) const
 			}
 		}
 	}
+
+	// ¿¼ÂÇÖÜÎ§µÄ¶¯Ì¬×èµ²
+	if (g_ActorBank.getFirstCollideActor(location, m_radius, this))
+	{
+		return true;
+	}
+
 	return false;
 }
 
@@ -150,4 +159,16 @@ BoundingBox Actor::getBoundingBox() const
 {
 	return BoundingBox(m_location.x-m_radius,m_location.y-m_radius,
 		m_location.x+m_radius+1,m_location.y+m_radius+1);
+}
+
+void Actor::plotToMapManager(bool bPlot)
+{
+	VertexCoord vertexCoord = util::locationToVertexCoord(getLocation());
+	Location prunedlocation = util::vertexCoordToLocation(vertexCoord);
+	fdkgame::VectorI iOrignLocation((int)getLocation().x, (int)getLocation().y);
+	fdkgame::VectorI iPrunedlocation((int)prunedlocation.x, (int)prunedlocation.y);
+	const bool xAlign = (iOrignLocation.x == iPrunedlocation.x);
+	const bool yAlign = (iOrignLocation.y == iPrunedlocation.y);
+
+	g_MapManager.plotUnit(vertexCoord, getUnitSize(), xAlign, yAlign, bPlot);
 }

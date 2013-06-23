@@ -31,6 +31,8 @@ namespace fdk { namespace game { namespace navi
 
 		void onPlotUnit(const VertexCoord& vertexCoord, UnitSize unitSize, bool xAlign, bool yAlign, bool bPlot);
 
+		bool isDirectlyReachable(const VertexCoord& startVertexCoord, const VertexCoord& targetVertexCoord) const;
+
 		// Environment interfaces
 		virtual int getNodeSpaceSize() const;
 		virtual int getHeuristic(int startNodeID, int targetNodeID) const;
@@ -38,7 +40,7 @@ namespace fdk { namespace game { namespace navi
 	private:
 		typedef Array2D<int> MapData;
 		bool tryAddSuccessorNode(Navigator& navigator, std::vector<SuccessorNodeInfo>& result, const VertexCoord& vertexCoord, int cost, int parentNodeID) const;
-		BlockMap& m_blockMap;			
+		BlockMap& m_blockMap;
 		UnitSize m_unitSize;
 		MapData m_data;
 	};

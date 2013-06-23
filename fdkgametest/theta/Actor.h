@@ -21,6 +21,7 @@ public:
 	bool searchPath(const Location& targetLocation);
 	const Location& getLastAstarTargetLocation() const;
 	bool isLocationBlocked(const Location& location) const;
+	void plotToMapManager(bool bPlot);
 private:
 	Actor(const Location& location, int moveCapability, int unitSize);
 	~Actor();

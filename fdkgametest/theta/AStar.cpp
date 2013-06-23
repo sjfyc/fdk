@@ -9,48 +9,9 @@
 
 AStar::AStar(Actor& actor, const Location& targetLocation)
 	: m_actor(actor)
+	, m_targetLocation(targetLocation)
 	, m_navigator(0)
-	, m_needSearch(true)
-{
-	util::output("start path finding..");
-
-	const Location& startLocation = actor.getLocation();		
-	
-	const VertexCoord& startVertexCoord = util::locationToVertexCoord(startLocation);
-	const VertexCoord& targetVertexCoord = util::locationToVertexCoord(targetLocation);
-	
-	const fdkgame::navi::VertexMap& vertexMap = g_MapManager.getVertexMap(actor.getMoveCapability(), actor.getUnitSize());
-
-	std::set<int> startVertexIDs;
-	for (int yOffSet = 0; yOffSet <= 0; ++yOffSet)
-	{
-		for (int xOffSet = 0; xOffSet <= 0; ++xOffSet)
-		{
-			VertexCoord v = startVertexCoord+VertexCoord(xOffSet, yOffSet);
-			if (!vertexMap.isValidVertexCoord(v) || vertexMap.isBlock(v))
-			{
-				continue;
-			}
-			startVertexIDs.insert(vertexMap.toVertexID(v));
-		}
-	}	
-	if (startVertexIDs.empty())
-	{
-		m_needSearch = false;
-		return;
-	}
-	
-	m_locationPath.push_back(targetLocation);
-	
-	const int targetVertexID = vertexMap.toVertexID(targetVertexCoord);
-	if (startVertexIDs.find(targetVertexID) != startVertexIDs.end())
-	{
-		m_needSearch = false;
-		return;
-	}
-
-	// 考虑单位周围的单位
-	m_navigator = new fdkgame::navi::AStar(vertexMap, startVertexIDs, targetVertexID);
+{	
 }
 
 AStar::~AStar()
@@ -75,6 +36,13 @@ void AStar::render()
 			prevLocation = currentCenterLocation;
 		}
 	}
+	else
+	{
+		g_HGE->Gfx_RenderLine(m_actor.getLocation().x, m_actor.getLocation().y, 
+			m_targetLocation.x, m_targetLocation.y,
+			MyColor_Blue
+			);
+	}
 	// 绘制路径上的顶点
 	for (size_t i = 0; i < m_vertexCoordPath.size(); ++i)
 	{
@@ -91,67 +59,84 @@ void AStar::render()
 }
 
 bool AStar::search()
-{	
-	if (!m_needSearch)
+{
+	util::output("start path finding..");
+
+	const fdkgame::navi::VertexMap& vertexMap = g_MapManager.getVertexMap(m_actor.getMoveCapability(), m_actor.getUnitSize());
+
+	const Location& startLocation = m_actor.getLocation();
+	const VertexCoord& startVertexCoord = util::locationToVertexCoord(startLocation);
+	const VertexCoord& targetVertexCoord = util::locationToVertexCoord(m_targetLocation);	
+
+	if (!vertexMap.isValidVertexCoord(startVertexCoord) ||
+		!vertexMap.isValidVertexCoord(targetVertexCoord))
+	{
+		return false;
+	}
+
+	struct AutoPlot// 考虑单位周围的单位
+	{
+		AutoPlot(Actor& actor) 
+			: m_actor(actor) 
+		{
+			g_ActorBank.getActors(m_aroundActors, m_actor.getLocation(), m_actor.getRadius()*8, &m_actor);
+			for (size_t i = 0; i < m_aroundActors.size(); ++i)
+			{
+				Actor* aroundActor = m_aroundActors[i];
+				aroundActor->plotToMapManager(true);
+			}
+		}
+
+		~AutoPlot()
+		{
+			for (size_t i = 0; i < m_aroundActors.size(); ++i)
+			{
+				Actor* aroundActor = m_aroundActors[i];
+				aroundActor->plotToMapManager(false);
+			}
+		}
+
+		Actor& m_actor;
+		std::vector<Actor*> m_aroundActors;
+	} _autoPlot(m_actor);
+	
+	if (vertexMap.isBlock(startVertexCoord) ||
+		vertexMap.isBlock(targetVertexCoord) )
+	{
+		return false;
+	}
+
+	int startVertexID = vertexMap.toVertexID(startVertexCoord);
+	int targetVertexID = vertexMap.toVertexID(targetVertexCoord);
+
+	m_locationPath.push_back(m_targetLocation);
+
+	if (startVertexID == targetVertexID)
+	{
+		return true;
+	}
+
+	if (vertexMap.isDirectlyReachable(startVertexCoord, targetVertexCoord))
 	{
 		return true;
 	}
 	
-	std::vector<Actor*> aroundActors;
-	g_ActorBank.getActors(aroundActors, m_actor.getLocation(), m_actor.getRadius()*8, &m_actor);
-	struct PlotData
-	{
-		VertexCoord vertexCoord;
-		int unitSize;
-		bool xAlign;
-		bool yAlign;
-	};
-	std::vector<PlotData> plotDatas;
-	for (size_t i = 0; i < aroundActors.size(); ++i)
-	{
-		Actor* aroundActor = aroundActors[i];
-		VertexCoord vertexCoord = util::locationToVertexCoord(aroundActor->getLocation());
-		Location prunedlocation = util::vertexCoordToLocation(vertexCoord);
-		fdkgame::VectorI iOrignLocation((int)aroundActor->getLocation().x, (int)aroundActor->getLocation().y);
-		fdkgame::VectorI iPrunedlocation((int)prunedlocation.x, (int)prunedlocation.y);
-		const bool xAlign = (iOrignLocation.x == iPrunedlocation.x);
-		const bool yAlign = (iOrignLocation.y == iPrunedlocation.y);
-		
-		PlotData plotData;
-		plotData.vertexCoord = vertexCoord;
-		plotData.unitSize = aroundActor->getUnitSize();
-		plotData.xAlign = xAlign;
-		plotData.yAlign = yAlign;
-		plotDatas.push_back(plotData);
-
-		g_MapManager.plotUnit(plotData.vertexCoord, plotData.unitSize, plotData.xAlign, plotData.yAlign, true);
-	}
-
+	m_navigator = new fdkgame::navi::AStar(vertexMap, startVertexID, targetVertexID);
 	Navigator::SearchResult searchResult = m_navigator->search();
-
-	for (size_t i = 0; i < plotDatas.size(); ++i)
-	{
-		const PlotData& plotData = plotDatas[i];
-		g_MapManager.plotUnit(plotData.vertexCoord, plotData.unitSize, plotData.xAlign, plotData.yAlign, false);
-	}
-
 	if (searchResult == Navigator::SearchResult_PathUnexist)
 	{
 		return false;
 	}
+
 	FDK_ASSERT(searchResult == Navigator::SearchResult_Completed);
-	
-	const fdkgame::navi::VertexMap& vertexMap = static_cast<const fdkgame::navi::VertexMap&>(m_navigator->getEnvironment());
+
 	const std::vector<int>& path = m_navigator->getPath();
 	for (size_t i = 0; i < path.size(); ++i)
 	{
 		VertexCoord vertexCoord = vertexMap.toVertexCoord(path[i]);
 		m_vertexCoordPath.push_back(vertexCoord);
-		if (i >= 0)
-		{
-			Location location = util::vertexCoordToLocation(vertexCoord);
-			m_locationPath.push_back(location);
-		}		
+		Location location = util::vertexCoordToLocation(vertexCoord);
+		m_locationPath.push_back(location);	
 	}
 
 	return true;

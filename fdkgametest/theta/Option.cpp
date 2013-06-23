@@ -1,6 +1,7 @@
 #include "Option.h"
 #include "Util.h"
 #include "Actor.h"
+#include "ActorBank.h"
 
 Option::Option()
 	: m_toggles(0)
@@ -35,6 +36,16 @@ void Option::onEvent(int eventType, void* params)
 			toggle(Toggle_ShowVertex);
 			util::output("%s vertex", isOn(Toggle_ShowVertex) ? "show" : "hide");
 		}	
+		else if (key == HGEK_4)
+		{
+			toggle(Toggle_ShowCurrentActorVertex);
+			util::output("%s current actor vertex", isOn(Toggle_ShowCurrentActorVertex) ? "show" : "hide");
+			Actor* currentActor = g_ActorBank.getCurrentActor();
+			if (currentActor)
+			{
+				currentActor->plotToMapManager(isOn(Toggle_ShowCurrentActorVertex));
+			}
+		}
 		else if (key == HGEK_F1)
 		{
 			++m_brush;
@@ -115,6 +126,7 @@ void Option::outputUsage()
 	util::output("1: show/hide cell coord");
 	util::output("2: show/hide cell id");
 	util::output("3: show/hide vertex");
+	util::output("4: show/hide current actor vertex");
 	util::output("F1: change brush");
 	util::output("F2: change move capability");
 	util::output("+: increase unit size");

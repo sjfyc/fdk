@@ -121,13 +121,13 @@ void ActorBank::onEvent(int eventType, void* params)
 				if (!m_currentActor->isLocationBlocked(m_currentActor->getLocation()))
 				{
 					m_currentActor->searchPath(mouseLocation);
-				}				
+				}
 			}
 		}
 	}
 }
 
-void ActorBank::getActors(std::vector<Actor*>& output, const Location& center, float radius, Actor* except) const
+void ActorBank::getActors(std::vector<Actor*>& output, const Location& center, float radius, const Actor* except) const
 {
 	for (Actors::const_iterator it = m_actors.begin(); it != m_actors.end(); ++it)
 	{
@@ -141,4 +141,27 @@ void ActorBank::getActors(std::vector<Actor*>& output, const Location& center, f
 			output.push_back(actor);
 		}
 	}
+}
+
+Actor* ActorBank::getFirstCollideActor(const Location& center, float radius, const Actor* except) const
+{
+	for (Actors::const_iterator it = m_actors.begin(); it != m_actors.end(); ++it)
+	{
+		Actor* actor = *it;
+		if (actor == except)
+		{
+			continue;
+		}
+		if ((actor->getLocation()-center).lengthSquared() < 
+			(actor->getRadius()+radius)*(actor->getRadius()+radius) )
+		{
+			return actor;
+		}
+	}
+	return 0;
+}
+
+Actor* ActorBank::getCurrentActor() const
+{
+	return m_currentActor;
 }
