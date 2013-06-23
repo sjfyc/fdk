@@ -74,45 +74,60 @@ void Actor::tickMove(float delta)
 		return;
 	}
 	
-	bool hasReached = false;
+	if (isLocationBlocked(m_location))
+	{
+		stopMove();
+		return;
+	}
+
+	bool bReachWayPoint = false;
 	Location nextLocation = m_location + m_velocity*delta;
 	if ((m_moveLocation - m_location).length() <=  m_velocity.length()*delta)
 	{
 		nextLocation = m_moveLocation;
-		hasReached = true;
+		bReachWayPoint = true;
 	}
 
-	CellRange nextCellRange = util::locationRangeToCellRange(
-		LocationRange( nextLocation-Location( (m_unitSize*CELL_SIZE_X-1)/2, (m_unitSize*CELL_SIZE_Y-1)/2 ), 
-		nextLocation+Location( (m_unitSize*CELL_SIZE_X)/2, (m_unitSize*CELL_SIZE_Y)/2 ) )
-		);
-	
-	const fdkgame::navi::BlockMap& blockMap = g_MapManager.getBlockMap(m_moveCapability);
-	for (short y = nextCellRange.topLeft.y; y <= nextCellRange.bottomRight.y; ++y)
+	if (isLocationBlocked(nextLocation))
 	{
-		for (short x = nextCellRange.topLeft.x; x <= nextCellRange.bottomRight.x; ++x)
+		if (searchPath(m_lastAstarTargetLocation))
 		{
-			if (blockMap.isBlock(CellCoord(x, y)) )
-			{			
-				if (searchPath(m_lastAstarTargetLocation))
-				{
-					if (m_astar->getPathLocationCount() == 1)
-					{
-						stopMove();
-					}
-				}
-				return;
+			if (m_astar->getPathLocationCount() == 1)
+			{
+				stopMove();
 			}
 		}
+		return;
 	}
 
 	m_location = nextLocation;
-	if (hasReached)
+	if (bReachWayPoint)
 	{
 		m_moveLocation.reset();
 		m_velocity.reset();
 		return;
 	}
+}
+
+bool Actor::isLocationBlocked(const Location& location) const
+{
+	CellRange cellRange = util::locationRangeToCellRange(
+		LocationRange( location-Location( float( (m_unitSize*CELL_SIZE_X-1)/2 ), float( (m_unitSize*CELL_SIZE_Y-1)/2 ) ), 
+		location+Location( float( (m_unitSize*CELL_SIZE_X)/2 ), float((m_unitSize*CELL_SIZE_Y)/2 ) ) )
+		);
+
+	const fdkgame::navi::BlockMap& blockMap = g_MapManager.getBlockMap(m_moveCapability);
+	for (short y = cellRange.topLeft.y; y <= cellRange.bottomRight.y; ++y)
+	{
+		for (short x = cellRange.topLeft.x; x <= cellRange.bottomRight.x; ++x)
+		{
+			if (blockMap.isBlock(CellCoord(x, y)) )
+			{				
+				return true;
+			}
+		}
+	}
+	return false;
 }
 
 bool Actor::searchPath(const Location& targetLocation)
