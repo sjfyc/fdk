@@ -17,12 +17,9 @@ void testArray2D()
 	FDK_ASSERT(ia.is_valid_index(5));
 	FDK_ASSERT(!ia.is_valid_index(6));
 	FDK_ASSERT(ia.to_index(1, 2) == 5);
-	FDK_ASSERT(ia.to_index(0, 3) == fdk::Array2D<int>::INVALID_INDEX);
 	size_t x, y;
 	ia.to_index(5, x, y);
-	FDK_ASSERT(x == 1 && y == 2);
-	ia.to_index(6, x, y);
-	FDK_ASSERT(x == fdk::Array2D<int>::INVALID_INDEX && y == fdk::Array2D<int>::INVALID_INDEX);
+	FDK_ASSERT(x == 1 && y == 2);	
 
 	fdk::Array2D<int> ia1(2, 2, 5);
 	FDK_ASSERT(ia1.is_valid_index(1, 1));

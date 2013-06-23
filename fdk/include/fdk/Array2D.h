@@ -13,7 +13,6 @@ namespace fdk
 		typedef AllocatorT allocator_type;
 		typedef typename AllocatorT::size_type size_type;
 		typedef T value_type;
-		static const size_type INVALID_INDEX = -1;
 		Array2D();
 		Array2D(size_type sizeX, size_type sizeY);
 		Array2D(size_type sizeX, size_type sizeY, const T& value);
@@ -218,22 +217,14 @@ namespace fdk
 	template <class T, class AllocatorT>
 	inline typename Array2D<T, AllocatorT>::size_type Array2D<T, AllocatorT>::to_index(size_type x, size_type y) const
 	{
-		if (!is_valid_index(x, y))
-		{
-			return INVALID_INDEX;
-		}
+		FDK_ASSERT(is_valid_index(x, y));
 		return y * size_x() + x;
 	}
 
 	template <class T, class AllocatorT>
 	inline void Array2D<T, AllocatorT>::to_index(size_t index, size_type& x, size_type& y) const
 	{
-		if (!is_valid_index(index))
-		{
-			x = INVALID_INDEX;
-			y = INVALID_INDEX;
-			return;
-		}
+		FDK_ASSERT(is_valid_index(index));
 		x = index % size_x();
 		y = index / size_x();
 	}
