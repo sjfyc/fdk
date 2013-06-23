@@ -15,7 +15,7 @@ namespace fdk { namespace game { namespace navi
 	{
 		FDK_ASSERT(minUnitSize >= 1 && maxUnitSize >= minUnitSize);
 	
-		for (std::set<MoveCapability>::iterator it = moveCapabilities.begin(); 
+		for (std::set<MoveCapability>::const_iterator it = moveCapabilities.begin(); 
 			it != moveCapabilities.end(); ++it)
 		{
 			const MoveCapability moveCapability = *it;
