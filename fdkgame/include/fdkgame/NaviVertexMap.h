@@ -29,6 +29,8 @@ namespace fdk { namespace game { namespace navi
 		bool isBlock(const VertexCoord& vertexCoord) const;
 		void onSetBlock(const CellCoord& cellCoord, bool bSet);
 
+		void onPlotUnit(const VertexCoord& vertexCoord, UnitSize unitSize, bool xAlign, bool yAlign, bool bPlot);
+
 		// Environment interfaces
 		virtual int getNodeSpaceSize() const;
 		virtual int getHeuristic(int startNodeID, int targetNodeID) const;

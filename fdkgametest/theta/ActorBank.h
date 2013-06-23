@@ -20,6 +20,7 @@ public:
 	void destroyActor(Actor& actor);
 	Actor* findFirstActorConverLocation(const Location& location) const;
 	const Actors& getActors() const;
+	void getActors(std::vector<Actor*>& output, const Location& center, float radius, Actor* except=0) const;
 private:
 	ActorBank();
 	~ActorBank();

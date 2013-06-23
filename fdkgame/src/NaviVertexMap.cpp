@@ -81,7 +81,7 @@ namespace fdk { namespace game { namespace navi
 			for (UnitSize x = -m_unitSize; x <= m_unitSize; ++x)
 			{				
 				VertexCoord vertexCoord(cellCoord.x*2+x, cellCoord.y*2+y);
-				if (m_data.is_valid_index(vertexCoord.x, vertexCoord.y))
+				if (isValidVertexCoord(vertexCoord))
 				{
 					m_data(vertexCoord.x, vertexCoord.y) += (bSet ? 1 : -1);
 					FDK_ASSERT(m_data(vertexCoord.x, vertexCoord.y) >= 0);
@@ -152,4 +152,22 @@ namespace fdk { namespace game { namespace navi
 		result.push_back(info);
 		return true;
 	}
+
+	void VertexMap::onPlotUnit(const VertexCoord& vertexCoord, UnitSize unitSize, bool xAlign, bool yAlign, bool bPlot)
+	{
+		UnitSize totalExtend = unitSize+m_unitSize-1;
+		for (UnitSize y = -totalExtend; y <= totalExtend+(yAlign?0:1); ++y)
+		{
+			for (UnitSize x = -totalExtend; x <= totalExtend+(xAlign?0:1); ++x)
+			{				
+				VertexCoord aroundVertexCoord(vertexCoord.x+x, vertexCoord.y+y);
+				if (isValidVertexCoord(aroundVertexCoord))
+				{
+					m_data(aroundVertexCoord.x, aroundVertexCoord.y) += (bPlot ? 1 : -1);
+					FDK_ASSERT(m_data(aroundVertexCoord.x, aroundVertexCoord.y) >= 0);
+				}
+			}
+		}	
+	}
+
 }}}

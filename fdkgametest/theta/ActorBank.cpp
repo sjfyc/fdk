@@ -126,3 +126,19 @@ void ActorBank::onEvent(int eventType, void* params)
 		}
 	}
 }
+
+void ActorBank::getActors(std::vector<Actor*>& output, const Location& center, float radius, Actor* except) const
+{
+	for (Actors::const_iterator it = m_actors.begin(); it != m_actors.end(); ++it)
+	{
+		Actor* actor = *it;
+		if (actor == except)
+		{
+			continue;
+		}
+		if ((actor->getLocation()-center).lengthSquared() < radius*radius)
+		{
+			output.push_back(actor);
+		}
+	}
+}

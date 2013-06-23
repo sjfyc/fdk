@@ -4,6 +4,7 @@
 #include "Game.h"
 #include "Font.h"
 #include "Actor.h"
+#include "ActorBank.h"
 #include "MapManager.h"
 
 AStar::AStar(Actor& actor, const Location& targetLocation)
@@ -19,7 +20,6 @@ AStar::AStar(Actor& actor, const Location& targetLocation)
 	const VertexCoord& targetVertexCoord = util::locationToVertexCoord(targetLocation);
 	
 	const fdkgame::navi::VertexMap& vertexMap = g_MapManager.getVertexMap(actor.getMoveCapability(), actor.getUnitSize());
-	
 
 	std::set<int> startVertexIDs;
 	for (int yOffSet = 0; yOffSet <= 0; ++yOffSet)
@@ -49,6 +49,7 @@ AStar::AStar(Actor& actor, const Location& targetLocation)
 		return;
 	}
 
+	// 考虑单位周围的单位
 	m_navigator = new fdkgame::navi::AStar(vertexMap, startVertexIDs, targetVertexID);
 }
 
@@ -95,7 +96,45 @@ bool AStar::search()
 	{
 		return true;
 	}
+	
+	std::vector<Actor*> aroundActors;
+	g_ActorBank.getActors(aroundActors, m_actor.getLocation(), m_actor.getRadius()*8, &m_actor);
+	struct PlotData
+	{
+		VertexCoord vertexCoord;
+		int unitSize;
+		bool xAlign;
+		bool yAlign;
+	};
+	std::vector<PlotData> plotDatas;
+	for (size_t i = 0; i < aroundActors.size(); ++i)
+	{
+		Actor* aroundActor = aroundActors[i];
+		VertexCoord vertexCoord = util::locationToVertexCoord(aroundActor->getLocation());
+		Location prunedlocation = util::vertexCoordToLocation(vertexCoord);
+		fdkgame::VectorI iOrignLocation((int)aroundActor->getLocation().x, (int)aroundActor->getLocation().y);
+		fdkgame::VectorI iPrunedlocation((int)prunedlocation.x, (int)prunedlocation.y);
+		const bool xAlign = (iOrignLocation.x == iPrunedlocation.x);
+		const bool yAlign = (iOrignLocation.y == iPrunedlocation.y);
+		
+		PlotData plotData;
+		plotData.vertexCoord = vertexCoord;
+		plotData.unitSize = aroundActor->getUnitSize();
+		plotData.xAlign = xAlign;
+		plotData.yAlign = yAlign;
+		plotDatas.push_back(plotData);
+
+		g_MapManager.plotUnit(plotData.vertexCoord, plotData.unitSize, plotData.xAlign, plotData.yAlign, true);
+	}
+
 	Navigator::SearchResult searchResult = m_navigator->search();
+
+	for (size_t i = 0; i < plotDatas.size(); ++i)
+	{
+		const PlotData& plotData = plotDatas[i];
+		g_MapManager.plotUnit(plotData.vertexCoord, plotData.unitSize, plotData.xAlign, plotData.yAlign, false);
+	}
+
 	if (searchResult == Navigator::SearchResult_PathUnexist)
 	{
 		return false;
