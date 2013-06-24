@@ -71,6 +71,9 @@ bool AStar::search()
 	if (!vertexMap.isValidVertexCoord(startVertexCoord) ||
 		!vertexMap.isValidVertexCoord(targetVertexCoord))
 	{
+		util::output("start vertex(%d/%d) or target vertex(%d/%d) invalid",
+			startVertexCoord.x, startVertexCoord.y,
+			targetVertexCoord.x, targetVertexCoord.y);
 		return false;
 	}
 
@@ -103,6 +106,9 @@ bool AStar::search()
 	if (vertexMap.isBlock(startVertexCoord) ||
 		vertexMap.isBlock(targetVertexCoord) )
 	{
+		util::output("start vertex(%d/%d) or target vertex(%d/%d) is block",
+			startVertexCoord.x, startVertexCoord.y,
+			targetVertexCoord.x, targetVertexCoord.y);
 		return false;
 	}
 
@@ -113,11 +119,17 @@ bool AStar::search()
 
 	if (startVertexID == targetVertexID)
 	{
+		util::output("start vertex(%d/%d) equal to target vertex(%d/%d)",
+			startVertexCoord.x, startVertexCoord.y,
+			targetVertexCoord.x, targetVertexCoord.y);
 		return true;
 	}
 
 	if (vertexMap.isDirectlyReachable(startVertexCoord, targetVertexCoord))
 	{
+		util::output("start vertex(%d/%d) can directly reach to target vertex(%d/%d)",
+			startVertexCoord.x, startVertexCoord.y,
+			targetVertexCoord.x, targetVertexCoord.y);
 		return true;
 	}
 	
@@ -125,6 +137,9 @@ bool AStar::search()
 	Navigator::SearchResult searchResult = m_navigator->search();
 	if (searchResult == Navigator::SearchResult_PathUnexist)
 	{
+		util::output("no path between start vertex(%d/%d) and target vertex(%d/%d)",
+			startVertexCoord.x, startVertexCoord.y,
+			targetVertexCoord.x, targetVertexCoord.y);
 		return false;
 	}
 
