@@ -1,5 +1,6 @@
 #ifndef __ASTAR_H_INCLUDE__
 #define __ASTAR_H_INCLUDE__
+#include <vector>
 #include <set>
 #include <fdkgame/NaviAStar.h>
 #include <fdkgame/NaviJps.h>
@@ -13,10 +14,22 @@ public:
 	virtual void onOpenNode(const fdkgame::navi::Environment& env, int nodeID, int parentNodeID, bool bReopen);
 	virtual void onCloseNode(const fdkgame::navi::Environment& env, int nodeID);
 	void render();
-	typedef std::set<CellCoord> Cells;
-	Cells m_openCells;
-	Cells m_closeCells;
+protected:
+	AStarRecorder();
+private:
+	struct RecNodeInfo
+	{
+		CellCoord cellCoord;
+		int parentNodeID;
+		int openSerial;
+		bool operator<(const RecNodeInfo& info) const { return cellCoord < info.cellCoord; }
+	};
+	typedef std::set<RecNodeInfo> OpenCells;
+	typedef std::vector<RecNodeInfo> CloseCells;	
+	OpenCells m_openCells;
+	CloseCells m_closeCells;
 	CellCoord m_currentClosedCell;
+	int m_nextOpenSerial;
 };
 
 class AStar	

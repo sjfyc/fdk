@@ -30,7 +30,7 @@ void Board::setBlock(const CellCoord& coord, bool bBlock)
 
 bool Board::isBlock(const CellCoord& coord) const
 {
-	return _Base::isNodeReachable(toNodeID(coord));
+	return !_Base::isNodeReachable(toNodeID(coord));
 }
 
 void Board::draw()

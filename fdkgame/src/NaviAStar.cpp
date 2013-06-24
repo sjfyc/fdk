@@ -13,6 +13,7 @@ namespace fdk { namespace game { namespace navi
 		, m_path()
 		, m_pathCost(PATHUNEXIST_COST)
 		, m_recorder(0)
+		, m_bInitedInspect(false)
 	{
 		FDK_ASSERT(m_env.isValidNodeID(startNodeID));
 		FDK_ASSERT(m_env.isValidNodeID(targetNodeID));
@@ -22,8 +23,6 @@ namespace fdk { namespace game { namespace navi
 		m_nodeStates = new NodeState[nodeCount];
 		m_nodeDatas = new NodeData[nodeCount];
 		memset(m_nodeStates, 0, sizeof(NodeState)*nodeCount);
-
-		inspectNode(startNodeID, INVALID_NODEID, 0);
 	}
 
 	AStar::~AStar()
@@ -34,6 +33,11 @@ namespace fdk { namespace game { namespace navi
 
 	AStar::SearchResult AStar::search(int step)
 	{
+		if (!m_bInitedInspect)
+		{
+			inspectNode(m_startNodeID, INVALID_NODEID, 0);
+			m_bInitedInspect = true;
+		}
 		if (m_searchResult != SearchResult_Proceeding)
 		{
 			return m_searchResult;
@@ -44,6 +48,12 @@ namespace fdk { namespace game { namespace navi
 		{
 			OpenListItem current = m_openList.front();			
 			m_openList.pop_front();
+			if (m_nodeStates[current.nodeID] != NodeState_Open)
+			{
+				FDK_ASSERT(m_nodeStates[current.nodeID] == NodeState_Closed);
+				continue;
+			}
+
 			m_nodeStates[current.nodeID] = NodeState_Closed;
 			if (m_recorder)
 			{

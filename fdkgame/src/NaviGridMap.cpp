@@ -95,7 +95,7 @@ namespace fdk { namespace game { namespace navi
 
 	void GridMap::annotateNode(const NodeCoord& coord)
 	{
-		if (isNodeReachable(toNodeID(coord)))
+		if (!isNodeReachable(toNodeID(coord)))
 		{
 			return;
 		}
@@ -138,7 +138,7 @@ namespace fdk { namespace game { namespace navi
 		{
 			return false;
 		}
-		return m_nodes.raw_data()[nodeID].clearanceValue == CLEARANCEVALUE_OBSTACLE;
+		return m_nodes.raw_data()[nodeID].clearanceValue != CLEARANCEVALUE_OBSTACLE;
 	}
 
 }}}

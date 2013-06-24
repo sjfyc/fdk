@@ -5,42 +5,69 @@
 #include "Font.h"
 #include "Option.h"
 
+AStarRecorder::AStarRecorder()
+	: m_nextOpenSerial(0)
+{
+}
+
 void AStarRecorder::onOpenNode(const fdkgame::navi::Environment& env, int nodeID, int parentNodeID, bool bReopen)
 {
-	CellCoord cellCoord = g_Board.toNodeCoord(nodeID);
-	m_openCells.insert(cellCoord);
+	RecNodeInfo recinfo;
+	recinfo.cellCoord = g_Board.toNodeCoord(nodeID);
+	recinfo.parentNodeID = parentNodeID;
+	recinfo.openSerial = m_nextOpenSerial++;
+	m_openCells.insert(recinfo);
 }
 
 void AStarRecorder::onCloseNode(const fdkgame::navi::Environment& env, int nodeID)
 {
 	CellCoord cellCoord = g_Board.toNodeCoord(nodeID);
-	m_openCells.erase(cellCoord);
-	m_closeCells.insert(cellCoord);
+	RecNodeInfo search;
+	search.cellCoord = cellCoord;
+	OpenCells::iterator it = m_openCells.find(search);
+	FDK_ASSERT(it != m_openCells.end());
+	RecNodeInfo recinfo = *it;
+	m_openCells.erase(it);
+	m_closeCells.push_back(recinfo);
 	m_currentClosedCell = cellCoord;
 }
 
 void AStarRecorder::render()
 {
 	// 绘制open表
-	for (Cells::const_iterator it = m_openCells.begin(); it != m_openCells.end(); ++it)
+	for (OpenCells::const_iterator it = m_openCells.begin(); it != m_openCells.end(); ++it)
 	{
-		const CellCoord& cellCoord = *it;
+		const RecNodeInfo& recInfo = *it;
+		const CellCoord& cellCoord = recInfo.cellCoord;
 		if (cellCoord == g_Game.getStartCoord() || cellCoord == g_Game.getTargetCoord())
 		{
 			continue;
 		}
 		util::fillCell(cellCoord, ARGB(255, 128, 128, 255));
+		g_Font.printf(cellCoord.x*CELL_SIZE_X+2.0f,cellCoord.y*CELL_SIZE_Y+2.0f,HGETEXT_LEFT,"%d",recInfo.openSerial);
 	}
 	// 绘制close表
-	for (Cells::const_iterator it = m_closeCells.begin(); it != m_closeCells.end(); ++it)
+	for (size_t i = 0; i < m_closeCells.size(); ++i)
 	{
-		const CellCoord& cellCoord = *it;
+		const RecNodeInfo& recInfo = m_closeCells[i];
+		const CellCoord& cellCoord = recInfo.cellCoord;
 		if (cellCoord == g_Game.getStartCoord() || cellCoord == g_Game.getTargetCoord())
 		{
 			continue;
 		}
 		util::fillCell(cellCoord, ARGB(255, 210, 248, 207));
-	}	
+		g_Font.printf(cellCoord.x*CELL_SIZE_X+2.0f,cellCoord.y*CELL_SIZE_Y+2.0f,HGETEXT_LEFT,"%d", recInfo.openSerial);
+		g_Font.printf((cellCoord.x+1)*CELL_SIZE_X-20.0f,(cellCoord.y+1)*CELL_SIZE_Y-10.0f,HGETEXT_LEFT,"%d", i);
+		
+		if (recInfo.parentNodeID != fdkgame::navi::INVALID_NODEID)
+		{
+			CellCoord parentCellCoord = g_Board.toNodeCoord(m_closeCells[i].parentNodeID);
+			g_HGE->Gfx_RenderLine(cellCoord.x*CELL_SIZE_X+CELL_SIZE_X/2.0f, cellCoord.y*CELL_SIZE_Y+CELL_SIZE_Y/2.0f, 
+				parentCellCoord.x*CELL_SIZE_X+CELL_SIZE_X/2.0f, parentCellCoord.y*CELL_SIZE_Y+CELL_SIZE_Y/2.0f,
+				ARGB(220, 78, 116, 148)
+				);
+		}				
+	}
 	// 绘制当前关闭节点
 	if (!(m_currentClosedCell == g_Game.getStartCoord() || m_currentClosedCell == g_Game.getTargetCoord()) )
 	{

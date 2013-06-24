@@ -77,6 +77,10 @@ namespace fdk { namespace game { namespace navi
 	JpsUtil::Direction JpsUtil::getDirectionFromParentToNode(int mapWidth, int parentNodeID, int nodeID)
 	{	
 		// top:0 topRight:1 ... clockwise
+		if (parentNodeID == INVALID_NODEID || nodeID == INVALID_NODEID)
+		{
+			return NO_DIRECTION;
+		}
 		if (parentNodeID - mapWidth == nodeID) 
 		{
 			return 0;
@@ -160,12 +164,14 @@ namespace fdk { namespace game { namespace navi
 		
 		if (isDiagonalDirection(direction)) 
 		{
-			if (isNeighbourInDirectionReachable(env, nodeCoord, direction+6) && 
+			if (//isNeighbourInDirectionReachable(env, nodeCoord, direction+3) &&
+				isNeighbourInDirectionReachable(env, nodeCoord, direction+6) && 
 				!isNeighbourInDirectionReachable(env, nodeCoord, direction+5))
 			{
 				setEnumMask(directions, (direction + 6) % 8);
 			}
-			if (isNeighbourInDirectionReachable(env, nodeCoord, direction +2) && 
+			if (//isNeighbourInDirectionReachable(env, nodeCoord, direction +5) && 
+				isNeighbourInDirectionReachable(env, nodeCoord, direction +2) && 
 				!isNeighbourInDirectionReachable(env, nodeCoord, direction +3)) 
 			{
 				setEnumMask(directions, (direction + 2) % 8);
@@ -173,12 +179,14 @@ namespace fdk { namespace game { namespace navi
 		} 
 		else 
 		{
-			if (isNeighbourInDirectionReachable(env, nodeCoord, direction +1) && 
+			if (//isNeighbourInDirectionReachable(env, nodeCoord, direction) &&
+				isNeighbourInDirectionReachable(env, nodeCoord, direction +1) && 
 				!isNeighbourInDirectionReachable(env, nodeCoord, direction +2)) 
 			{
 				setEnumMask(directions, (direction + 1) % 8);
 			}
-			if (isNeighbourInDirectionReachable(env, nodeCoord, direction +7) && 
+			if (//isNeighbourInDirectionReachable(env, nodeCoord, direction) && 
+				isNeighbourInDirectionReachable(env, nodeCoord, direction +7) && 
 				!isNeighbourInDirectionReachable(env, nodeCoord, direction +6)) 
 			{
 				setEnumMask(directions, (direction + 7) % 8);

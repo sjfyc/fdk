@@ -68,6 +68,7 @@ namespace fdk { namespace game { namespace navi
 		std::vector<int> m_path;
 		int m_pathCost;
 		AStarRecorder* m_recorder;
+		bool m_bInitedInspect;
 	};
 
 	inline int AStar::NodeData::fValue() const
