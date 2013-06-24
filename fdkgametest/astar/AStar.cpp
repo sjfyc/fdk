@@ -16,13 +16,13 @@ AStar::~AStar()
 
 void AStar::onOpenNode(int nodeID, int parentNodeID, bool bReopen)
 {
-	CellCoord cellCoord = g_Board.getNodeCoord(nodeID);
+	CellCoord cellCoord = g_Board.toNodeCoord(nodeID);
 	m_openCells.insert(cellCoord);
 }
 
 void AStar::onCloseNode(int nodeID)
 {
-	CellCoord cellCoord = g_Board.getNodeCoord(nodeID);
+	CellCoord cellCoord = g_Board.toNodeCoord(nodeID);
 	m_openCells.erase(cellCoord);
 	m_closeCells.insert(cellCoord);
 	m_currentClosedCell = cellCoord;
@@ -65,7 +65,7 @@ void AStar::render()
 			Location prevCenterLocation = util::cellCoordToLocation(prevCellCoord);
 			prevCenterLocation += Location(CELL_SIZE_X/2, CELL_SIZE_Y/2);
 
-			CellCoord currentCellCoord = g_Board.getNodeCoord(path[i]);
+			CellCoord currentCellCoord = g_Board.toNodeCoord(path[i]);
 			Location currentCenterLocation = util::cellCoordToLocation(currentCellCoord);
 			currentCenterLocation += Location(CELL_SIZE_X/2, CELL_SIZE_Y/2);
 

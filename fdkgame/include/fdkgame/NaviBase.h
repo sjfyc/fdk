@@ -2,6 +2,7 @@
 #define __FDKGAME_NAVIBASE_H_INCLUDE__
 #include "Base.h"
 #include <vector>
+#include "Math.h"
 
 namespace fdk { namespace game { namespace navi
 {
@@ -27,6 +28,21 @@ namespace fdk { namespace game { namespace navi
 		virtual int getNodeSpaceSize() const = 0;
 		virtual int getHeuristic(int startNodeID, int targetNodeID) const = 0;
 		virtual void getSuccessorNodes(Navigator& navigator, int nodeID, std::vector<SuccessorNodeInfo>& result) const = 0;
+	};
+
+	class FDKGAME_API GridBasedEnv
+		: public Environment
+	{
+	public:
+		typedef Vector2D<int> NodeCoord;
+		virtual ~GridBasedEnv() {}
+		virtual int getSizeX() const = 0;
+		virtual int getSizeY() const = 0;
+		int toNodeID(const NodeCoord& nodeCoord) const;
+		NodeCoord toNodeCoord(int nodeID) const;
+		bool isValidNodeCoord(const NodeCoord& nodeCoord) const;
+		// Environment interfaces
+		virtual int getNodeSpaceSize() const;
 	};
 
 	class FDKGAME_API EnvironmentChecker

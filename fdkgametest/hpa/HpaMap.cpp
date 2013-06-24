@@ -32,12 +32,12 @@ void HpaMap::draw()
 	for (AbstractGraph::Nodes::const_iterator it = nodes.begin(); it != nodes.end(); ++it)
 	{
 		const AbstractNode* node = *it;	
-		if (node->getInfo().lowLevelNodeID == getLowLevelMap().getNodeID(g_Game.getStartCoord()) ||
-			node->getInfo().lowLevelNodeID == getLowLevelMap().getNodeID(g_Game.getTargetCoord()))
+		if (node->getInfo().lowLevelNodeID == getLowLevelMap().toNodeID(g_Game.getStartCoord()) ||
+			node->getInfo().lowLevelNodeID == getLowLevelMap().toNodeID(g_Game.getTargetCoord()))
 		{
 			continue;
 		}
-		CellCoord cellCoord = getLowLevelMap().getNodeCoord(node->getInfo().lowLevelNodeID);
+		CellCoord cellCoord = getLowLevelMap().toNodeCoord(node->getInfo().lowLevelNodeID);
 		util::fillCell(cellCoord, ARGB(255, 210, 248, 207));
 
 		if (g_Option.isOn(Option::Toggle_ShowPortID))
@@ -54,8 +54,8 @@ void HpaMap::draw()
 		{
 			continue;
 		}
-		CellCoord startCellCoord = getLowLevelMap().getNodeCoord(edge->getStartNode().getInfo().lowLevelNodeID);
-		CellCoord targetCellCoord = getLowLevelMap().getNodeCoord(edge->getTargetNode().getInfo().lowLevelNodeID);
+		CellCoord startCellCoord = getLowLevelMap().toNodeCoord(edge->getStartNode().getInfo().lowLevelNodeID);
+		CellCoord targetCellCoord = getLowLevelMap().toNodeCoord(edge->getTargetNode().getInfo().lowLevelNodeID);
 
 		g_HGE->Gfx_RenderLine(
 			startCellCoord.x*CELL_SIZE_X+CELL_SIZE_X/2,
@@ -139,7 +139,7 @@ void Hpa::render()
 			Location prevCenterLocation = util::cellCoordToLocation(prevCellCoord);
 			prevCenterLocation += Location(CELL_SIZE_X/2, CELL_SIZE_Y/2);
 
-			CellCoord currentCellCoord = g_Board.getNodeCoord(path[i]);
+			CellCoord currentCellCoord = g_Board.toNodeCoord(path[i]);
 			Location currentCenterLocation = util::cellCoordToLocation(currentCellCoord);
 			currentCenterLocation += Location(CELL_SIZE_X/2, CELL_SIZE_Y/2);
 
@@ -159,7 +159,7 @@ void Hpa::render()
 			Location prevCenterLocation = util::cellCoordToLocation(prevCellCoord);
 			prevCenterLocation += Location(CELL_SIZE_X/2, CELL_SIZE_Y/2);
 
-			CellCoord currentCellCoord = g_Board.getNodeCoord(m_path[i]);
+			CellCoord currentCellCoord = g_Board.toNodeCoord(m_path[i]);
 			Location currentCenterLocation = util::cellCoordToLocation(currentCellCoord);
 			currentCenterLocation += Location(CELL_SIZE_X/2, CELL_SIZE_Y/2);
 
@@ -185,7 +185,7 @@ int Hpa::popNextPathNode()
 
 void Hpa::onSearchBegining(const fdkgame::findpath::HpaMap& env, int startNodeID, int endNodeID)
 {
-	CellCoord cellCoord = env.getLowLevelMap().getNodeCoord(
+	CellCoord cellCoord = env.getLowLevelMap().toNodeCoord(
 		env.getAbstractGraph().getNode(startNodeID).getInfo().lowLevelNodeID
 		);
 	ignoreAroundActors(env.getLowLevelMap(), util::cellCoordToLocation(cellCoord), CELL_SIZE_X*8);
@@ -208,7 +208,7 @@ bool Hpa::checkSuccessorNode(const fdkgame::findpath::HpaMap& env, int nodeID, i
 
 void Hpa::onSearchBegining(const fdkgame::findpath::HpaCluster& env, int startNodeID, int endNodeID)
 {
-	CellCoord cellCoord = env.getOrignMap().getNodeCoord(env.toOrignNodeID(startNodeID));
+	CellCoord cellCoord = env.getOrignMap().toNodeCoord(env.toOrignNodeID(startNodeID));
 	ignoreAroundActors(env.getOrignMap(), util::cellCoordToLocation(cellCoord), CELL_SIZE_X*8);
 }
 
@@ -228,7 +228,7 @@ bool Hpa::checkSuccessorNode(const fdkgame::findpath::HpaCluster& env, int nodeI
 
 void Hpa::onSearchBegining(const fdkgame::findpath::GridMap& env, int startNodeID, int endNodeID)
 {
-	ignoreAroundActors(env, util::cellCoordToLocation(env.getNodeCoord(startNodeID))+Location(CELL_SIZE_X/2,CELL_SIZE_Y/2), CELL_SIZE_X*8);
+	ignoreAroundActors(env, util::cellCoordToLocation(env.toNodeCoord(startNodeID))+Location(CELL_SIZE_X/2,CELL_SIZE_Y/2), CELL_SIZE_X*8);
 }
 
 void Hpa::onSearchEnded(const fdkgame::findpath::GridMap& env, int startNodeID, int endNodeID)
@@ -268,7 +268,7 @@ void Hpa::ignoreAroundActors(const fdkgame::findpath::GridMap& env, const Locati
 		{
 			for (int x = tl.x; x <= br.x; ++x)
 			{
-				m_ignoredNodes.insert(env.getNodeID(CellCoord(x, y)));
+				m_ignoredNodes.insert(env.toNodeID(CellCoord(x, y)));
 			}
 		}
 	}

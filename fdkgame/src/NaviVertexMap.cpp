@@ -29,41 +29,7 @@ namespace fdk { namespace game { namespace navi
 			}
 		}
 	}
-
-	size_t VertexMap::getSizeX() const
-	{
-		return m_data.size_x();
-	}
-
-	size_t VertexMap::getSizeY() const
-	{
-		return m_data.size_y();
-	}
-
-	VertexID VertexMap::toVertexID(const VertexCoord& vertexCoord) const
-	{
-		FDK_ASSERT(isValidVertexCoord(vertexCoord));
-		return m_data.to_index(vertexCoord.x, vertexCoord.y);
-	}
-
-	VertexCoord VertexMap::toVertexCoord(VertexID vertexID) const
-	{
-		FDK_ASSERT(isValidVertexID(vertexID));
-		MapData::size_type x, y;
-		m_data.to_index(vertexID, x, y);
-		return VertexCoord(x, y);
-	}
-
-	bool VertexMap::isValidVertexID(VertexID vertexID) const
-	{
-		return vertexID >= 0 && m_data.is_valid_index(vertexID);	
-	}
 	
-	bool VertexMap::isValidVertexCoord(const VertexCoord& vertexCoord) const
-	{
-		return vertexCoord.x >= 0 && vertexCoord.y >= 0 && m_data.is_valid_index(vertexCoord.x, vertexCoord.y);
-	}
-
 	int VertexMap::getBlockValue(const VertexCoord& vertexCoord) const
 	{
 		return m_data(vertexCoord.x, vertexCoord.y);
@@ -81,7 +47,7 @@ namespace fdk { namespace game { namespace navi
 			for (UnitSize x = -m_unitSize; x <= m_unitSize; ++x)
 			{				
 				VertexCoord vertexCoord(cellCoord.x*2+x, cellCoord.y*2+y);
-				if (isValidVertexCoord(vertexCoord))
+				if (isValidNodeCoord(vertexCoord))
 				{
 					m_data(vertexCoord.x, vertexCoord.y) += (bSet ? 1 : -1);
 					FDK_ASSERT(m_data(vertexCoord.x, vertexCoord.y) >= 0);
@@ -90,14 +56,9 @@ namespace fdk { namespace game { namespace navi
 		}		
 	}
 
-	int VertexMap::getNodeSpaceSize() const
-	{
-		return m_data.count();
-	}
-
 	int VertexMap::getHeuristic(int startNodeID, int targetNodeID) const
 	{
-		return getHeuristic(toVertexCoord(startNodeID), toVertexCoord(targetNodeID));
+		return getHeuristic(toNodeCoord(startNodeID), toNodeCoord(targetNodeID));
 	}
 
 	int VertexMap::getHeuristic(const VertexCoord& startVertexCoord, const VertexCoord& targetVertexCoord) const
@@ -117,7 +78,7 @@ namespace fdk { namespace game { namespace navi
 
 	void VertexMap::getSuccessorNodes(Navigator& navigator, int nodeID, std::vector<SuccessorNodeInfo>& result) const
 	{
-		VertexCoord coord = toVertexCoord(nodeID);
+		VertexCoord coord = toNodeCoord(nodeID);
 
 		const bool bLeft = tryAddSuccessorNode(navigator, result, VertexCoord(coord.x-1,coord.y), COST_STRAIGHT, nodeID);		
 		const bool bTop = tryAddSuccessorNode(navigator, result, VertexCoord(coord.x,coord.y-1), COST_STRAIGHT, nodeID);
@@ -144,7 +105,7 @@ namespace fdk { namespace game { namespace navi
 
 	bool VertexMap::tryAddSuccessorNode(Navigator& navigator, std::vector<SuccessorNodeInfo>& result, const VertexCoord& vertexCoord, int cost, int parentNodeID) const
 	{
-		if (!isValidVertexCoord(vertexCoord))
+		if (!isValidNodeCoord(vertexCoord))
 		{
 			return false;
 		}
@@ -152,7 +113,7 @@ namespace fdk { namespace game { namespace navi
 		{
 			return false;
 		}
-		const VertexID vertexID = toVertexID(vertexCoord);
+		const VertexID vertexID = toNodeID(vertexCoord);
 		
 		//if (navigator.getEnvironmentChecker() &&
 		//	!navigator.getEnvironmentChecker()->checkSuccessorNode(*this, nodeID, parentNodeID))
@@ -175,7 +136,7 @@ namespace fdk { namespace game { namespace navi
 			for (UnitSize x = -totalExtend; x <= totalExtend+(xAlign?0:1); ++x)
 			{				
 				VertexCoord aroundVertexCoord(vertexCoord.x+x, vertexCoord.y+y);
-				if (isValidVertexCoord(aroundVertexCoord))
+				if (isValidNodeCoord(aroundVertexCoord))
 				{
 					m_data(aroundVertexCoord.x, aroundVertexCoord.y) += (bPlot ? 1 : -1);
 					FDK_ASSERT(m_data(aroundVertexCoord.x, aroundVertexCoord.y) >= 0);
@@ -255,7 +216,7 @@ namespace fdk { namespace game { namespace navi
 		for (int i = 1; i <= dx; ++i)
 		{
 			VertexCoord vertexCoord = VertexCoord(x, y);
-			if (!isValidVertexCoord(vertexCoord) || isBlock(vertexCoord) )
+			if (!isValidNodeCoord(vertexCoord) || isBlock(vertexCoord) )
 			{
 				return false;
 			}
@@ -265,14 +226,14 @@ namespace fdk { namespace game { namespace navi
 				if (state == DependOnY) 
 				{
 					vertexCoord.reset(x, y+sy);
-					if (!isValidVertexCoord(vertexCoord) || isBlock(vertexCoord) )
+					if (!isValidNodeCoord(vertexCoord) || isBlock(vertexCoord) )
 					{
 						return false;
 					}
 
 					x = x + sx;
 					vertexCoord.reset(x, y);
-					if (!isValidVertexCoord(vertexCoord) || isBlock(vertexCoord) )
+					if (!isValidNodeCoord(vertexCoord) || isBlock(vertexCoord) )
 					{
 						return false;
 					}
@@ -281,14 +242,14 @@ namespace fdk { namespace game { namespace navi
 				else
 				{
 					vertexCoord.reset(x+sx, y);
-					if (!isValidVertexCoord(vertexCoord) || isBlock(vertexCoord) )
+					if (!isValidNodeCoord(vertexCoord) || isBlock(vertexCoord) )
 					{
 						return false;
 					}
 
 					y = y + sy;
 					vertexCoord.reset(x, y);
-					if (!isValidVertexCoord(vertexCoord) || isBlock(vertexCoord) )
+					if (!isValidNodeCoord(vertexCoord) || isBlock(vertexCoord) )
 					{
 						return false;
 					}
@@ -306,6 +267,16 @@ namespace fdk { namespace game { namespace navi
 			NError = NError + 2 * dy;
 		}
 		return true;
+	}
+
+	int VertexMap::getSizeX() const
+	{
+		return (int)m_data.size_x();
+	}
+
+	int VertexMap::getSizeY() const
+	{
+		return (int)m_data.size_y();
 	}
 
 }}}

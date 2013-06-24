@@ -68,8 +68,8 @@ bool AStar::search()
 	const VertexCoord& startVertexCoord = util::locationToVertexCoord(startLocation);
 	const VertexCoord& targetVertexCoord = util::locationToVertexCoord(m_targetLocation);	
 
-	if (!vertexMap.isValidVertexCoord(startVertexCoord) ||
-		!vertexMap.isValidVertexCoord(targetVertexCoord))
+	if (!vertexMap.isValidNodeCoord(startVertexCoord) ||
+		!vertexMap.isValidNodeCoord(targetVertexCoord))
 	{
 		util::output("start vertex(%d/%d) or target vertex(%d/%d) invalid",
 			startVertexCoord.x, startVertexCoord.y,
@@ -112,8 +112,8 @@ bool AStar::search()
 		return false;
 	}
 
-	int startVertexID = vertexMap.toVertexID(startVertexCoord);
-	int targetVertexID = vertexMap.toVertexID(targetVertexCoord);
+	int startVertexID = vertexMap.toNodeID(startVertexCoord);
+	int targetVertexID = vertexMap.toNodeID(targetVertexCoord);
 
 	m_locationPath.push_back(m_targetLocation);
 
@@ -148,7 +148,7 @@ bool AStar::search()
 	const std::vector<int>& path = m_navigator->getPath();
 	for (size_t i = 0; i < path.size(); ++i)
 	{
-		VertexCoord vertexCoord = vertexMap.toVertexCoord(path[i]);
+		VertexCoord vertexCoord = vertexMap.toNodeCoord(path[i]);
 		m_vertexCoordPath.push_back(vertexCoord);
 		Location location = util::vertexCoordToLocation(vertexCoord);
 		m_locationPath.push_back(location);	

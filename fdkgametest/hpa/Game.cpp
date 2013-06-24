@@ -85,8 +85,8 @@ void Game::onEvent(int eventType, void* params)
 			{				
 				delete m_hpa;
 				m_hpa = new Hpa(0, g_HpaMap, 
-					g_Board.getNodeID(m_startCoord),
-					g_Board.getNodeID(m_targetCoord));
+					g_Board.toNodeID(m_startCoord),
+					g_Board.toNodeID(m_targetCoord));
 				if (m_hpa->getError() == Hpa::Error_PathUnexist)
 				{
 					util::output("path unexist");

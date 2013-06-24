@@ -2,6 +2,7 @@
 #define __FDKGAME_FINDPATHBASE_H_INCLUDE__
 #include "Base.h"
 #include <vector>
+#include "Math.h"
 
 namespace fdk { namespace game { namespace findpath
 {
@@ -31,6 +32,21 @@ namespace fdk { namespace game { namespace findpath
 		virtual int getHeuristic(int startNodeID, int targetNodeID) const = 0;
 		virtual void getSuccessorNodes(PathFinder& pathFinder, int nodeID, std::vector<SuccessorNodeInfo>& result) const = 0;
 		virtual bool isObstacle(int nodeID) const = 0;
+	};
+
+	class FDKGAME_API GridBasedEnv
+		: public Environment
+	{
+	public:
+		typedef Vector2D<int> NodeCoord;
+		virtual ~GridBasedEnv() {}
+		virtual int getSizeX() const = 0;
+		virtual int getSizeY() const = 0;
+		int toNodeID(const NodeCoord& nodeCoord) const;
+		NodeCoord toNodeCoord(int nodeID) const;
+		bool isValidNodeCoord(const NodeCoord& nodeCoord) const;
+		// Environment interfaces
+		virtual int getNodeSpaceSize() const;
 	};
 
 	class FDKGAME_API EnvironmentChecker

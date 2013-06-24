@@ -33,6 +33,7 @@ namespace fdk { namespace game { namespace navi
 		int getStartNodeID() const;
 		int getTargetNodeID() const;
 		AStarRecorder* setRecorder(AStarRecorder* recorder);
+		virtual void getSuccessorNodes(const Environment& env, int nodeID, int parentNodeID, std::vector<SuccessorNodeInfo>& result);
 	private:
 		enum NodeStateEnum
 		{

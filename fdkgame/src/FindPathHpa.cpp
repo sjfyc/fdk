@@ -187,8 +187,8 @@ namespace fdk { namespace game { namespace findpath
 
 		for (int x = xStart; x <= xEnd; ++x)
 		{			
-			node1ID = m_lowLevelMap.getNodeID(VectorI(x, y));
-			node2ID = m_lowLevelMap.getNodeID(VectorI(x, y+1));
+			node1ID = m_lowLevelMap.toNodeID(VectorI(x, y));
+			node2ID = m_lowLevelMap.toNodeID(VectorI(x, y+1));
 
 			if (!m_lowLevelMap.meetMinClearanceValueRequired(node1ID) ||
 				!m_lowLevelMap.meetMinClearanceValueRequired(node2ID) )
@@ -209,8 +209,8 @@ namespace fdk { namespace game { namespace findpath
 					break;
 				}
 
-				node1ID = m_lowLevelMap.getNodeID(VectorI(x, y));
-				node2ID = m_lowLevelMap.getNodeID(VectorI(x, y+1));
+				node1ID = m_lowLevelMap.toNodeID(VectorI(x, y));
+				node2ID = m_lowLevelMap.toNodeID(VectorI(x, y+1));
 				if (!m_lowLevelMap.meetMinClearanceValueRequired(node1ID) ||
 					!m_lowLevelMap.meetMinClearanceValueRequired(node2ID) )
 				{
@@ -224,18 +224,18 @@ namespace fdk { namespace game { namespace findpath
 
 			if (end-start+1 > 6)
 			{// 在两边创建port
-				bridge.lowLevelNode1ID = m_lowLevelMap.getNodeID(VectorI(start, y));
-				bridge.lowLevelNode2ID = m_lowLevelMap.getNodeID(VectorI(start, y+1));
+				bridge.lowLevelNode1ID = m_lowLevelMap.toNodeID(VectorI(start, y));
+				bridge.lowLevelNode2ID = m_lowLevelMap.toNodeID(VectorI(start, y+1));
 				m_bridges.push_back(bridge);
 
-				bridge.lowLevelNode1ID = m_lowLevelMap.getNodeID(VectorI(end, y));
-				bridge.lowLevelNode2ID = m_lowLevelMap.getNodeID(VectorI(end, y+1));
+				bridge.lowLevelNode1ID = m_lowLevelMap.toNodeID(VectorI(end, y));
+				bridge.lowLevelNode2ID = m_lowLevelMap.toNodeID(VectorI(end, y+1));
 				m_bridges.push_back(bridge);
 			}
 			else
 			{// 在中间创建port
-				bridge.lowLevelNode1ID = m_lowLevelMap.getNodeID( (VectorI(start, y)+VectorI(end, y))/2 );
-				bridge.lowLevelNode2ID = m_lowLevelMap.getNodeID( (VectorI(start, y+1)+VectorI(end, y+1))/2 );
+				bridge.lowLevelNode1ID = m_lowLevelMap.toNodeID( (VectorI(start, y)+VectorI(end, y))/2 );
+				bridge.lowLevelNode2ID = m_lowLevelMap.toNodeID( (VectorI(start, y+1)+VectorI(end, y+1))/2 );
 				m_bridges.push_back(bridge);
 			}
 		}
@@ -247,8 +247,8 @@ namespace fdk { namespace game { namespace findpath
 
 		for (int y = yStart; y <= yEnd; ++y)
 		{			
-			node1ID = m_lowLevelMap.getNodeID(VectorI(x, y));
-			node2ID = m_lowLevelMap.getNodeID(VectorI(x+1, y));
+			node1ID = m_lowLevelMap.toNodeID(VectorI(x, y));
+			node2ID = m_lowLevelMap.toNodeID(VectorI(x+1, y));
 
 			if (!m_lowLevelMap.meetMinClearanceValueRequired(node1ID) ||
 				!m_lowLevelMap.meetMinClearanceValueRequired(node2ID) )
@@ -276,8 +276,8 @@ namespace fdk { namespace game { namespace findpath
 					break;
 				}
 
-				node1ID = m_lowLevelMap.getNodeID(VectorI(x, y));
-				node2ID = m_lowLevelMap.getNodeID(VectorI(x+1, y));
+				node1ID = m_lowLevelMap.toNodeID(VectorI(x, y));
+				node2ID = m_lowLevelMap.toNodeID(VectorI(x+1, y));
 				if (!m_lowLevelMap.meetMinClearanceValueRequired(node1ID) ||
 					!m_lowLevelMap.meetMinClearanceValueRequired(node2ID) )
 				{
@@ -292,24 +292,24 @@ namespace fdk { namespace game { namespace findpath
 			int length = end-start+1;
 			if (length > 6)
 			{// 在两边创建port
-				bridge.lowLevelNode1ID = m_lowLevelMap.getNodeID(VectorI(x, start));
-				bridge.lowLevelNode2ID = m_lowLevelMap.getNodeID(VectorI(x+1, start));
+				bridge.lowLevelNode1ID = m_lowLevelMap.toNodeID(VectorI(x, start));
+				bridge.lowLevelNode2ID = m_lowLevelMap.toNodeID(VectorI(x+1, start));
 				m_bridges.push_back(bridge);
 
-				bridge.lowLevelNode1ID = m_lowLevelMap.getNodeID(VectorI(x, end));
-				bridge.lowLevelNode2ID = m_lowLevelMap.getNodeID(VectorI(x+1, end));
+				bridge.lowLevelNode1ID = m_lowLevelMap.toNodeID(VectorI(x, end));
+				bridge.lowLevelNode2ID = m_lowLevelMap.toNodeID(VectorI(x+1, end));
 				m_bridges.push_back(bridge);
 				if (length > 12)
 				{// 在中间创建port
-					bridge.lowLevelNode1ID = m_lowLevelMap.getNodeID( (VectorI(x, start)+VectorI(x, end))/2 );
-					bridge.lowLevelNode2ID = m_lowLevelMap.getNodeID( (VectorI(x+1, start)+VectorI(x+1, end))/2 );
+					bridge.lowLevelNode1ID = m_lowLevelMap.toNodeID( (VectorI(x, start)+VectorI(x, end))/2 );
+					bridge.lowLevelNode2ID = m_lowLevelMap.toNodeID( (VectorI(x+1, start)+VectorI(x+1, end))/2 );
 					m_bridges.push_back(bridge);
 				}
 			}
 			else
 			{// 在中间创建port
-				bridge.lowLevelNode1ID = m_lowLevelMap.getNodeID( (VectorI(x, start)+VectorI(x, end))/2 );
-				bridge.lowLevelNode2ID = m_lowLevelMap.getNodeID( (VectorI(x+1, start)+VectorI(x+1, end))/2 );
+				bridge.lowLevelNode1ID = m_lowLevelMap.toNodeID( (VectorI(x, start)+VectorI(x, end))/2 );
+				bridge.lowLevelNode2ID = m_lowLevelMap.toNodeID( (VectorI(x+1, start)+VectorI(x+1, end))/2 );
 				m_bridges.push_back(bridge);
 			}
 		}
@@ -397,7 +397,7 @@ namespace fdk { namespace game { namespace findpath
 
 	HpaCluster& HpaMap::getClusterOfLowLevelNode(int lowLevelNodeID) const
 	{
-		GridMap::NodeCoord lowLevelNodeCoord = m_lowLevelMap.getNodeCoord(lowLevelNodeID);
+		GridMap::NodeCoord lowLevelNodeCoord = m_lowLevelMap.toNodeCoord(lowLevelNodeID);
 		ClusterCoord::ValueType clusterCoordX = lowLevelNodeCoord.x/m_maxClusterSize.x;
 		ClusterCoord::ValueType clusterCoordY = lowLevelNodeCoord.y/m_maxClusterSize.y;
 		return *m_clusters(clusterCoordX, clusterCoordY);

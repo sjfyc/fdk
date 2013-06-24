@@ -41,7 +41,7 @@ void Actor::tick(float delta)
 			else
 			{
 				const int converNodes = (int)(m_radius*2/CELL_SIZE_X)+1;
-				CellCoord coord = g_HpaMap.getLowLevelMap().getNodeCoord(nodeID);
+				CellCoord coord = g_HpaMap.getLowLevelMap().toNodeCoord(nodeID);
 				Location location = util::cellCoordToLocation(coord) + 
 					Location((float)converNodes*CELL_SIZE_X/2, (float)converNodes*CELL_SIZE_Y/2);
 				move(location, 100);
@@ -95,8 +95,8 @@ void Actor::searchPath(const Location& targetLocation)
 	}
 
 	m_hpa = new Hpa(this, g_HpaMap, 
-		g_HpaMap.getLowLevelMap().getNodeID(startCellCoord),
-		g_HpaMap.getLowLevelMap().getNodeID(targetCellCoord));
+		g_HpaMap.getLowLevelMap().toNodeID(startCellCoord),
+		g_HpaMap.getLowLevelMap().toNodeID(targetCellCoord));
 	if (m_hpa->getError() == Hpa::Error_PathUnexist)
 	{
 		util::output("actor can't find path");

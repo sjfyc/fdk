@@ -10,21 +10,13 @@ namespace fdk { namespace game { namespace navi
 
 	// 对应某种尺寸单位的顶点地图：每个顶点存储对于该尺寸单位的碰撞数量
 	class FDKGAME_API VertexMap
-		: public Environment
+		: public GridBasedEnv
 	{
 	public:
 		VertexMap(BlockMap& blockMap, UnitSize unitSize);
 		~VertexMap();		
 		void rebuildFromBlockMap();		
 		
-		size_t getSizeX() const;
-		size_t getSizeY() const;
-
-		VertexID toVertexID(const VertexCoord& vertexCoord) const;
-		VertexCoord toVertexCoord(VertexID vertexID) const;		
-		bool isValidVertexID(VertexID vertexID) const;
-		bool isValidVertexCoord(const VertexCoord& vertexCoord) const;
-
 		int getBlockValue(const VertexCoord& vertexCoord) const;
 		bool isBlock(const VertexCoord& vertexCoord) const;
 		void onSetBlock(const CellCoord& cellCoord, bool bSet);
@@ -33,8 +25,11 @@ namespace fdk { namespace game { namespace navi
 
 		bool isDirectlyReachable(const VertexCoord& startVertexCoord, const VertexCoord& targetVertexCoord) const;
 
+		// GridBasedEnv interfaces
+		virtual int getSizeX() const;
+		virtual int getSizeY() const;
+
 		// Environment interfaces
-		virtual int getNodeSpaceSize() const;
 		virtual int getHeuristic(int startNodeID, int targetNodeID) const;
 		virtual void getSuccessorNodes(Navigator& navigator, int nodeID, std::vector<SuccessorNodeInfo>& result) const;
 	private:

@@ -91,8 +91,8 @@ void Game::onEvent(int eventType, void* params)
 			{				
 				delete m_astar;
 				m_astar = new AStar(g_Board, 
-					g_Board.getNodeID(m_startCoord),
-					g_Board.getNodeID(m_targetCoord));
+					g_Board.toNodeID(m_startCoord),
+					g_Board.toNodeID(m_targetCoord));
 			}
 		}
 	}

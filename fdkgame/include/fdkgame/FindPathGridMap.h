@@ -7,7 +7,7 @@
 namespace fdk { namespace game { namespace findpath
 {
 	class FDKGAME_API GridMap
-		: public Environment
+		: public GridBasedEnv
 	{
 	public:		
 		struct Node
@@ -16,7 +16,6 @@ namespace fdk { namespace game { namespace findpath
 			int clearanceValue; // -1代表未初始化，0代表障碍，>=1代表正常值
 		};
 		typedef Array2D<Node> MapData;
-		typedef VectorI NodeCoord;
 		static const int CLEARANCEVALUE_UNINITED = -1;
 		static const int CLEARANCEVALUE_OBSTACLE = 0;
 		static const int COST_STRAIGHT = 100;	
@@ -34,14 +33,13 @@ namespace fdk { namespace game { namespace findpath
 		bool meetMinClearanceValueRequired(int nodeID) const;
 		int getClearanceValue(int nodeID) const;				
 		
-		NodeCoord getNodeCoord(int nodeID) const;
-		int getNodeID(const NodeCoord& coord) const;
-		bool isValidNodeCoord(const NodeCoord& coord) const;
-		
 		bool isDirectlyReachable(int startNodeID, int targetNodeID, EnvironmentChecker* envChecker=0) const;
 
+		// GridBasedEnv interfaces
+		virtual int getSizeX() const;
+		virtual int getSizeY() const;
+
 		// Environment interfaces
-		virtual int getNodeSpaceSize() const;
 		virtual int getHeuristic(int startNodeID, int targetNodeID) const;
 		virtual void getSuccessorNodes(PathFinder& pathFinder, int nodeID, std::vector<SuccessorNodeInfo>& result) const;
 		virtual bool isObstacle(int nodeID) const;

@@ -15,20 +15,26 @@ namespace fdk { namespace game { namespace findpath
 		}
 	}
 
-	int GridMap::getNodeSpaceSize() const
+	int GridMap::getSizeX() const
 	{
-		return m_nodes.count();
+		return (int)m_nodes.size_x();
 	}
+
+	int GridMap::getSizeY() const
+	{
+		return (int)m_nodes.size_y();
+	}
+
 
 	int GridMap::getHeuristic(int startNodeID, int targetNodeID) const
 	{
-		VectorI startToTarget = getNodeCoord(targetNodeID) - getNodeCoord(startNodeID);
+		VectorI startToTarget = toNodeCoord(targetNodeID) - toNodeCoord(startNodeID);
 		return (abs(startToTarget.x) + abs(startToTarget.y)) * COST_STRAIGHT;
 	}
 
 	void GridMap::getSuccessorNodes(PathFinder& pathFinder, int nodeID, std::vector<SuccessorNodeInfo>& result) const
 	{
-		NodeCoord coord = getNodeCoord(nodeID);
+		NodeCoord coord = toNodeCoord(nodeID);
 	
 		const bool bLeft = tryAddSuccessorNode(pathFinder, result, NodeCoord(coord.x-1,coord.y), COST_STRAIGHT, nodeID);		
 		const bool bTop = tryAddSuccessorNode(pathFinder, result, NodeCoord(coord.x,coord.y-1), COST_STRAIGHT, nodeID);
@@ -55,11 +61,11 @@ namespace fdk { namespace game { namespace findpath
 	
 	bool GridMap::tryAddSuccessorNode(PathFinder& pathFinder, std::vector<SuccessorNodeInfo>& result, const NodeCoord& coord, int cost, int parentNodeID) const
 	{
-		const int nodeID = getNodeID(coord);
-		if (nodeID == INVALID_NODEID)
+		if (!isValidNodeCoord(coord))
 		{
 			return false;
 		}
+		const int nodeID = toNodeID(coord);
 		if (!meetMinClearanceValueRequired(nodeID))
 		{
 			return false;
@@ -85,26 +91,6 @@ namespace fdk { namespace game { namespace findpath
 		return m_nodes.raw_data()[nodeID].clearanceValue == CLEARANCEVALUE_OBSTACLE;
 	}
 
-	GridMap::NodeCoord GridMap::getNodeCoord(int nodeID) const
-	{
-		return NodeCoord(nodeID%m_nodes.size_x(), nodeID/m_nodes.size_x());
-	}
-
-	int GridMap::getNodeID(const NodeCoord& coord) const
-	{
-		if (!isValidNodeCoord(coord))
-		{
-			return INVALID_NODEID;
-		}
-		return coord.y * m_nodes.size_x() + coord.x;
-	}
-
-	bool GridMap::isValidNodeCoord(const NodeCoord& coord) const
-	{
-		return coord.x >= 0 && coord.x < (NodeCoord::ValueType)m_nodes.size_x()
-			&& coord.y >= 0 && coord.y < (NodeCoord::ValueType)m_nodes.size_y();
-	}	
-
 	void GridMap::annotateMap()
 	{
 		for (int x = m_nodes.size_x()-1; x >= 0; --x)
@@ -118,7 +104,7 @@ namespace fdk { namespace game { namespace findpath
 
 	void GridMap::annotateNode(const NodeCoord& coord)
 	{
-		if (isObstacle(getNodeID(coord)))
+		if (isObstacle(toNodeID(coord)))
 		{
 			return;
 		}
@@ -246,8 +232,8 @@ namespace fdk { namespace game { namespace findpath
 
 	bool GridMap::_isDirectlyReachable(int startNodeID, int targetNodeID, EnvironmentChecker* envChecker) const
 	{
-		NodeCoord startCoord = getNodeCoord(startNodeID);
-		NodeCoord targetCoord = getNodeCoord(targetNodeID);
+		NodeCoord startCoord = toNodeCoord(startNodeID);
+		NodeCoord targetCoord = toNodeCoord(targetNodeID);
 
 		int startX = startCoord.x;
 		int startY = startCoord.y;
@@ -318,7 +304,7 @@ namespace fdk { namespace game { namespace findpath
 		int nodeID;
 		for (int i = 1; i <= dx; ++i)
 		{
-			nodeID = getNodeID(NodeCoord(x, y));
+			nodeID = toNodeID(NodeCoord(x, y));
 			if (!meetMinClearanceValueRequired(nodeID) )
 			{
 				return false;
@@ -331,7 +317,7 @@ namespace fdk { namespace game { namespace findpath
 			{
 				if (state == DependOnY) 
 				{
-					nodeID = getNodeID(NodeCoord(x, y+sy));
+					nodeID = toNodeID(NodeCoord(x, y+sy));
 					if (!meetMinClearanceValueRequired(nodeID ) )
 					{
 						return false;
@@ -341,7 +327,7 @@ namespace fdk { namespace game { namespace findpath
 						return false;
 					}
 					x = x + sx;
-					nodeID = getNodeID(NodeCoord(x, y));
+					nodeID = toNodeID(NodeCoord(x, y));
 					if (!meetMinClearanceValueRequired(nodeID ) )
 					{
 						return false;
@@ -353,7 +339,7 @@ namespace fdk { namespace game { namespace findpath
 				}
 				else
 				{
-					nodeID = getNodeID(NodeCoord(x+sx, y));
+					nodeID = toNodeID(NodeCoord(x+sx, y));
 					if (!meetMinClearanceValueRequired(nodeID ) )
 					{
 						return false;
@@ -363,7 +349,7 @@ namespace fdk { namespace game { namespace findpath
 						return false;
 					}
 					y = y + sy;
-					nodeID = getNodeID(NodeCoord(x, y));
+					nodeID = toNodeID(NodeCoord(x, y));
 					if (!meetMinClearanceValueRequired(nodeID ) )
 					{
 						return false;
@@ -447,12 +433,12 @@ namespace fdk { namespace game { namespace findpath
 	int GridMapPart::toOrignNodeID(int partNodeID) const
 	{
 		PartNodeCoord partNodeCoord = getPartNodeCoord(partNodeID);
-		return m_orignMap.getNodeID(toOrignNodeCoord(partNodeCoord));
+		return m_orignMap.toNodeID(toOrignNodeCoord(partNodeCoord));
 	}
 
 	int GridMapPart::toPartNodeID(int orignNodeID) const
 	{
-		OrginNodeCoord orginNodeCoord = m_orignMap.getNodeCoord(orignNodeID);
+		OrginNodeCoord orginNodeCoord = m_orignMap.toNodeCoord(orignNodeID);
 		return getPartNodeID(toPartNodeCoord(orginNodeCoord));
 	}	
 }}}

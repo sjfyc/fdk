@@ -59,7 +59,7 @@ namespace fdk { namespace game { namespace navi
 			}			
 
 			successors.clear();
-			m_env.getSuccessorNodes(*this, current.nodeID, successors);
+			getSuccessorNodes(m_env, current.nodeID, m_nodeDatas[current.nodeID].parentNodeID, successors);
 			for (size_t i = 0; i < successors.size(); ++i)
 			{
 				SuccessorNodeInfo& successor = successors[i];
@@ -129,6 +129,11 @@ namespace fdk { namespace game { namespace navi
 			}
 			nodeId = parentNodeID;
 		}
+	}
+
+	void AStar::getSuccessorNodes(const Environment& env, int nodeID, int parentNodeID, std::vector<SuccessorNodeInfo>& result)
+	{
+		env.getSuccessorNodes(*this, nodeID, result);
 	}
 
 }}}

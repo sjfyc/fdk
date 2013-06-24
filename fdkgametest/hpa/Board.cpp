@@ -26,12 +26,12 @@ void Board::clearBlocks()
 
 void Board::setBlock(const CellCoord& coord, bool bBlock)
 {
-	_Base::setObstacle(getNodeID(coord), bBlock);
+	_Base::setObstacle(toNodeID(coord), bBlock);
 }
 
 bool Board::isBlock(const CellCoord& coord) const
 {
-	return _Base::isObstacle(getNodeID(coord));
+	return _Base::isObstacle(toNodeID(coord));
 }
 
 void Board::draw()
@@ -68,11 +68,11 @@ void Board::drawCellInfo()
 			}
 			if (g_Option.isOn(Option::Toggle_ShowCellID))
 			{
-				g_Font.printf(x*CELL_SIZE_X+2, y*CELL_SIZE_Y+2, HGETEXT_LEFT, "%d", getNodeID(CellCoord(x, y) ) );
+				g_Font.printf(x*CELL_SIZE_X+2, y*CELL_SIZE_Y+2, HGETEXT_LEFT, "%d", toNodeID(CellCoord(x, y) ) );
 			}			
 			if (g_Option.isOn(Option::Toggle_ShowCellClearanceValue))
 			{
-				g_Font.printf(x*CELL_SIZE_X+2, y*CELL_SIZE_Y+2, HGETEXT_LEFT, "%d", getClearanceValue(getNodeID(CellCoord(x, y)) ) );
+				g_Font.printf(x*CELL_SIZE_X+2, y*CELL_SIZE_Y+2, HGETEXT_LEFT, "%d", getClearanceValue(toNodeID(CellCoord(x, y)) ) );
 			}
 		}
 	}
