@@ -164,13 +164,13 @@ namespace fdk { namespace game { namespace navi
 		
 		if (isDiagonalDirection(direction)) 
 		{
-			if (//isNeighbourInDirectionReachable(env, nodeCoord, direction+3) &&
+			if (isNeighbourInDirectionReachable(env, nodeCoord, direction+7) &&
 				isNeighbourInDirectionReachable(env, nodeCoord, direction+6) && 
 				!isNeighbourInDirectionReachable(env, nodeCoord, direction+5))
 			{
 				setEnumMask(directions, (direction + 6) % 8);
 			}
-			if (//isNeighbourInDirectionReachable(env, nodeCoord, direction +5) && 
+			if (isNeighbourInDirectionReachable(env, nodeCoord, direction +1) && 
 				isNeighbourInDirectionReachable(env, nodeCoord, direction +2) && 
 				!isNeighbourInDirectionReachable(env, nodeCoord, direction +3)) 
 			{
@@ -179,13 +179,13 @@ namespace fdk { namespace game { namespace navi
 		} 
 		else 
 		{
-			if (//isNeighbourInDirectionReachable(env, nodeCoord, direction) &&
+			if (isNeighbourInDirectionReachable(env, nodeCoord, direction) &&
 				isNeighbourInDirectionReachable(env, nodeCoord, direction +1) && 
 				!isNeighbourInDirectionReachable(env, nodeCoord, direction +2)) 
 			{
 				setEnumMask(directions, (direction + 1) % 8);
 			}
-			if (//isNeighbourInDirectionReachable(env, nodeCoord, direction) && 
+			if (isNeighbourInDirectionReachable(env, nodeCoord, direction) && 
 				isNeighbourInDirectionReachable(env, nodeCoord, direction +7) && 
 				!isNeighbourInDirectionReachable(env, nodeCoord, direction +6)) 
 			{
