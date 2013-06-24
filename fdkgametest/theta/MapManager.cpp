@@ -38,9 +38,9 @@ void MapManager::draw()
 	if (g_Option.isOn(Option::Toggle_ShowVertex))
 	{
 		const fdkgame::navi::VertexMap& vertexMap = getVertexMap(g_Option.getMoveCapability(), g_Option.getUnitSize());
-		for (size_t y = 0; y < vertexMap.getSizeY(); ++y)
+		for (int y = 0; y < vertexMap.getSizeY(); ++y)
 		{
-			for (size_t x = 0; x < vertexMap.getSizeX(); ++x)
+			for (int x = 0; x < vertexMap.getSizeX(); ++x)
 			{
 				Location location = util::vertexCoordToLocation(VertexCoord(x, y));
 				g_HGE.FrameRect(

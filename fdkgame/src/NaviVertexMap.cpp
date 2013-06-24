@@ -128,6 +128,11 @@ namespace fdk { namespace game { namespace navi
 		return true;
 	}
 
+	bool VertexMap::isNodeReachable(int nodeID) const
+	{
+		return isBlock(toNodeCoord(nodeID));
+	}
+
 	void VertexMap::onPlotUnit(const VertexCoord& vertexCoord, UnitSize unitSize, bool xAlign, bool yAlign, bool bPlot)
 	{
 		UnitSize totalExtend = unitSize+m_unitSize-1;

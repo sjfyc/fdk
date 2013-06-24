@@ -24,7 +24,7 @@ namespace fdk { namespace game { namespace navi
 			SearchResult_PathUnexist,
 		};		
 		AStar(const Environment& env, int startNodeID, int targetNodeID);
-		~AStar();
+		virtual ~AStar();
 		SearchResult search(int step=-1);
 		SearchResult getSearchResult() const;
 		const std::vector<int>& getPath() const;

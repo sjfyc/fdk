@@ -2,6 +2,7 @@
 #define __ASTAR_H_INCLUDE__
 #include <set>
 #include <fdkgame/NaviAStar.h>
+#include <fdkgame/NaviJps.h>
 #include "Types.h"
 class Actor;
 

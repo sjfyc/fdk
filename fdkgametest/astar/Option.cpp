@@ -3,6 +3,7 @@
 
 Option::Option()
 	: m_toggles(0)
+	, m_navigatorType(0)
 {
 }
 
@@ -24,6 +25,15 @@ void Option::onEvent(int eventType, void* params)
 		{
 			toggle(Toggle_ShowCellClearanceValue);
 			util::output("%s cell clearance value", isOn(Toggle_ShowCellClearanceValue) ? "show" : "hide");
+		}
+		else if (key == HGEK_F1)
+		{
+			++m_navigatorType;
+			if (m_navigatorType >= NavigatorType__Count)
+			{
+				m_navigatorType = 0;
+			}
+			util::output("navigator type change to %d", m_navigatorType);
 		}
 	}
 }
@@ -49,6 +59,7 @@ void Option::outputUsage()
 {
 	util::output("1: show/hide cell coord");
 	util::output("2: show/hide cell clearance value");
+	util::output("F1: change navigator");
 }
 
 void Option::start()
@@ -61,4 +72,9 @@ void Option::start()
 void Option::stop()
 {
 	fdk::EventHook::unregist();
+}
+
+Option::NavigatorType Option::getNavigatorType() const
+{
+	return m_navigatorType;
 }

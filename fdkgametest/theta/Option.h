@@ -9,13 +9,20 @@ class Option
 {
 	friend class fdk::Singleton<Option>;
 public:		
+	enum ENavigatorType
+	{
+		NavigatorType_AStar,
+		NavigatorType_Jps,
+		NavigatorType__Count,
+	};
+	typedef unsigned char NavigatorType;
 	enum Toggle
 	{
 		Toggle_ShowCellCoord,
 		Toggle_ShowCellID,
 		Toggle_ShowVertex,
-		Toggle_ShowCurrentActorVertex,
-		Toggle_Brush,		
+		Toggle_ShowCurrentActorVertex,		
+		Toggle_Brush,
 	};
 	void start();
 	void stop();
@@ -23,6 +30,7 @@ public:
 	int getMoveCapability() const;
 	int getUnitSize() const;
 	TileType getBrush() const; 
+	NavigatorType getNavigatorType() const; 
 private:
 	Option();
 	~Option();
@@ -33,6 +41,7 @@ private:
 	int m_moveCapability;
 	int m_unitSize;	
 	TileType m_brush;
+	NavigatorType m_navigatorType;
 };
 
 #define g_Option (Option::instance())

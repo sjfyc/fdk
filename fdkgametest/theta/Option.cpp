@@ -8,6 +8,7 @@ Option::Option()
 	, m_moveCapability(0)
 	, m_unitSize(1)
 	, m_brush(Tile_Block)
+	, m_navigatorType(0)
 {
 	fdk::setEnumMask(m_moveCapability, Tile_None);
 }
@@ -55,15 +56,6 @@ void Option::onEvent(int eventType, void* params)
 			}
 			util::output("brush change to %s", getTileName(m_brush));
 		}
-		else if (key == HGEK_F1)
-		{
-			++m_brush;
-			if (m_brush >= Tile__Count)
-			{
-				m_brush = Tile_None;
-			}
-			util::output("brush change to %s", getTileName(m_brush));
-		}
 		else if (key == HGEK_F2)
 		{			
 			if (fdk::hasEnumMask(m_moveCapability, Tile_Water))
@@ -76,6 +68,15 @@ void Option::onEvent(int eventType, void* params)
 				fdk::setEnumMask(m_moveCapability, Tile_Water);
 				util::output("can move to water");
 			}
+		}
+		else if (key == HGEK_F3)
+		{
+			++m_navigatorType;
+			if (m_navigatorType >= NavigatorType__Count)
+			{
+				m_navigatorType = 0;
+			}
+			util::output("navigator type change to %d", m_navigatorType);
 		}
 		else if (key == HGEK_ADD)
 		{
@@ -129,6 +130,7 @@ void Option::outputUsage()
 	util::output("4: show/hide current actor vertex");
 	util::output("F1: change brush");
 	util::output("F2: change move capability");
+	util::output("F3: change navigator");
 	util::output("+: increase unit size");
 	util::output("-: decrease unit size");
 }
@@ -159,4 +161,9 @@ int Option::getUnitSize() const
 TileType Option::getBrush() const
 {
 	return m_brush;
+}
+
+Option::NavigatorType Option::getNavigatorType() const
+{
+	return m_navigatorType;
 }

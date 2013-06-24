@@ -1,6 +1,7 @@
 #include "AStar.h"
 #include <fdkgame/NaviVertexMap.h>
 #include "Util.h"
+#include "Option.h"
 #include "Game.h"
 #include "Font.h"
 #include "Actor.h"
@@ -133,8 +134,22 @@ bool AStar::search()
 		return true;
 	}
 	
-	m_navigator = new fdkgame::navi::AStar(vertexMap, startVertexID, targetVertexID);
+	if (g_Option.getNavigatorType() == Option::NavigatorType_AStar)
+	{
+		m_navigator = new fdkgame::navi::AStar(vertexMap, startVertexID, targetVertexID);
+	}
+	else if (g_Option.getNavigatorType() == Option::NavigatorType_Jps)
+	{
+		m_navigator = new fdkgame::navi::Jps(vertexMap, startVertexID, targetVertexID);
+	}
+	else 
+	{
+		FDK_ASSERT(0);
+	}
+	double searchStartTime = util::getSeconds();
 	Navigator::SearchResult searchResult = m_navigator->search();
+	double searchEndTime = util::getSeconds();
+	util::output("search cost %lf seconds", searchEndTime - searchStartTime);
 	if (searchResult == Navigator::SearchResult_PathUnexist)
 	{
 		util::output("no path between start vertex(%d/%d) and target vertex(%d/%d)",

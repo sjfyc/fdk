@@ -87,10 +87,10 @@ void Game::onEvent(int eventType, void* params)
 			{
 				toggleMode();
 			}
-			if (!m_astar || m_astar->getSearchResult() != AStar::SearchResult_Proceeding)
+			if (!m_astar || m_astar->getSearchResult() != AStar::Navigator::SearchResult_Proceeding)
 			{				
 				delete m_astar;
-				m_astar = new AStar(g_Board, 
+				m_astar = new AStar( 
 					g_Board.toNodeID(m_startCoord),
 					g_Board.toNodeID(m_targetCoord));
 			}
@@ -130,7 +130,7 @@ GameModeGame::GameModeGame()
 void GameModeGame::update(Game& game, float delta)
 {
 	AStar* astar = game.m_astar;
-	if (astar && astar->getSearchResult() == AStar::SearchResult_Proceeding && !m_bStepByStep)
+	if (astar && astar->getSearchResult() == AStar::Navigator::SearchResult_Proceeding && !m_bStepByStep)
 	{
 		search(*astar);	
 	}
@@ -163,12 +163,12 @@ void GameModeGame::handleEvent(Game& game, int eventType, void* params)
 
 void GameModeGame::search(AStar& astar)
 {
-	AStar::SearchResult result = astar.search(1);
-	if (result == AStar::SearchResult_Completed)
+	AStar::Navigator::SearchResult result = astar.search(1);
+	if (result == AStar::Navigator::SearchResult_Completed)
 	{			
 		util::output("search completed");
 	}
-	else if (result == AStar::SearchResult_PathUnexist)
+	else if (result == AStar::Navigator::SearchResult_PathUnexist)
 	{
 		util::output("search failed");
 	}

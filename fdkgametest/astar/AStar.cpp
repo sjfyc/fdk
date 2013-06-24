@@ -3,24 +3,15 @@
 #include "Game.h"
 #include "Board.h"
 #include "Font.h"
+#include "Option.h"
 
-AStar::AStar(const fdkgame::findpath::Environment& env, int startNodeID, int targetNodeID)
-	: _Base(env, startNodeID, targetNodeID)
-{
-	_Base::setRecorder(this);
-}
-
-AStar::~AStar()
-{
-}
-
-void AStar::onOpenNode(int nodeID, int parentNodeID, bool bReopen)
+void AStarRecorder::onOpenNode(const fdkgame::navi::Environment& env, int nodeID, int parentNodeID, bool bReopen)
 {
 	CellCoord cellCoord = g_Board.toNodeCoord(nodeID);
 	m_openCells.insert(cellCoord);
 }
 
-void AStar::onCloseNode(int nodeID)
+void AStarRecorder::onCloseNode(const fdkgame::navi::Environment& env, int nodeID)
 {
 	CellCoord cellCoord = g_Board.toNodeCoord(nodeID);
 	m_openCells.erase(cellCoord);
@@ -28,7 +19,7 @@ void AStar::onCloseNode(int nodeID)
 	m_currentClosedCell = cellCoord;
 }
 
-void AStar::render()
+void AStarRecorder::render()
 {
 	// 绘制open表
 	for (Cells::const_iterator it = m_openCells.begin(); it != m_openCells.end(); ++it)
@@ -54,12 +45,36 @@ void AStar::render()
 	if (!(m_currentClosedCell == g_Game.getStartCoord() || m_currentClosedCell == g_Game.getTargetCoord()) )
 	{
 		util::fillCell(m_currentClosedCell, MyColor_Yellow);
+	}	
+}
+
+AStar::AStar(int startNodeID, int targetNodeID)
+{
+	if (g_Option.getNavigatorType() == Option::NavigatorType_AStar)
+	{
+		m_navigator = new fdkgame::navi::AStar(g_Board, startNodeID, targetNodeID);
 	}
+	else if (g_Option.getNavigatorType() == Option::NavigatorType_Jps)
+	{
+		m_navigator = new fdkgame::navi::Jps(g_Board, startNodeID, targetNodeID);
+	}
+
+	m_navigator->setRecorder(this);
+}
+
+AStar::~AStar()
+{
+	delete m_navigator;
+}
+
+void AStar::render()
+{
+	_Recorder::render();
 	// 绘制路径
-	if (getSearchResult() == SearchResult_Completed)
+	if (m_navigator->getSearchResult() == Navigator::SearchResult_Completed)
 	{
 		CellCoord prevCellCoord = g_Game.getStartCoord();
-		const std::vector<int>& path = getPath();
+		const std::vector<int>& path = m_navigator->getPath();
 		for (int i = (int)path.size()-1; i >= 0; --i)
 		{
 			Location prevCenterLocation = util::cellCoordToLocation(prevCellCoord);
@@ -75,6 +90,6 @@ void AStar::render()
 				);
 			prevCellCoord = currentCellCoord;
 		}
-		g_Font.printf(2, 2, HGETEXT_LEFT, "path total cost: %d", getPathCost());
+		g_Font.printf(2, 2, HGETEXT_LEFT, "path total cost: %d", m_navigator->getPathCost());
 	}	
 }

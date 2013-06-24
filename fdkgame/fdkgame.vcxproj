@@ -16,6 +16,7 @@
     <ClInclude Include="include\fdkgame\FindPathBase.h" />
     <ClInclude Include="include\fdkgame\FindPathGridMap.h" />
     <ClInclude Include="include\fdkgame\FindPathHpa.h" />
+    <ClInclude Include="include\fdkgame\NaviGridMap.h" />
     <ClInclude Include="include\fdkgame\NaviJps.h" />
     <ClInclude Include="include\fdkgame\Graph.h" />
     <ClInclude Include="include\fdkgame\Math.h" />
@@ -33,6 +34,7 @@
     <ClCompile Include="src\FindPathBase.cpp" />
     <ClCompile Include="src\FindPathGridMap.cpp" />
     <ClCompile Include="src\FindPathHpa.cpp" />
+    <ClCompile Include="src\NaviGridMap.cpp" />
     <ClCompile Include="src\NaviJps.cpp" />
     <ClCompile Include="src\Math.cpp" />
     <ClCompile Include="src\NaviAStar.cpp" />

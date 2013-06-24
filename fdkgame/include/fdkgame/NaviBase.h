@@ -28,6 +28,7 @@ namespace fdk { namespace game { namespace navi
 		virtual int getNodeSpaceSize() const = 0;
 		virtual int getHeuristic(int startNodeID, int targetNodeID) const = 0;
 		virtual void getSuccessorNodes(Navigator& navigator, int nodeID, std::vector<SuccessorNodeInfo>& result) const = 0;
+		virtual bool isNodeReachable(int nodeID) const = 0;
 	};
 
 	class FDKGAME_API GridBasedEnv
