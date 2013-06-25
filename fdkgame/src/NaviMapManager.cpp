@@ -147,4 +147,52 @@ namespace fdk { namespace game { namespace navi
 		}
 	}
 
+	void MapManager::allowModify(const VertexCoord& vertexCoord, UnitSize unitSize, bool bAllow)
+	{
+		for (VertexMaps::iterator it = m_vertexMaps.begin(); it != m_vertexMaps.end(); ++it)
+		{
+			VertexMap* vertexMap = it->second;
+			vertexMap->allowModify(vertexCoord, unitSize, bAllow);
+		}
+	}
+	
+	MapManager::AutoPlotUnits::AutoPlotUnits(MapManager& mapManager, const std::vector<PlotUnitArgument>& units, const PlotUnitArgument* subtract, bool bPolt)
+		: m_mapManager(mapManager)
+		, m_units(units)
+		, m_bPlot(bPolt)
+		, m_subtractUnit()
+	{
+		if (!m_units.empty())
+		{
+			if (subtract)
+			{
+				m_subtractUnit = *subtract;
+			}
+			if (m_subtractUnit.unitSize > 0)
+			{
+				m_mapManager.allowModify(m_subtractUnit.vertexCoord, m_subtractUnit.unitSize, false);
+			}
+			for (size_t i = 0; i < m_units.size(); ++i)
+			{
+				const PlotUnitArgument& arg = m_units[i];
+				m_mapManager.plotUnit(arg.vertexCoord, arg.unitSize, m_bPlot);
+			}
+		}		
+	}
+
+	MapManager::AutoPlotUnits::~AutoPlotUnits()
+	{
+		if (!m_units.empty())
+		{
+			for (size_t i = 0; i < m_units.size(); ++i)
+			{
+				const PlotUnitArgument& arg = m_units[i];
+				m_mapManager.plotUnit(arg.vertexCoord, arg.unitSize, !m_bPlot);
+			}
+			if (m_subtractUnit.unitSize > 0)
+			{
+				m_mapManager.allowModify(m_subtractUnit.vertexCoord, m_subtractUnit.unitSize, true);
+			}
+		}		
+	}
 }}}

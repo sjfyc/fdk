@@ -8,6 +8,7 @@ namespace util
 	void output(const char* fmt, ...);
 	
 	void fillCell(const CellCoord& coord, DWORD color);
+	void drawVertex(const VertexCoord& vertex, DWORD color);
 
 	CellCoord locationToCellCoord(const Location& location);
 	Location cellCoordToLocation(const CellCoord& cellCoord);

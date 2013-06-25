@@ -3,33 +3,11 @@
 #include <fdkgame/NaviBlockMap.h>
 #include <fdkgame/NaviVertexMap.h>
 #include "Util.h"
+#include "Option.h"
 #include "Font.h"
 #include "AStar.h"
 #include "MapManager.h"
 #include "ActorBank.h"
-
-struct AutoPlot// 考虑单位周围的单位
-{
-	AutoPlot(const Location& location, float radius, Actor* egnore) 
-	{
-		g_ActorBank.getActors(m_aroundActors, location, radius, egnore);
-		for (size_t i = 0; i < m_aroundActors.size(); ++i)
-		{
-			Actor* aroundActor = m_aroundActors[i];
-			aroundActor->plotToMapManager(true);
-		}
-	}
-
-	~AutoPlot()
-	{
-		for (size_t i = 0; i < m_aroundActors.size(); ++i)
-		{
-			Actor* aroundActor = m_aroundActors[i];
-			aroundActor->plotToMapManager(false);
-		}
-	}
-	std::vector<Actor*> m_aroundActors;
-};
 
 Actor::Actor(const Location& location, int moveCapability, int unitSize)
 	: m_color(ARGB(180, (int)fdk::rand(100, 255), (int)fdk::rand(100, 255), (int)fdk::rand(100, 255)))
@@ -80,6 +58,10 @@ void Actor::draw()
 	{
 		m_astar->render();
 	}
+	if (g_Option.isOn(Option::Toggle_ShowActorVertex))
+	{
+		drawOccupiedVertexs();
+	}	
 }
 
 void Actor::stopMove()
@@ -103,12 +85,6 @@ void Actor::tickMove(float delta)
 		return;
 	}
 	
-	if (isLocationBlocked(m_location))
-	{
-		stopMove();
-		return;
-	}
-
 	bool bReachWayPoint = false;
 	Location nextLocation = m_location + m_velocity*delta;
 	if ((m_moveLocation - m_location).length() <=  m_velocity.length()*delta)
@@ -130,31 +106,29 @@ void Actor::tickMove(float delta)
 		return;
 	}
 
-	{
-		AutoPlot _autoPlot(nextLocation, getRadius()*8, this);
-		// 考虑周围半径两个最大单位尺寸大小的人
-		// 考察与每个单位之间的距离
-
-		if (!g_MapManager.isLocationReachable(*this, nextLocation))
+	bool isLocationReachable = false;
+	{		
+		std::vector<fdkgame::navi::MapManager::PlotUnitArgument> plotArounds;
+		std::vector<Actor*> aroundActors;
+		g_ActorBank.getActors(aroundActors, nextLocation, getRadius()*8, this);
+		for (size_t i = 0; i < aroundActors.size(); ++i)
 		{
-			if (searchPath(m_lastAstarTargetLocation))
-			{
-				if (m_astar->getPathLocationCount() == 1)
-				{
-					util::output("stop move 2");
-					stopMove();
-				}
-			}
-			return;
+			Actor* aroundActor = aroundActors[i];
+			fdkgame::navi::MapManager::PlotUnitArgument pua;
+			pua.vertexCoord = util::locationToVertexCoord(aroundActor->getLocation());
+			pua.unitSize = aroundActor->getUnitSize();
+			plotArounds.push_back(pua);
 		}
+		fdkgame::navi::MapManager::AutoPlotUnits _AutoPlotUnits(g_MapManager, plotArounds);
+		isLocationReachable = g_MapManager.isLocationReachable(*this, nextLocation);
 	}
-
-	if (isLocationBlocked(nextLocation))
+	if (!isLocationReachable)
 	{
 		if (searchPath(m_lastAstarTargetLocation))
 		{
 			if (m_astar->getPathLocationCount() == 1)
 			{
+				util::output("stop move 2");
 				stopMove();
 			}
 		}
@@ -168,36 +142,6 @@ void Actor::tickMove(float delta)
 		m_velocity.reset();
 		return;
 	}
-}
-
-bool Actor::isLocationBlocked(const Location& location) const
-{
-	return false;
-	// 考虑周围的静态阻挡
-	CellRange cellRange = util::locationRangeToCellRange(
-		LocationRange( location-Location( float( (m_unitSize*CELL_SIZE_X-1)/2 ), float( (m_unitSize*CELL_SIZE_Y-1)/2 ) ), 
-		location+Location( float( (m_unitSize*CELL_SIZE_X)/2 ), float((m_unitSize*CELL_SIZE_Y)/2 ) ) )
-		);
-
-	const fdkgame::navi::BlockMap& blockMap = g_MapManager.getBlockMap(m_moveCapability);
-	for (short y = cellRange.topLeft.y; y <= cellRange.bottomRight.y; ++y)
-	{
-		for (short x = cellRange.topLeft.x; x <= cellRange.bottomRight.x; ++x)
-		{
-			if (blockMap.isBlock(CellCoord(x, y)) )
-			{				
-				return true;
-			}
-		}
-	}
-
-	// 考虑周围的动态阻挡
-	if (g_ActorBank.getFirstCollideActor(location, m_radius, this))
-	{
-		return true;
-	}
-
-	return false;
 }
 
 bool Actor::searchPath(const Location& targetLocation)
@@ -231,4 +175,18 @@ void Actor::plotToMapManager(bool bPlot)
 int Actor::getID() const
 {
 	return m_id;
+}
+
+void Actor::drawOccupiedVertexs()
+{
+	VertexCoord vertexCoord = util::locationToVertexCoord(m_location);
+	int totalExtend = g_Option.getUnitSize()+m_unitSize;
+	for (int y = -totalExtend; y <= totalExtend; ++y)
+	{
+		for (int x = -totalExtend; x <= totalExtend; ++x)
+		{				
+			VertexCoord aroundVertexCoord(vertexCoord.x+x, vertexCoord.y+y);
+			util::drawVertex(aroundVertexCoord, ARGB(255, 226, 98, 29));
+		}
+	}
 }

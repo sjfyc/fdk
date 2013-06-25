@@ -21,7 +21,7 @@ public:
 		Toggle_ShowCellCoord,
 		Toggle_ShowCellID,
 		Toggle_ShowVertex,
-		Toggle_ShowCurrentActorVertex,	
+		Toggle_ShowActorVertex,	
 		Toggle_ShowVertexCoordInMouse,
 		Toggle_Brush,
 	};

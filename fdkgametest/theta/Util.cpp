@@ -22,6 +22,18 @@ namespace util
 			(coord.x+1)*CELL_SIZE_X-1, (coord.y+1)*CELL_SIZE_Y-1, color);
 	}
 
+	void drawVertex(const VertexCoord& vertex, DWORD color)
+	{
+		Location location = util::vertexCoordToLocation(vertex);
+		g_HGE.FrameRect(
+			location.x-2, 
+			location.y-2, 
+			location.x+2, 
+			location.y+2, 
+			color
+			);
+	}
+
 	CellCoord locationToCellCoord(const Location& location)
 	{
 		return CellCoord(

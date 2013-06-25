@@ -40,13 +40,8 @@ void Option::onEvent(int eventType, void* params)
 		}	
 		else if (key == HGEK_4)
 		{
-			toggle(Toggle_ShowCurrentActorVertex);
-			util::output("%s current actor vertex", isOn(Toggle_ShowCurrentActorVertex) ? "show" : "hide");
-			Actor* currentActor = g_ActorBank.getCurrentActor();
-			if (currentActor)
-			{
-				currentActor->plotToMapManager(isOn(Toggle_ShowCurrentActorVertex));
-			}
+			toggle(Toggle_ShowActorVertex);
+			util::output("%s actor vertex", isOn(Toggle_ShowActorVertex) ? "show" : "hide");
 		}
 		else if (key == HGEK_5)
 		{
@@ -151,7 +146,7 @@ void Option::outputUsage()
 	util::output("1: show/hide cell coord");
 	util::output("2: show/hide cell id");
 	util::output("3: show/hide vertex");
-	util::output("4: show/hide current actor vertex");
+	util::output("4: show/hide actor vertex");
 	util::output("5: show/hide vertex coord in mouse");
 	util::output("F1: change brush");
 	util::output("F2: change move capability");

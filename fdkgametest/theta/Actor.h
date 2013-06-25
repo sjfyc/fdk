@@ -21,12 +21,12 @@ public:
 	BoundingBox getBoundingBox() const;
 	bool searchPath(const Location& targetLocation);
 	const Location& getLastAstarTargetLocation() const;
-	bool isLocationBlocked(const Location& location) const;
 	void plotToMapManager(bool bPlot);
 private:
 	Actor(const Location& location, int moveCapability, int unitSize);
 	~Actor();
 	void tickMove(float delta);
+	void drawOccupiedVertexs();
 	int m_id;
 	DWORD m_color;
 	int m_moveCapability;

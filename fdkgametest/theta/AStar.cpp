@@ -78,44 +78,34 @@ bool AStar::search()
 		return false;
 	}
 
-	struct AutoPlot// 考虑单位周围的单位
+	std::vector<fdkgame::navi::MapManager::PlotUnitArgument> plotArounds;
+	std::vector<Actor*> aroundActors;
+	g_ActorBank.getActors(aroundActors, m_actor.getLocation(), m_actor.getRadius()*8, &m_actor);
+	for (size_t i = 0; i < aroundActors.size(); ++i)
 	{
-		AutoPlot(Actor& actor) 
-			: m_actor(actor) 
-		{
-			g_ActorBank.getActors(m_aroundActors, m_actor.getLocation(), m_actor.getRadius()*8, &m_actor);
-			for (size_t i = 0; i < m_aroundActors.size(); ++i)
-			{
-				Actor* aroundActor = m_aroundActors[i];
-				aroundActor->plotToMapManager(true);
-			}
-		}
-
-		~AutoPlot()
-		{
-			for (size_t i = 0; i < m_aroundActors.size(); ++i)
-			{
-				Actor* aroundActor = m_aroundActors[i];
-				aroundActor->plotToMapManager(false);
-			}
-		}
-
-		Actor& m_actor;
-		std::vector<Actor*> m_aroundActors;
-	} _autoPlot(m_actor);
+		Actor* aroundActor = aroundActors[i];
+		fdkgame::navi::MapManager::PlotUnitArgument pua;
+		pua.vertexCoord = util::locationToVertexCoord(aroundActor->getLocation());
+		pua.unitSize = aroundActor->getUnitSize();
+		plotArounds.push_back(pua);
+	}
+	fdkgame::navi::MapManager::PlotUnitArgument subtract;
+	subtract.vertexCoord = util::locationToVertexCoord(m_actor.getLocation());
+	subtract.unitSize = m_actor.getUnitSize();	
+	fdkgame::navi::MapManager::AutoPlotUnits _AutoPlotUnits(g_MapManager, plotArounds, NULL);
 	
 	if (vertexMap.isBlock(startVertexCoord))
 	{
 		util::output("start vertex(%d/%d) is block",
 			startVertexCoord.x, startVertexCoord.y);
-		g_Game.pauseGame();
+		//g_Game.pauseGame();
 		return false;
 	}
 	if (vertexMap.isBlock(targetVertexCoord) )
 	{
 		util::output("target vertex(%d/%d) is block",
 			targetVertexCoord.x, targetVertexCoord.y);
-		g_Game.pauseGame();
+		//g_Game.pauseGame();
 		return false;
 	}
 

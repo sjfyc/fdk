@@ -22,6 +22,7 @@ namespace fdk { namespace game { namespace navi
 		void onSetBlock(const CellCoord& cellCoord, bool bSet);
 
 		void onPlotUnit(const VertexCoord& vertexCoord, UnitSize unitSize, bool bPlot);
+		void allowModify(const VertexCoord& vertexCoord, UnitSize unitSize, bool bAllow);
 
 		bool isDirectlyReachable(const VertexCoord& startVertexCoord, const VertexCoord& targetVertexCoord) const;
 
@@ -40,6 +41,7 @@ namespace fdk { namespace game { namespace navi
 		BlockMap& m_blockMap;
 		UnitSize m_unitSize;
 		MapData m_data;
+		Array2D<bool> m_allowModify;
 	};
 }}}
 

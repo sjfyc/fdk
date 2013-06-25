@@ -62,7 +62,7 @@ void Game::render()
 	g_ActorBank.draw();
 	g_TileMap.drawCellInfo();
 
-	g_Font.printf(200,200,HGETEXT_LEFT,"%f",m_savedDeltaTime);
+	//g_Font.printf(200,200,HGETEXT_LEFT,"%f",m_savedDeltaTime);
 }
 
 void Game::onEvent(int eventType, void* params)
