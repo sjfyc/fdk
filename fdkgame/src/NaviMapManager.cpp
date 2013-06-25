@@ -138,12 +138,12 @@ namespace fdk { namespace game { namespace navi
 		}
 	}
 
-	void MapManager::plotUnit(const VertexCoord& vertexCoord, UnitSize unitSize, bool xAlign, bool yAlign, bool bPlot)
+	void MapManager::plotUnit(const VertexCoord& vertexCoord, UnitSize unitSize, bool bPlot)
 	{
 		for (VertexMaps::iterator it = m_vertexMaps.begin(); it != m_vertexMaps.end(); ++it)
 		{
 			VertexMap* vertexMap = it->second;
-			vertexMap->onPlotUnit(vertexCoord, unitSize, xAlign, yAlign, bPlot);
+			vertexMap->onPlotUnit(vertexCoord, unitSize, bPlot);
 		}
 	}
 

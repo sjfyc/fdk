@@ -16,7 +16,6 @@ namespace util
 	LocationRange cellRangeToLocationRange(const CellRange& cellRange);
 
 	VertexCoord locationToVertexCoord(const Location& location);
-	VertexCoord locationToVertexCoord(const Location& location, bool& xAlign, bool& yAlign);
 	Location vertexCoordToLocation(const VertexCoord& vertexCoord);
 
 	double getSeconds();

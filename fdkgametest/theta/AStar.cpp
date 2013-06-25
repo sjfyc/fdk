@@ -106,7 +106,7 @@ bool AStar::search()
 	
 	if (vertexMap.isBlock(startVertexCoord))
 	{
-		util::output("start vertex(%d/%d)",
+		util::output("start vertex(%d/%d) is block",
 			startVertexCoord.x, startVertexCoord.y);
 		g_Game.pauseGame();
 		return false;

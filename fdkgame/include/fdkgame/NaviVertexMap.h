@@ -21,7 +21,7 @@ namespace fdk { namespace game { namespace navi
 		bool isBlock(const VertexCoord& vertexCoord) const;
 		void onSetBlock(const CellCoord& cellCoord, bool bSet);
 
-		void onPlotUnit(const VertexCoord& vertexCoord, UnitSize unitSize, bool xAlign, bool yAlign, bool bPlot);
+		void onPlotUnit(const VertexCoord& vertexCoord, UnitSize unitSize, bool bPlot);
 
 		bool isDirectlyReachable(const VertexCoord& startVertexCoord, const VertexCoord& targetVertexCoord) const;
 

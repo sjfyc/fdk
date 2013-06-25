@@ -225,13 +225,7 @@ BoundingBox Actor::getBoundingBox() const
 void Actor::plotToMapManager(bool bPlot)
 {
 	VertexCoord vertexCoord = util::locationToVertexCoord(getLocation());
-	Location prunedlocation = util::vertexCoordToLocation(vertexCoord);
-	fdkgame::VectorI iOrignLocation((int)getLocation().x, (int)getLocation().y);
-	fdkgame::VectorI iPrunedlocation((int)prunedlocation.x, (int)prunedlocation.y);
-	const bool xAlign = (iOrignLocation.x == iPrunedlocation.x);
-	const bool yAlign = (iOrignLocation.y == iPrunedlocation.y);
-
-	g_MapManager.plotUnit(vertexCoord, getUnitSize(), xAlign, yAlign, bPlot);
+	g_MapManager.plotUnit(vertexCoord, getUnitSize(), bPlot);
 }
 
 int Actor::getID() const

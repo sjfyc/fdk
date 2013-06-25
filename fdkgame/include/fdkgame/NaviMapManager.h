@@ -21,7 +21,7 @@ namespace fdk { namespace game { namespace navi
 		const VertexMap& getVertexMap(MoveCapability moveCapability, UnitSize unitSize) const;		
 		void rebuildAfterTileMapReset();
 		void changeTileType(const CellCoord& cellCoord, TileType tileType);
-		void plotUnit(const VertexCoord& vertexCoord, UnitSize unitSize, bool xAlign, bool yAlign, bool bPlot);
+		void plotUnit(const VertexCoord& vertexCoord, UnitSize unitSize, bool bPlot);
 	private:
 		struct CmpBlockMap
 		{

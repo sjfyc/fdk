@@ -133,15 +133,12 @@ namespace fdk { namespace game { namespace navi
 		return !isBlock(toNodeCoord(nodeID));
 	}
 
-	void VertexMap::onPlotUnit(const VertexCoord& vertexCoord, UnitSize unitSize, bool xAlign, bool yAlign, bool bPlot)
+	void VertexMap::onPlotUnit(const VertexCoord& vertexCoord, UnitSize unitSize, bool bPlot)
 	{
-		xAlign = false;
-		yAlign = false;
-
-		UnitSize totalExtend = unitSize+m_unitSize-1;
-		for (UnitSize y = -totalExtend-1; y <= totalExtend+(yAlign?0:1); ++y)
+		UnitSize totalExtend = unitSize+m_unitSize;
+		for (UnitSize y = -totalExtend; y <= totalExtend; ++y)
 		{
-			for (UnitSize x = -totalExtend-1; x <= totalExtend+(xAlign?0:1); ++x)
+			for (UnitSize x = -totalExtend; x <= totalExtend; ++x)
 			{				
 				VertexCoord aroundVertexCoord(vertexCoord.x+x, vertexCoord.y+y);
 				if (isValidNodeCoord(aroundVertexCoord))
