@@ -55,7 +55,7 @@ void MapManager::draw()
 		Location mouseLocation;
 		g_HGE->Input_GetMousePos(&mouseLocation.x, &mouseLocation.y);
 
-		VertexCoord vertexCoord = util::locationToVertexCoord(mouseLocation);
+		VertexCoord vertexCoord = util::locationToNearestVertexCoord(mouseLocation);
 
 		g_Font.printf(mouseLocation.x-20.0f,mouseLocation.y-20.0f,HGETEXT_LEFT,"%d,%d", vertexCoord.x, vertexCoord.y);
 	}	
@@ -64,5 +64,5 @@ void MapManager::draw()
 bool MapManager::isLocationReachable(Actor& actor, const Location& location)
 {
 	const fdkgame::navi::VertexMap& vertexMap = getVertexMap(actor.getMoveCapability(), actor.getUnitSize());
-	return !vertexMap.isBlock(util::locationToVertexCoord(location));
+	return !vertexMap.isBlock(util::locationToNearestVertexCoord(location));
 }

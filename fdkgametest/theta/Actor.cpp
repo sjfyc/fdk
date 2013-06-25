@@ -6,6 +6,7 @@
 #include "Option.h"
 #include "Font.h"
 #include "AStar.h"
+#include "Game.h"
 #include "MapManager.h"
 #include "ActorBank.h"
 
@@ -92,20 +93,20 @@ void Actor::tickMove(float delta)
 		nextLocation = m_moveLocation;
 		bReachWayPoint = true;
 	}
-	
+		
 	if (!g_MapManager.isLocationReachable(*this, nextLocation))
-	{
+	{// 下个位置直接不可走
 		if (searchPath(m_lastAstarTargetLocation))
 		{
 			if (m_astar->getPathLocationCount() == 1)
 			{
-				util::output("stop move 1");
+				util::output("stop move 0");
 				stopMove();
 			}
 		}
 		return;
 	}
-
+	
 	bool isLocationReachable = false;
 	{		
 		std::vector<fdkgame::navi::MapManager::PlotUnitArgument> plotArounds;
@@ -115,12 +116,22 @@ void Actor::tickMove(float delta)
 		{
 			Actor* aroundActor = aroundActors[i];
 			fdkgame::navi::MapManager::PlotUnitArgument pua;
-			pua.vertexCoord = util::locationToVertexCoord(aroundActor->getLocation());
+			pua.vertexCoord = util::locationToNearestVertexCoord(aroundActor->getLocation());
 			pua.unitSize = aroundActor->getUnitSize();
 			plotArounds.push_back(pua);
 		}
 		fdkgame::navi::MapManager::AutoPlotUnits _AutoPlotUnits(g_MapManager, plotArounds);
-		isLocationReachable = g_MapManager.isLocationReachable(*this, nextLocation);
+
+		if (g_MapManager.isLocationReachable(*this, getLocation()))
+		{
+			isLocationReachable = g_MapManager.isLocationReachable(*this, nextLocation);
+		}
+		else
+		{
+			util::output("stop move 1");
+			isLocationReachable = true;
+			//g_Game.pauseGame();
+		}
 	}
 	if (!isLocationReachable)
 	{
@@ -166,25 +177,19 @@ BoundingBox Actor::getBoundingBox() const
 		m_location.x+m_radius+1,m_location.y+m_radius+1);
 }
 
-void Actor::plotToMapManager(bool bPlot)
-{
-	VertexCoord vertexCoord = util::locationToVertexCoord(getLocation());
-	g_MapManager.plotUnit(vertexCoord, getUnitSize(), bPlot);
-}
-
 int Actor::getID() const
 {
 	return m_id;
 }
 
 void Actor::drawOccupiedVertexs()
-{
-	VertexCoord vertexCoord = util::locationToVertexCoord(m_location);
-	int totalExtend = g_Option.getUnitSize()+m_unitSize;
+{	
+	VertexCoord vertexCoord = util::locationToNearestVertexCoord(m_location);
+	int totalExtend = g_Option.getUnitSize()+m_unitSize-1;
 	for (int y = -totalExtend; y <= totalExtend; ++y)
 	{
 		for (int x = -totalExtend; x <= totalExtend; ++x)
-		{				
+		{
 			VertexCoord aroundVertexCoord(vertexCoord.x+x, vertexCoord.y+y);
 			util::drawVertex(aroundVertexCoord, ARGB(255, 226, 98, 29));
 		}

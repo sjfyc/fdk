@@ -136,7 +136,7 @@ namespace fdk { namespace game { namespace navi
 
 	void VertexMap::onPlotUnit(const VertexCoord& vertexCoord, UnitSize unitSize, bool bPlot)
 	{
-		UnitSize totalExtend = unitSize+m_unitSize;
+		UnitSize totalExtend = unitSize+m_unitSize-1;
 		for (UnitSize y = -totalExtend; y <= totalExtend; ++y)
 		{
 			for (UnitSize x = -totalExtend; x <= totalExtend; ++x)

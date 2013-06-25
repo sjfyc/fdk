@@ -17,6 +17,7 @@ namespace util
 	LocationRange cellRangeToLocationRange(const CellRange& cellRange);
 
 	VertexCoord locationToVertexCoord(const Location& location);
+	VertexCoord locationToNearestVertexCoord(const Location& location);
 	Location vertexCoordToLocation(const VertexCoord& vertexCoord);
 
 	double getSeconds();

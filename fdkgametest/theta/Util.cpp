@@ -74,6 +74,15 @@ namespace util
 			);
 	}
 
+	VertexCoord locationToNearestVertexCoord(const Location& location)
+	{
+		VertexCoord topLeftVertexCoord = locationToVertexCoord(location);
+		Location topLeftLocation = vertexCoordToLocation(topLeftVertexCoord);
+		Location offset = location - topLeftLocation;
+		return VertexCoord(topLeftVertexCoord.x + (offset.x > QUATER_CELL_SIZE_X ? 1 : 0),
+			topLeftVertexCoord.y + (offset.y > QUATER_CELL_SIZE_Y ? 1 : 0) ); 
+	}
+
 	Location vertexCoordToLocation(const VertexCoord& vertexCoord)
 	{
 		return Location(

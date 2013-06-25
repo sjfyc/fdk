@@ -66,8 +66,8 @@ bool AStar::search()
 	const fdkgame::navi::VertexMap& vertexMap = g_MapManager.getVertexMap(m_actor.getMoveCapability(), m_actor.getUnitSize());
 
 	const Location& startLocation = m_actor.getLocation();
-	const VertexCoord& startVertexCoord = util::locationToVertexCoord(startLocation);
-	const VertexCoord& targetVertexCoord = util::locationToVertexCoord(m_targetLocation);	
+	const VertexCoord& startVertexCoord = util::locationToNearestVertexCoord(startLocation);
+	const VertexCoord& targetVertexCoord = util::locationToNearestVertexCoord(m_targetLocation);	
 
 	if (!vertexMap.isValidNodeCoord(startVertexCoord) ||
 		!vertexMap.isValidNodeCoord(targetVertexCoord))
@@ -85,21 +85,24 @@ bool AStar::search()
 	{
 		Actor* aroundActor = aroundActors[i];
 		fdkgame::navi::MapManager::PlotUnitArgument pua;
-		pua.vertexCoord = util::locationToVertexCoord(aroundActor->getLocation());
+		pua.vertexCoord = util::locationToNearestVertexCoord(aroundActor->getLocation());
 		pua.unitSize = aroundActor->getUnitSize();
 		plotArounds.push_back(pua);
 	}
 	fdkgame::navi::MapManager::PlotUnitArgument subtract;
-	subtract.vertexCoord = util::locationToVertexCoord(m_actor.getLocation());
+	subtract.vertexCoord = util::locationToNearestVertexCoord(m_actor.getLocation());
 	subtract.unitSize = m_actor.getUnitSize();	
-	fdkgame::navi::MapManager::AutoPlotUnits _AutoPlotUnits(g_MapManager, plotArounds, NULL);
+	fdkgame::navi::MapManager::AutoPlotUnits _AutoPlotUnits(g_MapManager, plotArounds);
 	
 	if (vertexMap.isBlock(startVertexCoord))
 	{
-		util::output("start vertex(%d/%d) is block",
+		util::output("start vertex(%d/%d) is block, go directly",
 			startVertexCoord.x, startVertexCoord.y);
 		//g_Game.pauseGame();
-		return false;
+
+		m_locationPath.push_back(m_targetLocation);
+
+		return true;
 	}
 	if (vertexMap.isBlock(targetVertexCoord) )
 	{
