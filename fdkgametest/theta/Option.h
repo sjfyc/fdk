@@ -21,7 +21,8 @@ public:
 		Toggle_ShowCellCoord,
 		Toggle_ShowCellID,
 		Toggle_ShowVertex,
-		Toggle_ShowCurrentActorVertex,		
+		Toggle_ShowCurrentActorVertex,	
+		Toggle_ShowVertexCoordInMouse,
 		Toggle_Brush,
 	};
 	void start();
@@ -31,6 +32,7 @@ public:
 	int getUnitSize() const;
 	TileType getBrush() const; 
 	NavigatorType getNavigatorType() const; 
+	float getTimeRate() const;
 private:
 	Option();
 	~Option();
@@ -42,6 +44,7 @@ private:
 	int m_unitSize;	
 	TileType m_brush;
 	NavigatorType m_navigatorType;
+	float m_timeRate;
 };
 
 #define g_Option (Option::instance())

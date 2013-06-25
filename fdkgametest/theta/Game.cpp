@@ -3,12 +3,14 @@
 #include <fdk/Module.h>
 #include "Util.h"
 #include "Option.h"
+#include "Font.h"
 #include "TileMap.h"
 #include "MapManager.h"
 #include "ActorBank.h"
 
 Game::Game()
 	: m_mode(&g_GameModeGame)
+	, m_savedDeltaTime(0)
 {
 }
 
@@ -41,12 +43,14 @@ void Game::stop()
 }
 
 void Game::update(float delta)
-{
+{	
 	if (!fdk::ModuleManager::instance().tick(delta))
 	{
 		util::output(fdk::ModuleManager::instance().getErrorMessage().c_str());
 	}
 	m_mode->update(*this, delta);
+
+	m_savedDeltaTime = delta;
 }
 
 void Game::render()
@@ -57,6 +61,8 @@ void Game::render()
 	m_mode->render(*this);	
 	g_ActorBank.draw();
 	g_TileMap.drawCellInfo();
+
+	g_Font.printf(200,200,HGETEXT_LEFT,"%f",m_savedDeltaTime);
 }
 
 void Game::onEvent(int eventType, void* params)
@@ -71,6 +77,10 @@ void Game::onEvent(int eventType, void* params)
 		else if (key == HGEK_T)
 		{
 			toggleMode();
+		}
+		else if (key == HGEK_P)
+		{
+			pauseGame();
 		}
 	}
 	m_mode->handleEvent(*this, eventType, params);
@@ -87,8 +97,7 @@ void Game::toggleMode()
 	{
 		m_mode = &g_GameModeGame;
 	}
-	m_mode->enter(*this);
-	util::output("toggle to %s mode", (m_mode == &g_GameModeGame ? "game" : "map edit") );
+	m_mode->enter(*this);	
 }
 
 void Game::outputUsage()
@@ -105,9 +114,35 @@ bool Game::isInGameMode() const
 	return m_mode == &g_GameModeGame;
 }
 
+void Game::pauseGame()
+{
+	GameMode* nextMode = &g_GameModePause;
+	if (m_mode == &g_GameModePause)
+	{
+		nextMode = g_GameModePause.m_lastMode;
+	}
+	else
+	{
+		g_GameModePause.m_lastMode = m_mode;
+	}
+	m_mode->leave(*this);		
+	m_mode = nextMode;			
+	m_mode->enter(*this);
+}
+
 GameModeGame::GameModeGame()
 	: m_canDynamicChangeTile(false)
 {
+}
+
+void GameModeGame::enter(Game& game)
+{
+	util::output("toggle to game mode");
+}
+
+void GameModeGame::leave(Game& game)
+{
+
 }
 
 void GameModeGame::update(Game& game, float delta)
@@ -154,6 +189,7 @@ GameModeMapEdit::GameModeMapEdit()
 
 void GameModeMapEdit::enter(Game& game)
 {
+	util::output("toggle to map edit mode");
 }
 
 void GameModeMapEdit::leave(Game& game)
@@ -209,4 +245,14 @@ void GameModeMapEdit::update(Game& game, float delta)
 	m_lastMouseCoord = mouseCoord;
 
 	g_TileMap.setTileType(mouseCoord, g_Option.getBrush());
+}
+
+void GameModePause::enter(Game& game)
+{
+	util::output("toggle to pause mode");
+}
+
+void GameModePause::leave(Game& game)
+{
+
 }

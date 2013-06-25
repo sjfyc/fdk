@@ -12,6 +12,7 @@ public:
 	void draw();
 	void stopMove();
 	void move(const Location& location, float speed);
+	int getID() const;
 	float getRadius() const;
 	int getMoveCapability() const;
 	int getUnitSize() const;
@@ -26,6 +27,7 @@ private:
 	Actor(const Location& location, int moveCapability, int unitSize);
 	~Actor();
 	void tickMove(float delta);
+	int m_id;
 	DWORD m_color;
 	int m_moveCapability;
 	int m_unitSize;	

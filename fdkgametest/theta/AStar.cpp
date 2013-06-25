@@ -104,12 +104,18 @@ bool AStar::search()
 		std::vector<Actor*> m_aroundActors;
 	} _autoPlot(m_actor);
 	
-	if (vertexMap.isBlock(startVertexCoord) ||
-		vertexMap.isBlock(targetVertexCoord) )
+	if (vertexMap.isBlock(startVertexCoord))
 	{
-		util::output("start vertex(%d/%d) or target vertex(%d/%d) is block",
-			startVertexCoord.x, startVertexCoord.y,
+		util::output("start vertex(%d/%d)",
+			startVertexCoord.x, startVertexCoord.y);
+		g_Game.pauseGame();
+		return false;
+	}
+	if (vertexMap.isBlock(targetVertexCoord) )
+	{
+		util::output("target vertex(%d/%d) is block",
 			targetVertexCoord.x, targetVertexCoord.y);
+		g_Game.pauseGame();
 		return false;
 	}
 

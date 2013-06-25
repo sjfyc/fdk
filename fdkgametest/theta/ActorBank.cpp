@@ -92,12 +92,27 @@ void ActorBank::onEvent(int eventType, void* params)
 {
 	if (!g_Game.isInGameMode())
 	{
+		if (eventType == GAME_SYSTEM_EVENT_KEYUP)
+		{
+			int key = (int)params;	
+			if (key == HGEK_LBUTTON)
+			{
+				Location mouseLocation;
+				g_HGE->Input_GetMousePos(&mouseLocation.x, &mouseLocation.y);
+				Actor* actor = findFirstActorConverLocation(mouseLocation);
+				if (actor && m_currentActor != actor)
+				{
+					m_currentActor = actor;
+					fdk::EventCenter::instance().send(Event_OnActorSelected, actor);
+				}
+			}
+		}
 		return;
 	}
 	if (eventType == GAME_SYSTEM_EVENT_KEYUP)
 	{
 		int key = (int)params;	
-		if (key == HGEK_P)
+		if (key == HGEK_A)
 		{
 			createActor(Location(CELL_SIZE_X+CELL_SIZE_X/2, CELL_SIZE_Y+CELL_SIZE_Y/2));
 		}

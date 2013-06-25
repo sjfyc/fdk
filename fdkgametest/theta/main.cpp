@@ -1,6 +1,7 @@
 #include <common/hgeall.h>
 #include "Types.h"
 #include "Game.h"
+#include "Option.h"
 
 bool FrameFunc();
 bool RenderFunc();
@@ -37,7 +38,7 @@ bool FrameFunc()
 		return true;
 	}
 	g_HGE.Update();
-	g_Game.update(g_HGE->Timer_GetDelta());
+	g_Game.update(g_HGE->Timer_GetDelta()*g_Option.getTimeRate());
 	return false;
 }
 

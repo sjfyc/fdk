@@ -3,9 +3,33 @@
 #include <fdkgame/NaviBlockMap.h>
 #include <fdkgame/NaviVertexMap.h>
 #include "Util.h"
+#include "Font.h"
 #include "AStar.h"
 #include "MapManager.h"
 #include "ActorBank.h"
+
+struct AutoPlot// 考虑单位周围的单位
+{
+	AutoPlot(const Location& location, float radius, Actor* egnore) 
+	{
+		g_ActorBank.getActors(m_aroundActors, location, radius, egnore);
+		for (size_t i = 0; i < m_aroundActors.size(); ++i)
+		{
+			Actor* aroundActor = m_aroundActors[i];
+			aroundActor->plotToMapManager(true);
+		}
+	}
+
+	~AutoPlot()
+	{
+		for (size_t i = 0; i < m_aroundActors.size(); ++i)
+		{
+			Actor* aroundActor = m_aroundActors[i];
+			aroundActor->plotToMapManager(false);
+		}
+	}
+	std::vector<Actor*> m_aroundActors;
+};
 
 Actor::Actor(const Location& location, int moveCapability, int unitSize)
 	: m_color(ARGB(180, (int)fdk::rand(100, 255), (int)fdk::rand(100, 255), (int)fdk::rand(100, 255)))
@@ -18,6 +42,8 @@ Actor::Actor(const Location& location, int moveCapability, int unitSize)
 	, m_moveLocation()
 	, m_astar(0)
 {
+	static int id = 0;
+	m_id = id++;
 }
 
 Actor::~Actor()
@@ -46,8 +72,10 @@ void Actor::tick(float delta)
 }
 
 void Actor::draw()
-{
+{	
 	g_HGE.Rectangle(m_location.x-m_radius, m_location.y-m_radius, m_location.x+m_radius, m_location.y+m_radius, m_color);
+	g_Font.printf(m_location.x-m_radius+2.0f,m_location.y-m_radius+2.0f,HGETEXT_LEFT,"%d",getID());
+	g_HGE.Rectangle(m_location.x-1, m_location.y-1, m_location.x+1, m_location.y+1, MyColor_White);
 	if (m_astar)
 	{
 		m_astar->render();
@@ -88,6 +116,38 @@ void Actor::tickMove(float delta)
 		nextLocation = m_moveLocation;
 		bReachWayPoint = true;
 	}
+	
+	if (!g_MapManager.isLocationReachable(*this, nextLocation))
+	{
+		if (searchPath(m_lastAstarTargetLocation))
+		{
+			if (m_astar->getPathLocationCount() == 1)
+			{
+				util::output("stop move 1");
+				stopMove();
+			}
+		}
+		return;
+	}
+
+	{
+		AutoPlot _autoPlot(nextLocation, getRadius()*8, this);
+		// 考虑周围半径两个最大单位尺寸大小的人
+		// 考察与每个单位之间的距离
+
+		if (!g_MapManager.isLocationReachable(*this, nextLocation))
+		{
+			if (searchPath(m_lastAstarTargetLocation))
+			{
+				if (m_astar->getPathLocationCount() == 1)
+				{
+					util::output("stop move 2");
+					stopMove();
+				}
+			}
+			return;
+		}
+	}
 
 	if (isLocationBlocked(nextLocation))
 	{
@@ -112,6 +172,7 @@ void Actor::tickMove(float delta)
 
 bool Actor::isLocationBlocked(const Location& location) const
 {
+	return false;
 	// 考虑周围的静态阻挡
 	CellRange cellRange = util::locationRangeToCellRange(
 		LocationRange( location-Location( float( (m_unitSize*CELL_SIZE_X-1)/2 ), float( (m_unitSize*CELL_SIZE_Y-1)/2 ) ), 
@@ -147,7 +208,7 @@ bool Actor::searchPath(const Location& targetLocation)
 	m_astar = new AStar(*this, targetLocation);
 	if (!m_astar->search())
 	{
-		util::output("actor can't find path");
+		util::output("actor(%d) can't find path", getID());
 		FDK_DELETE(m_astar);
 		return false;
 	}
@@ -171,4 +232,9 @@ void Actor::plotToMapManager(bool bPlot)
 	const bool yAlign = (iOrignLocation.y == iPrunedlocation.y);
 
 	g_MapManager.plotUnit(vertexCoord, getUnitSize(), xAlign, yAlign, bPlot);
+}
+
+int Actor::getID() const
+{
+	return m_id;
 }

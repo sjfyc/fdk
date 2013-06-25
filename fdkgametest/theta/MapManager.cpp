@@ -4,6 +4,7 @@
 #include "Font.h"
 #include "Option.h"
 #include "TileMap.h"
+#include "Actor.h"
 #pragma warning(disable:4244)
 namespace
 {
@@ -53,4 +54,20 @@ void MapManager::draw()
 			}
 		}
 	}	
+
+	if (g_Option.isOn(Option::Toggle_ShowVertexCoordInMouse))
+	{
+		Location mouseLocation;
+		g_HGE->Input_GetMousePos(&mouseLocation.x, &mouseLocation.y);
+
+		VertexCoord vertexCoord = util::locationToVertexCoord(mouseLocation);
+
+		g_Font.printf(mouseLocation.x-20.0f,mouseLocation.y-20.0f,HGETEXT_LEFT,"%d,%d", vertexCoord.x, vertexCoord.y);
+	}	
+}
+
+bool MapManager::isLocationReachable(Actor& actor, const Location& location)
+{
+	const fdkgame::navi::VertexMap& vertexMap = getVertexMap(actor.getMoveCapability(), actor.getUnitSize());
+	return !vertexMap.isBlock(util::locationToVertexCoord(location));
 }

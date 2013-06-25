@@ -9,6 +9,7 @@ Option::Option()
 	, m_unitSize(1)
 	, m_brush(Tile_Block)
 	, m_navigatorType(0)
+	, m_timeRate(1.f)
 {
 	fdk::setEnumMask(m_moveCapability, Tile_None);
 }
@@ -46,6 +47,11 @@ void Option::onEvent(int eventType, void* params)
 			{
 				currentActor->plotToMapManager(isOn(Toggle_ShowCurrentActorVertex));
 			}
+		}
+		else if (key == HGEK_5)
+		{
+			toggle(Toggle_ShowVertexCoordInMouse);
+			util::output("%s vertex coord in mouse", isOn(Toggle_ShowVertexCoordInMouse) ? "show" : "hide");
 		}
 		else if (key == HGEK_F1)
 		{
@@ -94,6 +100,24 @@ void Option::onEvent(int eventType, void* params)
 			}
 			util::output("unit size: %d", m_unitSize);
 		}
+		else if (key == HGEK_UP)
+		{
+			m_timeRate *= 2.f;
+			if (m_timeRate > 16.f)
+			{
+				m_timeRate = 16.f;
+			}
+			util::output("time rate: %f", m_timeRate);
+		}
+		else if (key == HGEK_DOWN)
+		{
+			m_timeRate *= 0.5f;
+			if (m_timeRate < 1.f/16.f)
+			{
+				m_timeRate = 1.f/16.f;
+			}
+			util::output("time rate: %f", m_timeRate);;
+		}
 	}
 	else if (eventType == Event_OnActorSelected)
 	{
@@ -128,11 +152,14 @@ void Option::outputUsage()
 	util::output("2: show/hide cell id");
 	util::output("3: show/hide vertex");
 	util::output("4: show/hide current actor vertex");
+	util::output("5: show/hide vertex coord in mouse");
 	util::output("F1: change brush");
 	util::output("F2: change move capability");
 	util::output("F3: change navigator");
 	util::output("+: increase unit size");
 	util::output("-: decrease unit size");
+	util::output("up: time rate x 2");
+	util::output("down: time rate x 0.5");
 }
 
 void Option::start()
@@ -166,4 +193,9 @@ TileType Option::getBrush() const
 Option::NavigatorType Option::getNavigatorType() const
 {
 	return m_navigatorType;
+}
+
+float Option::getTimeRate() const
+{
+	return m_timeRate;
 }
