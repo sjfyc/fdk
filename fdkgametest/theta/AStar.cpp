@@ -100,6 +100,7 @@ bool AStar::search()
 			startVertexCoord.x, startVertexCoord.y);
 		//g_Game.pauseGame();
 
+		// when stuck with other unit, navigator will success with the target location returned
 		m_locationPath.push_back(m_targetLocation);
 
 		return true;
@@ -158,10 +159,14 @@ bool AStar::search()
 	}
 
 	FDK_ASSERT(searchResult == Navigator::SearchResult_Completed);
-
+		
 	const std::vector<int>& path = m_navigator->getPath();
 	for (size_t i = 0; i < path.size(); ++i)
 	{
+		if (i == 0 || i == path.size()-1)
+		{
+			continue;// ignore start vertex and target vertex
+		}
 		VertexCoord vertexCoord = vertexMap.toNodeCoord(path[i]);
 		m_vertexCoordPath.push_back(vertexCoord);
 		Location location = util::vertexCoordToLocation(vertexCoord);
