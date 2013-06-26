@@ -30,6 +30,11 @@ namespace fdk { namespace game { namespace navi
 			&& nodeCoord.y >= 0 && nodeCoord.y < getSizeY();
 	}
 
+	bool GridBasedEnv::isNodeWithCoordReachable(const NodeCoord& nodeCoord) const
+	{
+		return isNodeReachable(toNodeID(nodeCoord));
+	}
+
 	Navigator::Navigator()
 		: m_environmentChecker(0)
 	{

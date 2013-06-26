@@ -42,6 +42,7 @@ namespace fdk { namespace game { namespace navi
 		int toNodeID(const NodeCoord& nodeCoord) const;
 		NodeCoord toNodeCoord(int nodeID) const;
 		bool isValidNodeCoord(const NodeCoord& nodeCoord) const;
+		bool isNodeWithCoordReachable(const NodeCoord& nodeCoord) const;
 		// Environment interfaces
 		virtual int getNodeSpaceSize() const;
 	};
