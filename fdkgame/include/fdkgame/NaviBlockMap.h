@@ -25,6 +25,41 @@ namespace fdk { namespace game { namespace navi
 		MoveCapability m_moveCapability;
 		Array2D<bool> m_data;
 	};
+
+	inline BlockMap::BlockMap(TileMap& tileMap, MoveCapability moveCapability)
+		: m_tileMap(tileMap)
+		, m_moveCapability(moveCapability)
+	{
+	}
+
+	inline BlockMap::~BlockMap()
+	{
+	}
+
+	inline size_t BlockMap::getSizeX() const
+	{
+		return m_data.size_x();
+	}
+
+	inline size_t BlockMap::getSizeY() const
+	{
+		return m_data.size_y();
+	}
+
+	inline MoveCapability BlockMap::getMoveCapability() const
+	{
+		return m_moveCapability;
+	}
+
+	inline void BlockMap::setBlock(const CellCoord& cellCoord, bool bSet)
+	{
+		m_data(cellCoord.x, cellCoord.y) = bSet;
+	}
+
+	inline bool BlockMap::isBlock(const CellCoord& cellCoord) const
+	{
+		return m_data(cellCoord.x, cellCoord.y);
+	}
 }}}
 
 #endif

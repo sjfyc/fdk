@@ -3,17 +3,6 @@
 
 namespace fdk { namespace game { namespace navi
 {
-	VertexMap::VertexMap(BlockMap& blockMap, UnitSize unitSize)
-		: m_blockMap(blockMap)
-		, m_unitSize(unitSize)
-	{
-		FDK_ASSERT(unitSize >= 1);
-	}
-
-	VertexMap::~VertexMap()
-	{
-	}
-
 	void VertexMap::rebuildFromBlockMap()
 	{
 		m_data.reset(m_blockMap.getSizeX()*2-1, m_blockMap.getSizeY()*2-1);
@@ -29,16 +18,6 @@ namespace fdk { namespace game { namespace navi
 				}
 			}
 		}
-	}
-	
-	int VertexMap::getBlockValue(const VertexCoord& vertexCoord) const
-	{
-		return m_data(vertexCoord.x, vertexCoord.y);
-	}
-	
-	bool VertexMap::isBlock(const VertexCoord& vertexCoord) const
-	{
-		return getBlockValue(vertexCoord) > 0;
 	}
 
 	void VertexMap::onSetBlock(const CellCoord& cellCoord, bool bSet)
@@ -307,7 +286,4 @@ namespace fdk { namespace game { namespace navi
 	{
 		return (int)m_data.size_y();
 	}
-
-	
-
 }}}

@@ -11,7 +11,7 @@ namespace fdk
 	{
 		const T& minVal = minOf(a, b);
 		const T& maxVal = maxOf(a, b);
-		return static_cast<T>( ((double)::rand()/RAND_MAX)*(maxVal-minVal+1) + minVal );
+		return static_cast<T>( ((double)::rand()/RAND_MAX)*(maxVal-minVal) + minVal );
 	}
 }
 

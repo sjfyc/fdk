@@ -3,16 +3,6 @@
 
 namespace fdk { namespace game { namespace navi
 {
-	BlockMap::BlockMap(TileMap& tileMap, MoveCapability moveCapability)
-		: m_tileMap(tileMap)
-		, m_moveCapability(moveCapability)
-	{
-	}
-
-	BlockMap::~BlockMap()
-	{
-	}
-	
 	void BlockMap::rebuildFromTileMap()
 	{
 		m_data.reset(m_tileMap.getSizeX(), m_tileMap.getSizeY());
@@ -27,30 +17,5 @@ namespace fdk { namespace game { namespace navi
 			}
 		}
 	}
-
-	size_t BlockMap::getSizeX() const
-	{
-		return m_data.size_x();
-	}
-
-	size_t BlockMap::getSizeY() const
-	{
-		return m_data.size_y();
-	}
-
-	MoveCapability BlockMap::getMoveCapability() const
-	{
-		return m_moveCapability;
-	}
-
-	void BlockMap::setBlock(const CellCoord& cellCoord, bool bSet)
-	{
-		m_data(cellCoord.x, cellCoord.y) = bSet;
-	}
-
-	bool BlockMap::isBlock(const CellCoord& cellCoord) const
-	{
-		return m_data(cellCoord.x, cellCoord.y);
-	}
-
+	
 }}}
