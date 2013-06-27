@@ -15,7 +15,7 @@ int main()
 	g_HGE->System_SetState(HGE_SCREENHEIGHT, CELL_SIZE_Y*CELL_COUNT_Y);
 	g_HGE->System_SetState(HGE_SCREENBPP, 32);
 	g_HGE->System_SetState(HGE_TITLE, "AStar Demo");
-	g_HGE->System_SetState(HGE_FPS, 60);
+	g_HGE->System_SetState(HGE_FPS, 800);
 
 	if (g_HGE->System_Initiate() && g_Game.start()) 
 	{

@@ -34,15 +34,16 @@ namespace fdk { namespace game { namespace navi
 	
 		// GridBasedEnv interfaces
 		virtual int getSizeX() const;
-		virtual int getSizeY() const;
-		virtual bool isNodeReachable(int nodeID) const;
+		virtual int getSizeY() const;		
 
 		// Environment interfaces
 		virtual int getHeuristic(int startNodeID, int targetNodeID) const;
 		virtual void getSuccessorNodes(Navigator& navigator, int nodeID, std::vector<SuccessorNodeInfo>& result) const;
+		virtual bool isNodeReachable(int nodeID) const;
 	private:		
 		void annotateNode(const NodeCoord& coord);
 		bool tryAddSuccessorNode(Navigator& navigator, std::vector<SuccessorNodeInfo>& result, const NodeCoord& coord, int cost, int parentNodeID) const;
+		int getHeuristic(const VertexCoord& startVertexCoord, const VertexCoord& targetVertexCoord) const;
 		MapData m_nodes;
 		int m_minClearanceValueRequired;
 	};

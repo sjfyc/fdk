@@ -142,6 +142,10 @@ bool AStar::search()
 	{
 		m_navigator = new fdkgame::navi::Jps(vertexMap, startVertexID, targetVertexID);
 	}
+	else if (g_Option.getNavigatorType() == Option::NavigatorType_JpsPlus)
+	{
+		m_navigator = new fdkgame::navi::JpsPlus(vertexMap, startVertexID, targetVertexID);
+	}
 	else 
 	{
 		FDK_ASSERT(0);

@@ -83,7 +83,7 @@ AStar::AStar(int startNodeID, int targetNodeID)
 	}
 	else if (g_Option.getNavigatorType() == Option::NavigatorType_Jps)
 	{
-		m_navigator = new fdkgame::navi::Jps(g_Board, startNodeID, targetNodeID);
+		m_navigator = new fdkgame::navi::JpsPlus(g_Board, startNodeID, targetNodeID);
 	}
 
 	m_navigator->setRecorder(this);

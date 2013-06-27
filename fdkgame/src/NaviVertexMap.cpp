@@ -52,7 +52,7 @@ namespace fdk { namespace game { namespace navi
 		//}
 		{// Euclidean
 			VertexCoord startToTarget = targetVertexCoord - startVertexCoord;
-			return COST_STRAIGHT * startVertexCoord.length();
+			return COST_STRAIGHT * startToTarget.length();
 		}
 	}
 
@@ -88,13 +88,13 @@ namespace fdk { namespace game { namespace navi
 		if (!isValidNodeCoord(vertexCoord))
 		{
 			return false;
-		}
-		if (isBlock(vertexCoord))
+		}		
+		const VertexID vertexID = toNodeID(vertexCoord);
+		if (!isNodeReachable(vertexID))
 		{
 			return false;
 		}
-		const VertexID vertexID = toNodeID(vertexCoord);
-		
+
 		//if (navigator.getEnvironmentChecker() &&
 		//	!navigator.getEnvironmentChecker()->checkSuccessorNode(*this, nodeID, parentNodeID))
 		//{
@@ -110,7 +110,8 @@ namespace fdk { namespace game { namespace navi
 
 	bool VertexMap::isNodeReachable(int nodeID) const
 	{
-		return !isBlock(toNodeCoord(nodeID));
+		FDK_ASSERT(isValidNodeID(nodeID));
+		return m_data.raw_data()[nodeID] <= 0;
 	}
 
 	void VertexMap::onPlotUnit(const VertexCoord& vertexCoord, UnitSize unitSize, bool bPlot)

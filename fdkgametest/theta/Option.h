@@ -13,6 +13,7 @@ public:
 	{
 		NavigatorType_AStar,
 		NavigatorType_Jps,
+		NavigatorType_JpsPlus,
 		NavigatorType__Count,
 	};
 	typedef unsigned char NavigatorType;

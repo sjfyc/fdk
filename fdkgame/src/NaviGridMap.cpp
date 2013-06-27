@@ -28,8 +28,22 @@ namespace fdk { namespace game { namespace navi
 
 	int GridMap::getHeuristic(int startNodeID, int targetNodeID) const
 	{
-		VectorI startToTarget = toNodeCoord(targetNodeID) - toNodeCoord(startNodeID);
-		return (abs(startToTarget.x) + abs(startToTarget.y)) * COST_STRAIGHT;
+		return getHeuristic(toNodeCoord(startNodeID), toNodeCoord(targetNodeID));
+	}
+
+	int GridMap::getHeuristic(const VertexCoord& startVertexCoord, const VertexCoord& targetVertexCoord) const
+	{		
+		//{// Manhattan
+		//	VertexCoord startToTarget = targetVertexCoord - startVertexCoord;
+		//	return COST_STRAIGHT * (abs(startToTarget.x) + abs(startToTarget.y));
+		//}
+		//{// Chebyshev
+		//	return COST_STRAIGHT * maxOf(abs(startVertexCoord.x - targetVertexCoord.x), abs(startVertexCoord.y - targetVertexCoord.y));
+		//}
+		{// Euclidean
+			VertexCoord startToTarget = targetVertexCoord - startVertexCoord;
+			return COST_STRAIGHT * startToTarget.length();
+		}
 	}
 
 	void GridMap::getSuccessorNodes(Navigator& navigator, int nodeID, std::vector<SuccessorNodeInfo>& result) const

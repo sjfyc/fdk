@@ -206,7 +206,7 @@ namespace fdk { namespace game { namespace navi
 		}
 	}
 	
-	bool JpsUtil::isDiagonalDirection(Direction direction)
+	inline bool JpsUtil::isDiagonalDirection(Direction direction)
 	{
 		return (direction % 2) != 0;
 	}
@@ -363,44 +363,4 @@ namespace fdk { namespace game { namespace navi
 		}
 		return env.isNodeReachable(env.toNodeID(neighbourNodeCoord));		
 	}
-
-	//int JpsUtil::jump(const GridBasedEnv& env, int targetNodeID, const NodeCoord& nodeCoord, Direction direction)
-	//{
-	//	const bool bDiagonal = isDiagonalDirection(direction);
-	//	NodeCoord prevNodeCoord = nodeCoord;
-	//	while (1)
-	//	{
-	//		if (!isNeighbourInDirectionReachable(env, prevNodeCoord, direction))
-	//		{
-	//			return INVALID_NODEID;
-	//		}
-	//		NodeCoord stepNodeCoord = getNeighbourNodeCoordInDirection(prevNodeCoord, direction);
-	//		int stepNodeID = env.toNodeID(stepNodeCoord);
-	//		if (stepNodeID == targetNodeID) 
-	//		{
-	//			return stepNodeID;
-	//		}
-	//		if (getForcedNeighbourDirections(env, stepNodeCoord, direction) != EMPTY_DIRECTIONS) 
-	//		{
-	//			return stepNodeID;
-	//		}
-	//		if (bDiagonal)
-	//		{
-	//			int nodeID = jump(env, targetNodeID, stepNodeCoord, (direction + 7) % 8);
-	//			if (nodeID != INVALID_NODEID) 
-	//			{
-	//				Save
-	//				m_savedJumps.insert();
-	//				return stepNodeID;
-	//			}
-	//			nodeID = jump(env, targetNodeID, stepNodeCoord, (direction + 1) % 8);
-	//			if (nodeID != INVALID_NODEID) 
-	//			{
-	//				return stepNodeID;
-	//			}
-	//		}
-	//		prevNodeCoord = stepNodeCoord;
-	//	}
-	//	FDK_ASSERT(0);
-	//}
 }}}

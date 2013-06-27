@@ -23,6 +23,7 @@
     <ClInclude Include="include\fdkgame\NaviAStar.h" />
     <ClInclude Include="include\fdkgame\NaviBlockMap.h" />
     <ClInclude Include="include\fdkgame\NaviBase.h" />
+    <ClInclude Include="include\fdkgame\NaviJpsPlus.h" />
     <ClInclude Include="include\fdkgame\NaviMapManager.h" />
     <ClInclude Include="include\fdkgame\NaviTypes.h" />
     <ClInclude Include="include\fdkgame\NaviTileMap.h" />
@@ -40,6 +41,7 @@
     <ClCompile Include="src\NaviAStar.cpp" />
     <ClCompile Include="src\NaviBase.cpp" />
     <ClCompile Include="src\NaviBlockMap.cpp" />
+    <ClCompile Include="src\NaviJpsPlus.cpp" />
     <ClCompile Include="src\NaviMapManager.cpp" />
     <ClCompile Include="src\NaviTileMap.cpp" />
     <ClCompile Include="src\NaviVertexMap.cpp" />

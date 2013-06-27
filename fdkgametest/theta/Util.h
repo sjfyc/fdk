@@ -2,6 +2,7 @@
 #define __UTIL_H_INCLUDE__
 #include "Types.h"
 #include <iostream>
+#include <time.h>
 
 namespace util
 {

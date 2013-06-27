@@ -3,7 +3,7 @@
 #include <vector>
 #include <set>
 #include <fdkgame/NaviAStar.h>
-#include <fdkgame/NaviJps.h>
+#include <fdkgame/NaviJpsPlus.h>
 #include "Types.h"
 
 class AStarRecorder
