@@ -168,14 +168,12 @@ namespace fdk { namespace game { namespace navi
 		
 		if (isDiagonalDirection(direction)) 
 		{
-			if (isNeighbourInDirectionReachable(env, nodeCoord, direction+7) &&
-				isNeighbourInDirectionReachable(env, nodeCoord, direction+6) && 
+			if (isNeighbourInDirectionReachable(env, nodeCoord, direction+6) && 
 				!isNeighbourInDirectionReachable(env, nodeCoord, direction+5))
 			{
 				setEnumMask(directions, (direction + 6) % 8);
 			}
-			if (isNeighbourInDirectionReachable(env, nodeCoord, direction +1) && 
-				isNeighbourInDirectionReachable(env, nodeCoord, direction +2) && 
+			if (isNeighbourInDirectionReachable(env, nodeCoord, direction +2) && 
 				!isNeighbourInDirectionReachable(env, nodeCoord, direction +3)) 
 			{
 				setEnumMask(directions, (direction + 2) % 8);
@@ -183,14 +181,12 @@ namespace fdk { namespace game { namespace navi
 		} 
 		else 
 		{
-			if (isNeighbourInDirectionReachable(env, nodeCoord, direction) &&
-				isNeighbourInDirectionReachable(env, nodeCoord, direction +1) && 
+			if (isNeighbourInDirectionReachable(env, nodeCoord, direction +1) && 
 				!isNeighbourInDirectionReachable(env, nodeCoord, direction +2)) 
 			{
 				setEnumMask(directions, (direction + 1) % 8);
 			}
-			if (isNeighbourInDirectionReachable(env, nodeCoord, direction) && 
-				isNeighbourInDirectionReachable(env, nodeCoord, direction +7) && 
+			if (isNeighbourInDirectionReachable(env, nodeCoord, direction +7) && 
 				!isNeighbourInDirectionReachable(env, nodeCoord, direction +6)) 
 			{
 				setEnumMask(directions, (direction + 7) % 8);
@@ -202,26 +198,32 @@ namespace fdk { namespace game { namespace navi
 
 	bool JpsUtil::isNeighbourInDirectionReachable(const GridBasedEnv& env, const NodeCoord& nodeCoord, Direction direction)
 	{
+		if (isDiagonalDirection(direction))
+		{
+			if (!isNeighbourInDirectionReachable(env, nodeCoord, (direction + 7) % 8) &&
+				!isNeighbourInDirectionReachable(env, nodeCoord, (direction + 1) % 8))
+			{
+				return false;
+			}
+		}
 		NodeCoord neighbourNodeCoord = getNeighbourNodeCoordInDirection(nodeCoord, direction % 8);
 		if (!env.isValidNodeCoord(neighbourNodeCoord))
 		{
 			return false;
 		}
-		return env.isNodeReachable(env.toNodeID(neighbourNodeCoord));
+		return env.isNodeReachable(env.toNodeID(neighbourNodeCoord));		
 	}
 
 	int JpsUtil::jump(const GridBasedEnv& env, int targetNodeID, const NodeCoord& nodeCoord, Direction direction)
 	{
-		NodeCoord stepNodeCoord = getNeighbourNodeCoordInDirection(nodeCoord, direction);
-		if (!env.isValidNodeCoord(stepNodeCoord))
+		if (!isNeighbourInDirectionReachable(env, nodeCoord, direction))
 		{
 			return INVALID_NODEID;
 		}
+		
+		NodeCoord stepNodeCoord = getNeighbourNodeCoordInDirection(nodeCoord, direction);		
 		int stepNodeID = env.toNodeID(stepNodeCoord);
-		if (!env.isNodeReachable(stepNodeID)) 
-		{
-			return INVALID_NODEID;
-		}
+
 		if (stepNodeID == targetNodeID) 
 		{
 			return stepNodeID;
@@ -241,7 +243,7 @@ namespace fdk { namespace game { namespace navi
 			if (nodeID != INVALID_NODEID) 
 			{
 				return stepNodeID;
-			}
+			}			
 		}
 		return jump(env, targetNodeID, stepNodeCoord, direction);
 	}

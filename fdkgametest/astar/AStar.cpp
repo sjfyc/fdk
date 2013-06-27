@@ -113,7 +113,11 @@ void AStar::render()
 
 			g_HGE->Gfx_RenderLine(prevCenterLocation.x, prevCenterLocation.y, 
 				currentCenterLocation.x, currentCenterLocation.y,
-				MyColor_Blue
+				ARGB(255, 132, 38, 64)
+				);
+			g_HGE->Gfx_RenderLine(prevCenterLocation.x, prevCenterLocation.y+1,
+				currentCenterLocation.x, currentCenterLocation.y+1,
+				ARGB(255, 132, 38, 64)
 				);
 			prevCellCoord = currentCellCoord;
 		}
