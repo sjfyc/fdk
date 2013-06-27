@@ -21,6 +21,7 @@ namespace fdk { namespace game { namespace navi
 		static Directions getForcedNeighbourDirections(const GridBasedEnv& env, const NodeCoord& nodeCoord, Direction direction);
 		static bool isNeighbourInDirectionReachable(const GridBasedEnv& env, const NodeCoord& nodeCoord, Direction direction);
 		static int jump(const GridBasedEnv& env, int targetNodeID, const NodeCoord& nodeCoord, Direction direction);
+		static int jumpStraight(const GridBasedEnv& env, int targetNodeID, const NodeCoord& nodeCoord, Direction direction);
 	};
 
 	Jps::Jps(const GridBasedEnv& env, int startNodeID, int targetNodeID)
@@ -235,6 +236,11 @@ namespace fdk { namespace game { namespace navi
 
 	int JpsUtil::jump(const GridBasedEnv& env, int targetNodeID, const NodeCoord& nodeCoord, Direction direction)
 	{
+		if (!isDiagonalDirection(direction))
+		{
+			return jumpStraight(env, targetNodeID, nodeCoord, direction);
+		}
+
 		if (!isNeighbourInDirectionReachable(env, nodeCoord, direction))
 		{
 			return INVALID_NODEID;
@@ -253,18 +259,43 @@ namespace fdk { namespace game { namespace navi
 		}
 		if (isDiagonalDirection(direction)) 
 		{
-			int nodeID = jump(env, targetNodeID, stepNodeCoord, (direction + 7) % 8);
+			int nodeID = jumpStraight(env, targetNodeID, stepNodeCoord, (direction + 7) % 8);
 			if (nodeID != INVALID_NODEID) 
 			{
 				return stepNodeID;
 			}
-			nodeID = jump(env, targetNodeID, stepNodeCoord, (direction + 1) % 8);
+			nodeID = jumpStraight(env, targetNodeID, stepNodeCoord, (direction + 1) % 8);
 			if (nodeID != INVALID_NODEID) 
 			{
 				return stepNodeID;
-			}			
+			}
 		}
 		return jump(env, targetNodeID, stepNodeCoord, direction);
+	}
+
+	int JpsUtil::jumpStraight(const GridBasedEnv& env, int targetNodeID, const NodeCoord& nodeCoord, Direction direction)
+	{		
+		NodeCoord prevNodeCoord = nodeCoord;
+		while (1)
+		{			
+			if (!isNeighbourInDirectionReachable(env, prevNodeCoord, direction))
+			{
+				return INVALID_NODEID;
+			}
+			NodeCoord stepNodeCoord = getNeighbourNodeCoordInDirection(prevNodeCoord, direction);
+			int stepNodeID = env.toNodeID(stepNodeCoord);
+			if (stepNodeID == targetNodeID) 
+			{
+				return stepNodeID;
+			}
+			if (getForcedNeighbourDirections(env, stepNodeCoord, direction) != EMPTY_DIRECTIONS) 
+			{
+				return stepNodeID;
+			}
+			prevNodeCoord = stepNodeCoord;
+		}
+		FDK_ASSERT(0);
+		throw 0;
 	}
 
 }}}
