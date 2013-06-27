@@ -19,16 +19,19 @@ namespace fdk { namespace game { namespace navi
 		FDK_ASSERT(m_env.isValidNodeID(targetNodeID));
 		FDK_ASSERT(startNodeID != targetNodeID);
 
-		const int nodeCount = m_env.getNodeSpaceSize();
-		m_nodeStates = new NodeState[nodeCount];
-		m_nodeDatas = new NodeData[nodeCount];
-		memset(m_nodeStates, 0, sizeof(NodeState)*nodeCount);
+		const size_t NODE_SPACE_SIZE = 2048*2048;
+		static NodeState* s_nodeStates = new NodeState[NODE_SPACE_SIZE];
+		static NodeData* s_nodeDatas = new NodeData[NODE_SPACE_SIZE];
+
+		m_nodeStates = s_nodeStates;
+		m_nodeDatas = s_nodeDatas;
+		memset(m_nodeStates, 0, m_env.getNodeSpaceSize());
 	}
 
 	AStar::~AStar()
 	{
-		FDK_DELETE_ARRAY(m_nodeStates);
-		FDK_DELETE_ARRAY(m_nodeDatas);
+		//FDK_DELETE_ARRAY(m_nodeStates);
+		//FDK_DELETE_ARRAY(m_nodeDatas);
 	}	
 
 	AStar::SearchResult AStar::search(int step)
