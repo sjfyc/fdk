@@ -15,7 +15,7 @@ namespace fdk { namespace game { namespace navi
 		typedef GridBasedEnv::NodeCoord NodeCoord;
 		static bool isDiagonalDirection(Direction direction);
 		static Direction getNextDirection(Directions& directions);
-		static Direction getDirectionFromParent(int mapWidth, int parentNodeID, int nodeID);
+		static Direction getDirectionFromParent(const NodeCoord* parentNodeCoord, const NodeCoord& nodeCoord);
 		static NodeCoord getNeighbourNodeCoordInDirection(const NodeCoord& nodeCoord, Direction direction);
 		static Directions getNaturalNeighbourDirections(Direction direction);
 		static Directions getForcedNeighbourDirections(const GridBasedEnv& env, const NodeCoord& nodeCoord, Direction direction);
@@ -36,8 +36,15 @@ namespace fdk { namespace game { namespace navi
 	{
 		const GridBasedEnv& env = static_cast<const GridBasedEnv&>(l_env);
 		GridBasedEnv::NodeCoord nodeCoord = env.toNodeCoord(nodeID);
+		GridBasedEnv::NodeCoord* pParentNodeCoord = 0;
+		GridBasedEnv::NodeCoord parentNodeCoord;
+		if (parentNodeID != INVALID_NODEID)
+		{
+			parentNodeCoord = env.toNodeCoord(parentNodeID);
+			pParentNodeCoord = &parentNodeCoord;
+		}
 
-		JpsUtil::Direction fromParentDirection = JpsUtil::getDirectionFromParent(env.getSizeX(), parentNodeID, nodeID);
+		JpsUtil::Direction fromParentDirection = JpsUtil::getDirectionFromParent(pParentNodeCoord, nodeCoord);
 		JpsUtil::Directions naturalNeighbourDirections = JpsUtil::getNaturalNeighbourDirections(fromParentDirection);		
 		JpsUtil::Directions forcedNeighbourDirections = JpsUtil::getForcedNeighbourDirections(env, nodeCoord, fromParentDirection);
 		JpsUtil::Directions directions = naturalNeighbourDirections | forcedNeighbourDirections;
@@ -50,10 +57,20 @@ namespace fdk { namespace game { namespace navi
 			{
 				continue;
 			}
-			GridBasedEnv::NodeCoord successorNodeCoord = env.toNodeCoord(successorNodeID);
+			GridBasedEnv::NodeCoord successorNodeCoord = env.toNodeCoord(successorNodeID);			
+			GridBasedEnv::NodeCoord offset = successorNodeCoord-nodeCoord;
 			SuccessorNodeInfo info;
 			info.nodeID = successorNodeID;
-			info.cost = COST_STRAIGHT * (successorNodeCoord-nodeCoord).length();
+			
+			if (JpsUtil::isDiagonalDirection(direction))
+			{
+				FDK_ASSERT(abs(offset.x) == abs(offset.y));
+				info.cost = COST_DIAGONAL * abs(offset.x);
+			}
+			else
+			{
+				info.cost = COST_STRAIGHT * abs(offset.x != 0 ? offset.x : offset.y);
+			}
 			result.push_back(info);
 		}
 	}
@@ -78,41 +95,43 @@ namespace fdk { namespace game { namespace navi
 		return NO_DIRECTION;
 	}
 
-	JpsUtil::Direction JpsUtil::getDirectionFromParent(int mapWidth, int parentNodeID, int nodeID)
+	JpsUtil::Direction JpsUtil::getDirectionFromParent(const NodeCoord* parentNodeCoord, const NodeCoord& nodeCoord)
 	{	
 		// top:0 topRight:1 ... clockwise
-		if (parentNodeID == INVALID_NODEID || nodeID == INVALID_NODEID)
+		if (!parentNodeCoord)
 		{
 			return NO_DIRECTION;
 		}
-		if (parentNodeID - mapWidth == nodeID) 
+		const NodeCoord offset = nodeCoord - *parentNodeCoord;
+		if (offset.x == 0 && offset.y < 0) 
 		{
 			return 0;
 		} 
-		else if (parentNodeID - mapWidth + 1 == nodeID) 
+		else if (offset.x > 0 && offset.y < 0) 
 		{
 			return 1;
 		} 
-		else if (parentNodeID + 1 == nodeID) 
+		else if (offset.x > 0 && offset.y == 0) 
 		{
 			return 2;
 		} 
-		else if (parentNodeID + mapWidth + 1 == nodeID) 
+		else if (offset.x > 0 && offset.y > 0) 
 		{
 			return 3;
 		} 
-		else if (parentNodeID + mapWidth == nodeID) {
+		else if (offset.x == 0 && offset.y > 0)
+		{
 			return 4;
 		} 
-		else if (parentNodeID + mapWidth - 1 == nodeID) 
+		else if (offset.x < 0 && offset.y > 0) 
 		{
 			return 5;
 		} 
-		else if (parentNodeID - 1 == nodeID) 
+		else if (offset.x < 0 && offset.y == 0) 
 		{
 			return 6;
 		} 
-		else if (parentNodeID - mapWidth - 1 == nodeID) 
+		else if (offset.x < 0 && offset.y < 0)
 		{
 			return 7;
 		}
