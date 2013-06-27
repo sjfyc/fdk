@@ -13,7 +13,6 @@ namespace fdk { namespace game { namespace navi
 		virtual ~Jps();
 		// AStar interfaces
 		virtual void getSuccessorNodes(const Environment& env, int nodeID, int parentNodeID, std::vector<SuccessorNodeInfo>& result);
-	private:				
 	};
 }}}
 

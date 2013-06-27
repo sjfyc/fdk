@@ -3,6 +3,8 @@
 
 namespace fdk { namespace game { namespace navi
 {
+	typedef GridBasedEnv::NodeCoord NodeCoord;
+
 	class JpsUtil
 	{
 	public:
@@ -13,7 +15,7 @@ namespace fdk { namespace game { namespace navi
 		typedef GridBasedEnv::NodeCoord NodeCoord;
 		static bool isDiagonalDirection(Direction direction);
 		static Direction getNextDirection(Directions& directions);
-		static Direction getDirectionFromParentToNode(int mapWidth, int parentNodeID, int nodeID);
+		static Direction getDirectionFromParent(int mapWidth, int parentNodeID, int nodeID);
 		static NodeCoord getNeighbourNodeCoordInDirection(const NodeCoord& nodeCoord, Direction direction);
 		static Directions getNaturalNeighbourDirections(Direction direction);
 		static Directions getForcedNeighbourDirections(const GridBasedEnv& env, const NodeCoord& nodeCoord, Direction direction);
@@ -30,23 +32,25 @@ namespace fdk { namespace game { namespace navi
 	{
 	}
 
-	void Jps::getSuccessorNodes(const Environment& env, int nodeID, int parentNodeID, std::vector<SuccessorNodeInfo>& result)
+	void Jps::getSuccessorNodes(const Environment& l_env, int nodeID, int parentNodeID, std::vector<SuccessorNodeInfo>& result)
 	{
-		const GridBasedEnv& gridBasedEnv = static_cast<const GridBasedEnv&>(env);
-		GridBasedEnv::NodeCoord nodeCoord = gridBasedEnv.toNodeCoord(nodeID);
-		JpsUtil::Direction parentToCurrentDirection = JpsUtil::getDirectionFromParentToNode(gridBasedEnv.getSizeX(), parentNodeID, nodeID);
-		JpsUtil::Directions naturalNeighbourDirections = JpsUtil::getNaturalNeighbourDirections(parentToCurrentDirection);
-		JpsUtil::Directions forcedNeighbourDirections = JpsUtil::getForcedNeighbourDirections(gridBasedEnv, nodeCoord, parentToCurrentDirection);
+		const GridBasedEnv& env = static_cast<const GridBasedEnv&>(l_env);
+		GridBasedEnv::NodeCoord nodeCoord = env.toNodeCoord(nodeID);
+
+		JpsUtil::Direction fromParentDirection = JpsUtil::getDirectionFromParent(env.getSizeX(), parentNodeID, nodeID);
+		JpsUtil::Directions naturalNeighbourDirections = JpsUtil::getNaturalNeighbourDirections(fromParentDirection);		
+		JpsUtil::Directions forcedNeighbourDirections = JpsUtil::getForcedNeighbourDirections(env, nodeCoord, fromParentDirection);
 		JpsUtil::Directions directions = naturalNeighbourDirections | forcedNeighbourDirections;
+
 		for (JpsUtil::Direction direction = JpsUtil::getNextDirection(directions); 
 			direction != JpsUtil::NO_DIRECTION; direction = JpsUtil::getNextDirection(directions))
 		{			
-			int successorNodeID = JpsUtil::jump(gridBasedEnv, getTargetNodeID(), nodeCoord, direction);
+			int successorNodeID = JpsUtil::jump(env, getTargetNodeID(), nodeCoord, direction);
 			if (successorNodeID == INVALID_NODEID)
 			{
 				continue;
 			}
-			GridBasedEnv::NodeCoord successorNodeCoord = gridBasedEnv.toNodeCoord(successorNodeID);
+			GridBasedEnv::NodeCoord successorNodeCoord = env.toNodeCoord(successorNodeID);
 			SuccessorNodeInfo info;
 			info.nodeID = successorNodeID;
 			info.cost = COST_STRAIGHT * (successorNodeCoord-nodeCoord).length();
@@ -74,7 +78,7 @@ namespace fdk { namespace game { namespace navi
 		return NO_DIRECTION;
 	}
 
-	JpsUtil::Direction JpsUtil::getDirectionFromParentToNode(int mapWidth, int parentNodeID, int nodeID)
+	JpsUtil::Direction JpsUtil::getDirectionFromParent(int mapWidth, int parentNodeID, int nodeID)
 	{	
 		// top:0 topRight:1 ... clockwise
 		if (parentNodeID == INVALID_NODEID || nodeID == INVALID_NODEID)
