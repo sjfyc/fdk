@@ -5,32 +5,161 @@ namespace fdk { namespace game { namespace navi
 {
 	typedef GridBasedEnv::NodeCoord NodeCoord;
 
-	class JpsUtil
+	class JpsDef
 	{
 	public:
+		enum { MAX_DIRECTION_COUNT = 8 };
 		enum { NO_DIRECTION = 8 };
 		enum { EMPTY_DIRECTIONS = 0, FULL_DIRECTIONS = 255 } ;
 		typedef unsigned char Direction;
 		typedef unsigned char Directions;
 		typedef GridBasedEnv::NodeCoord NodeCoord;
+	};
+
+	class JpsUtil
+		: public JpsDef
+	{
+	public:
+		
 		static bool isDiagonalDirection(Direction direction);
 		static Direction getNextDirection(Directions& directions);
 		static Direction getDirectionFromParent(const NodeCoord* parentNodeCoord, const NodeCoord& nodeCoord);
 		static NodeCoord getNeighbourNodeCoordInDirection(const NodeCoord& nodeCoord, Direction direction);
 		static Directions getNaturalNeighbourDirections(Direction direction);
 		static Directions getForcedNeighbourDirections(const GridBasedEnv& env, const NodeCoord& nodeCoord, Direction direction);
-		static bool isNeighbourInDirectionReachable(const GridBasedEnv& env, const NodeCoord& nodeCoord, Direction direction);
-		static int jump(const GridBasedEnv& env, int targetNodeID, const NodeCoord& nodeCoord, Direction direction);
-		static int jumpStraight(const GridBasedEnv& env, int targetNodeID, const NodeCoord& nodeCoord, Direction direction);
+		static bool isNeighbourInDirectionReachable(const GridBasedEnv& env, const NodeCoord& nodeCoord, Direction direction);		
 	};
 
+	class JpsImpl
+		: public JpsDef
+	{		
+	public:
+		struct SavedJumpNodeInDirection
+		{
+			SavedJumpNodeInDirection();
+			bool bInspected;
+			int nodeID;
+		};
+		struct SavedJumpInfo
+		{	
+			int nodeID;
+			SavedJumpNodeInDirection jumps[MAX_DIRECTION_COUNT];
+			SavedJumpInfo(int nodeID);
+			bool operator<(const SavedJumpInfo& other) const;
+		};		
+		typedef std::set<SavedJumpInfo> SavedJumps;
+		int jump(const GridBasedEnv& env, int targetNodeID, const NodeCoord& nodeCoord, Direction direction, const JpsImpl::SavedJumpInfo* savedJumpInfo=0);
+		SavedJumpInfo* findSavedJumpInfo(int nodeID);
+	private:
+		SavedJumps m_savedJumps;
+	};
+
+	inline JpsImpl::SavedJumpNodeInDirection::SavedJumpNodeInDirection()
+		: bInspected(false)
+		, nodeID(INVALID_NODEID)
+	{
+	}
+
+	inline JpsImpl::SavedJumpInfo::SavedJumpInfo(int l_nodeID)
+		: nodeID(l_nodeID)
+	{
+	}
+
+	inline bool JpsImpl::SavedJumpInfo::operator<(const SavedJumpInfo& other) const
+	{
+		return nodeID < other.nodeID;
+	}
+
+	int JpsImpl::jump(const GridBasedEnv& env, int targetNodeID, const NodeCoord& nodeCoord, Direction direction, const JpsImpl::SavedJumpInfo* savedJumpInfo)
+	{
+		const bool bDiagonal = JpsUtil::isDiagonalDirection(direction);
+
+		if (savedJumpInfo)
+		{
+			if (bDiagonal)
+			{
+				FDK_ASSERT(!savedJumpInfo->jumps[direction].bInspected);
+			}
+			else
+			{
+				if (savedJumpInfo->jumps[direction].bInspected)
+				{
+					return savedJumpInfo->jumps[direction].nodeID;
+				}
+			}
+		}
+
+		NodeCoord prevNodeCoord = nodeCoord;
+		while (1)
+		{
+			if (!JpsUtil::isNeighbourInDirectionReachable(env, prevNodeCoord, direction))
+			{
+				return INVALID_NODEID;
+			}
+			NodeCoord stepNodeCoord = JpsUtil::getNeighbourNodeCoordInDirection(prevNodeCoord, direction);
+			int stepNodeID = env.toNodeID(stepNodeCoord);
+			if (stepNodeID == targetNodeID) 
+			{
+				return stepNodeID;
+			}
+			if (JpsUtil::getForcedNeighbourDirections(env, stepNodeCoord, direction) != EMPTY_DIRECTIONS) 
+			{
+				return stepNodeID;
+			}
+			if (bDiagonal)
+			{ 
+				SavedJumpInfo* pSavedJumpInfo = findSavedJumpInfo(stepNodeID);
+				if (!pSavedJumpInfo)
+				{
+					SavedJumpInfo temp(stepNodeID);
+					std::pair<SavedJumps::iterator, bool> resultPair = m_savedJumps.insert(temp);
+					FDK_ASSERT(resultPair.second);
+					pSavedJumpInfo = const_cast<SavedJumpInfo*>(&*resultPair.first);
+				}
+
+				Direction newDirs[] = { (direction + 7) % 8, (direction + 1) % 8 }; 
+				for (size_t i = 0; i < sizeof(newDirs)/sizeof(*newDirs); ++i)
+				{
+					Direction newDir = newDirs[i];
+					if (!pSavedJumpInfo->jumps[newDir].bInspected)
+					{
+						int jumpNodeID = jump(env, targetNodeID, stepNodeCoord, newDir);
+						pSavedJumpInfo->jumps[newDir].bInspected = true;
+						pSavedJumpInfo->jumps[newDir].nodeID = jumpNodeID;
+					}
+					if (pSavedJumpInfo->jumps[newDir].nodeID == INVALID_NODEID) 
+					{
+						continue;
+					}
+					return stepNodeID;
+				}				
+			}
+			prevNodeCoord = stepNodeCoord;
+		}
+		FDK_ASSERT(0);
+	}
+
+	JpsImpl::SavedJumpInfo* JpsImpl::findSavedJumpInfo(int nodeID)
+	{
+		FDK_CMP_PTR(SavedJumpInfo, search);
+		search->nodeID = nodeID;
+		SavedJumps::iterator it = m_savedJumps.find(nodeID);
+		if (it == m_savedJumps.end())
+		{
+			return 0;
+		}
+		return const_cast<JpsImpl::SavedJumpInfo*>(&*it);
+	}
+	
 	Jps::Jps(const GridBasedEnv& env, int startNodeID, int targetNodeID)
 		: _Base(env, startNodeID, targetNodeID)
+		, m_impl(*new JpsImpl)
 	{
 	}
 
 	Jps::~Jps()
 	{
+		delete &m_impl;
 	}
 
 	void Jps::getSuccessorNodes(const Environment& l_env, int nodeID, int parentNodeID, std::vector<SuccessorNodeInfo>& result)
@@ -50,10 +179,11 @@ namespace fdk { namespace game { namespace navi
 		JpsUtil::Directions forcedNeighbourDirections = JpsUtil::getForcedNeighbourDirections(env, nodeCoord, fromParentDirection);
 		JpsUtil::Directions directions = naturalNeighbourDirections | forcedNeighbourDirections;
 
+		const JpsImpl::SavedJumpInfo* savedJumpInfo = m_impl.findSavedJumpInfo(nodeID);
 		for (JpsUtil::Direction direction = JpsUtil::getNextDirection(directions); 
 			direction != JpsUtil::NO_DIRECTION; direction = JpsUtil::getNextDirection(directions))
-		{			
-			int successorNodeID = JpsUtil::jump(env, getTargetNodeID(), nodeCoord, direction);
+		{
+			int successorNodeID = m_impl.jump(env, getTargetNodeID(), nodeCoord, direction, savedJumpInfo);
 			if (successorNodeID == INVALID_NODEID)
 			{
 				continue;
@@ -75,7 +205,7 @@ namespace fdk { namespace game { namespace navi
 			result.push_back(info);
 		}
 	}
-
+	
 	bool JpsUtil::isDiagonalDirection(Direction direction)
 	{
 		return (direction % 2) != 0;
@@ -234,68 +364,43 @@ namespace fdk { namespace game { namespace navi
 		return env.isNodeReachable(env.toNodeID(neighbourNodeCoord));		
 	}
 
-	int JpsUtil::jump(const GridBasedEnv& env, int targetNodeID, const NodeCoord& nodeCoord, Direction direction)
-	{
-		if (!isDiagonalDirection(direction))
-		{
-			return jumpStraight(env, targetNodeID, nodeCoord, direction);
-		}
-
-		if (!isNeighbourInDirectionReachable(env, nodeCoord, direction))
-		{
-			return INVALID_NODEID;
-		}
-		
-		NodeCoord stepNodeCoord = getNeighbourNodeCoordInDirection(nodeCoord, direction);		
-		int stepNodeID = env.toNodeID(stepNodeCoord);
-
-		if (stepNodeID == targetNodeID) 
-		{
-			return stepNodeID;
-		}
-		if (getForcedNeighbourDirections(env, stepNodeCoord, direction) != EMPTY_DIRECTIONS) 
-		{
-			return stepNodeID;
-		}
-		if (isDiagonalDirection(direction)) 
-		{
-			int nodeID = jumpStraight(env, targetNodeID, stepNodeCoord, (direction + 7) % 8);
-			if (nodeID != INVALID_NODEID) 
-			{
-				return stepNodeID;
-			}
-			nodeID = jumpStraight(env, targetNodeID, stepNodeCoord, (direction + 1) % 8);
-			if (nodeID != INVALID_NODEID) 
-			{
-				return stepNodeID;
-			}
-		}
-		return jump(env, targetNodeID, stepNodeCoord, direction);
-	}
-
-	int JpsUtil::jumpStraight(const GridBasedEnv& env, int targetNodeID, const NodeCoord& nodeCoord, Direction direction)
-	{		
-		NodeCoord prevNodeCoord = nodeCoord;
-		while (1)
-		{			
-			if (!isNeighbourInDirectionReachable(env, prevNodeCoord, direction))
-			{
-				return INVALID_NODEID;
-			}
-			NodeCoord stepNodeCoord = getNeighbourNodeCoordInDirection(prevNodeCoord, direction);
-			int stepNodeID = env.toNodeID(stepNodeCoord);
-			if (stepNodeID == targetNodeID) 
-			{
-				return stepNodeID;
-			}
-			if (getForcedNeighbourDirections(env, stepNodeCoord, direction) != EMPTY_DIRECTIONS) 
-			{
-				return stepNodeID;
-			}
-			prevNodeCoord = stepNodeCoord;
-		}
-		FDK_ASSERT(0);
-		throw 0;
-	}
-
+	//int JpsUtil::jump(const GridBasedEnv& env, int targetNodeID, const NodeCoord& nodeCoord, Direction direction)
+	//{
+	//	const bool bDiagonal = isDiagonalDirection(direction);
+	//	NodeCoord prevNodeCoord = nodeCoord;
+	//	while (1)
+	//	{
+	//		if (!isNeighbourInDirectionReachable(env, prevNodeCoord, direction))
+	//		{
+	//			return INVALID_NODEID;
+	//		}
+	//		NodeCoord stepNodeCoord = getNeighbourNodeCoordInDirection(prevNodeCoord, direction);
+	//		int stepNodeID = env.toNodeID(stepNodeCoord);
+	//		if (stepNodeID == targetNodeID) 
+	//		{
+	//			return stepNodeID;
+	//		}
+	//		if (getForcedNeighbourDirections(env, stepNodeCoord, direction) != EMPTY_DIRECTIONS) 
+	//		{
+	//			return stepNodeID;
+	//		}
+	//		if (bDiagonal)
+	//		{
+	//			int nodeID = jump(env, targetNodeID, stepNodeCoord, (direction + 7) % 8);
+	//			if (nodeID != INVALID_NODEID) 
+	//			{
+	//				Save
+	//				m_savedJumps.insert();
+	//				return stepNodeID;
+	//			}
+	//			nodeID = jump(env, targetNodeID, stepNodeCoord, (direction + 1) % 8);
+	//			if (nodeID != INVALID_NODEID) 
+	//			{
+	//				return stepNodeID;
+	//			}
+	//		}
+	//		prevNodeCoord = stepNodeCoord;
+	//	}
+	//	FDK_ASSERT(0);
+	//}
 }}}
