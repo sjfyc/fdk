@@ -47,13 +47,13 @@ namespace fdk { namespace game { namespace navi
 		//	VertexCoord startToTarget = targetVertexCoord - startVertexCoord;
 		//	return COST_STRAIGHT * (abs(startToTarget.x) + abs(startToTarget.y));
 		//}
-		{// Chebyshev
-			return COST_STRAIGHT * maxOf(abs(startVertexCoord.x - targetVertexCoord.x), abs(startVertexCoord.y - targetVertexCoord.y));
-		}
-		//{// Euclidean
-		//	VertexCoord startToTarget = targetVertexCoord - startVertexCoord;
-		//	return COST_STRAIGHT * startToTarget.length();
+		//{// Chebyshev
+		//	return COST_STRAIGHT * maxOf(abs(startVertexCoord.x - targetVertexCoord.x), abs(startVertexCoord.y - targetVertexCoord.y));
 		//}
+		{// Euclidean
+			VertexCoord startToTarget = targetVertexCoord - startVertexCoord;
+			return COST_STRAIGHT * startToTarget.length();
+		}
 	}
 
 	void VertexMap::getSuccessorNodes(Navigator& navigator, int nodeID, std::vector<SuccessorNodeInfo>& result) const
@@ -65,19 +65,19 @@ namespace fdk { namespace game { namespace navi
 		const bool bRight = tryAddSuccessorNode(navigator, result, VertexCoord(coord.x+1,coord.y), COST_STRAIGHT, nodeID);
 		const bool bBottom = tryAddSuccessorNode(navigator, result, VertexCoord(coord.x,coord.y+1), COST_STRAIGHT, nodeID);
 
-		if (bLeft && bTop)
+		if (bLeft || bTop)
 		{
 			tryAddSuccessorNode(navigator, result, VertexCoord(coord.x-1,coord.y-1), COST_DIAGONAL, nodeID);
 		}
-		if (bTop && bRight)
+		if (bTop || bRight)
 		{
 			tryAddSuccessorNode(navigator, result, VertexCoord(coord.x+1,coord.y-1), COST_DIAGONAL, nodeID);
 		}
-		if (bRight && bBottom)
+		if (bRight || bBottom)
 		{
 			tryAddSuccessorNode(navigator, result, VertexCoord(coord.x+1,coord.y+1), COST_DIAGONAL, nodeID);
 		}
-		if (bBottom && bLeft)
+		if (bBottom || bLeft)
 		{
 			tryAddSuccessorNode(navigator, result, VertexCoord(coord.x-1,coord.y+1), COST_DIAGONAL, nodeID);
 		}
@@ -153,259 +153,7 @@ namespace fdk { namespace game { namespace navi
 			}
 		}
 	}
-
-	bool VertexMap::getFirstReachableVertex(VertexCoord& output, const VertexCoord& startVertexCoord, const VertexCoord& targetVertexCoord) const
-	{
-		int startX = startVertexCoord.x;
-		int startY = startVertexCoord.y;
-		int targetX = targetVertexCoord.x;
-		int targetY = targetVertexCoord.y;
-
-		if (startX == targetX &&
-			startY == targetY)
-		{
-			return true;
-		}
-
-		enum
-		{
-			DependOnX,
-			DependOnY,
-		} state;
-
-		int x = startX;
-		int y = startY;
-
-		int dx;
-		int sx;
-		if( targetX - startX > 0)
-		{
-			dx = targetX - startX;
-			sx = 1;
-		}
-		else if(targetX - startX < 0)
-		{
-			dx = startX - targetX;
-			sx = -1;
-		}
-		else
-		{
-			dx = 0;
-			sx = 0;
-		}
-		int dy;
-		int sy;
-		if( targetY - startY > 0)
-		{
-			dy = targetY - startY;
-			sy = 1;
-		}
-		else if(targetY - startY < 0)
-		{
-			dy = startY - targetY;
-			sy = -1;
-		}
-		else
-		{
-			dy = 0;
-			sy = 0;
-		}
-
-		if(dy > dx)
-		{
-			std::swap(dy,dx);
-			state = DependOnY;
-		}
-		else
-		{
-			state = DependOnX;
-		}
-		//initialize the error term to compensate for a nonezero intercept
-		int NError = 2 * dy - dx;
-		for (int i = 1; i <= dx; ++i)
-		{
-			VertexCoord vertexCoord = VertexCoord(x, y);
-			if (isValidNodeCoord(vertexCoord) && !isBlock(vertexCoord) )
-			{
-				output = vertexCoord;
-				return true;
-			}
-
-			if (NError >= 0)
-			{
-				if (state == DependOnY) 
-				{
-					vertexCoord.reset(x, y+sy);
-					if (isValidNodeCoord(vertexCoord) && !isBlock(vertexCoord) )
-					{
-						output = vertexCoord;
-						return true;
-					}
-
-					x = x + sx;
-					vertexCoord.reset(x, y);
-					if (isValidNodeCoord(vertexCoord) && !isBlock(vertexCoord) )
-					{
-						output = vertexCoord;
-						return true;
-					}
-				}
-				else
-				{
-					vertexCoord.reset(x+sx, y);
-					if (isValidNodeCoord(vertexCoord) && !isBlock(vertexCoord) )
-					{
-						output = vertexCoord;
-						return true;
-					}
-
-					y = y + sy;
-					vertexCoord.reset(x, y);
-					if (isValidNodeCoord(vertexCoord) && !isBlock(vertexCoord) )
-					{
-						output = vertexCoord;
-						return true;
-					}
-				}
-				NError = NError - 2 * dx;
-			}
-			if (state == DependOnY)
-			{
-				y = y + sy;
-			}
-			else
-			{
-				x = x + sx;
-			}
-			NError = NError + 2 * dy;
-		}
-		return true;
-	}
 	
-	bool VertexMap::isDirectlyReachable(const VertexCoord& startVertexCoord, const VertexCoord& targetVertexCoord) const
-	{
-		int startX = startVertexCoord.x;
-		int startY = startVertexCoord.y;
-		int targetX = targetVertexCoord.x;
-		int targetY = targetVertexCoord.y;
-
-		if (startX == targetX &&
-			startY == targetY)
-		{
-			return true;
-		}
-
-		enum
-		{
-			DependOnX,
-			DependOnY,
-		} state;
-
-		int x = startX;
-		int y = startY;
-
-		int dx;
-		int sx;
-		if( targetX - startX > 0)
-		{
-			dx = targetX - startX;
-			sx = 1;
-		}
-		else if(targetX - startX < 0)
-		{
-			dx = startX - targetX;
-			sx = -1;
-		}
-		else
-		{
-			dx = 0;
-			sx = 0;
-		}
-		int dy;
-		int sy;
-		if( targetY - startY > 0)
-		{
-			dy = targetY - startY;
-			sy = 1;
-		}
-		else if(targetY - startY < 0)
-		{
-			dy = startY - targetY;
-			sy = -1;
-		}
-		else
-		{
-			dy = 0;
-			sy = 0;
-		}
-
-		if(dy > dx)
-		{
-			std::swap(dy,dx);
-			state = DependOnY;
-		}
-		else
-		{
-			state = DependOnX;
-		}
-		//initialize the error term to compensate for a nonezero intercept
-		int NError = 2 * dy - dx;
-		for (int i = 1; i <= dx; ++i)
-		{
-			VertexCoord vertexCoord = VertexCoord(x, y);
-			if (!isValidNodeCoord(vertexCoord) || isBlock(vertexCoord) )
-			{
-				return false;
-			}
-
-			if (NError >= 0)
-			{
-				if (state == DependOnY) 
-				{
-					vertexCoord.reset(x, y+sy);
-					if (!isValidNodeCoord(vertexCoord) || isBlock(vertexCoord) )
-					{
-						return false;
-					}
-
-					x = x + sx;
-					vertexCoord.reset(x, y);
-					if (!isValidNodeCoord(vertexCoord) || isBlock(vertexCoord) )
-					{
-						return false;
-					}
-
-				}
-				else
-				{
-					vertexCoord.reset(x+sx, y);
-					if (!isValidNodeCoord(vertexCoord) || isBlock(vertexCoord) )
-					{
-						return false;
-					}
-
-					y = y + sy;
-					vertexCoord.reset(x, y);
-					if (!isValidNodeCoord(vertexCoord) || isBlock(vertexCoord) )
-					{
-						return false;
-					}
-				}
-				NError = NError - 2 * dx;
-			}
-			if (state == DependOnY)
-			{
-				y = y + sy;
-			}
-			else
-			{
-				x = x + sx;
-			}
-			NError = NError + 2 * dy;
-		}
-		return true;
-	}
-
 	int VertexMap::getSizeX() const
 	{
 		return (int)m_data.size_x();

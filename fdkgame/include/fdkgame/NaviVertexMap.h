@@ -24,9 +24,6 @@ namespace fdk { namespace game { namespace navi
 		void onPlotUnit(const VertexCoord& vertexCoord, UnitSize unitSize, bool bPlot);
 		void allowModify(const VertexCoord& vertexCoord, UnitSize unitSize, bool bAllow);
 
-		bool getFirstReachableVertex(VertexCoord& output, const VertexCoord& startVertexCoord, const VertexCoord& targetVertexCoord) const;
-		bool isDirectlyReachable(const VertexCoord& startVertexCoord, const VertexCoord& targetVertexCoord) const;
-
 		// GridBasedEnv interfaces
 		virtual int getSizeX() const;
 		virtual int getSizeY() const;		

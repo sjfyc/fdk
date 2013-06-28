@@ -2,6 +2,30 @@
 
 namespace fdk { namespace game { namespace navi
 {
+	static unsigned char getDirectionFromParent(int w, int start, int end)
+	{
+		if (start - w == end) {
+			return 0;
+		} else if (start - w + 1 == end) {
+			return 1;
+		} else if (start + 1 == end) {
+			return 2;
+		} else if (start + w + 1 == end) {
+			return 3;
+		} else if (start + w == end) {
+			return 4;
+		} else if (start + w - 1 == end) {
+			return 5;
+		} else if (start - 1 == end) {
+			return 6;
+		} else if (start - w - 1 == end) {
+			return 7;
+		} else {
+			FDK_ASSERT(0);
+			return 8;
+		}
+	}	
+
 	AStar::AStar(const Environment& env, int startNodeID, int targetNodeID)
 		: m_env(env)
 		, m_startNodeID(startNodeID)
@@ -131,16 +155,45 @@ namespace fdk { namespace game { namespace navi
 	void AStar::buildPath()
 	{
 		FDK_ASSERT(m_path.empty());
-		int nodeId = m_targetNodeID;
-		while (1)
+		int nodeID = m_targetNodeID;
+
+		const GridBasedEnv* pGridBaseEnv = m_env.toGridBaseEnv();
+		if (pGridBaseEnv)
 		{
-			m_path.push_back(nodeId);
-			const int parentNodeID = m_nodeDatas[nodeId].parentNodeID;
-			if (parentNodeID == INVALID_NODEID)
+			const int width = pGridBaseEnv->getSizeX();
+			while (1)
 			{
-				break;
+				m_path.push_back(nodeID);
+				int parentNodeID = m_nodeDatas[nodeID].parentNodeID;
+				if (parentNodeID == INVALID_NODEID)
+				{
+					break;
+				}
+				const unsigned char dir = getDirectionFromParent(width, nodeID, parentNodeID);
+				while (1)
+				{
+					nodeID = parentNodeID;
+					parentNodeID = m_nodeDatas[nodeID].parentNodeID;
+					if (parentNodeID == INVALID_NODEID || 
+						getDirectionFromParent(width, nodeID, parentNodeID) != dir)
+					{
+						break;
+					}
+				}
 			}
-			nodeId = parentNodeID;
+		}
+		else
+		{
+			while (1)
+			{
+				m_path.push_back(nodeID);
+				const int parentNodeID = m_nodeDatas[nodeID].parentNodeID;
+				if (parentNodeID == INVALID_NODEID)
+				{
+					break;
+				}
+				nodeID = parentNodeID;
+			}
 		}
 	}
 

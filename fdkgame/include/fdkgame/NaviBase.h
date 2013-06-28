@@ -8,6 +8,7 @@ namespace fdk { namespace game { namespace navi
 {
 	class Environment;
 	class EnvironmentChecker;
+	class GridBasedEnv;
 	class Navigator;
 
 	const int INVALID_NODEID = -1;
@@ -29,6 +30,8 @@ namespace fdk { namespace game { namespace navi
 		virtual int getHeuristic(int startNodeID, int targetNodeID) const = 0;
 		virtual void getSuccessorNodes(Navigator& navigator, int nodeID, std::vector<SuccessorNodeInfo>& result) const = 0;
 		virtual bool isNodeReachable(int nodeID) const = 0;
+		virtual const GridBasedEnv* toGridBaseEnv() const;
+		virtual GridBasedEnv* toGridBaseEnv();
 	};
 
 	class FDKGAME_API GridBasedEnv
@@ -43,8 +46,12 @@ namespace fdk { namespace game { namespace navi
 		NodeCoord toNodeCoord(int nodeID) const;
 		bool isValidNodeCoord(const NodeCoord& nodeCoord) const;
 		bool isNodeWithCoordReachable(const NodeCoord& nodeCoord) const;
+		bool isDirectlyReachable(int startNodeID, int targetNodeID) const;
+		int getFirstDirectlyReachableNode(int startNodeID, int targetNodeID) const;
 		// Environment interfaces
 		virtual int getNodeSpaceSize() const;
+		virtual const GridBasedEnv* toGridBaseEnv() const;
+		virtual GridBasedEnv* toGridBaseEnv();
 	};
 
 	class FDKGAME_API EnvironmentChecker
@@ -102,11 +109,6 @@ namespace fdk { namespace game { namespace navi
 	{
 		FDK_ASSERT(isValidNodeID(nodeID));
 		return NodeCoord(nodeID % getSizeX(), nodeID / getSizeX());
-	}
-
-	inline int GridBasedEnv::getNodeSpaceSize() const
-	{
-		return getSizeX() * getSizeY();
 	}
 
 	inline bool GridBasedEnv::isValidNodeCoord(const NodeCoord& nodeCoord) const
