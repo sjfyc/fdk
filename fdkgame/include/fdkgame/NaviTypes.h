@@ -4,7 +4,7 @@
 
 namespace fdk { namespace game { namespace navi
 {	
-	typedef unsigned char TileType;
+	typedef int TileType;
 	typedef unsigned short ExtraTileCountType;
 	typedef Vector2D<int> CellCoord;	
 	typedef int CellID;
@@ -18,7 +18,7 @@ namespace fdk { namespace game { namespace navi
 	
 	inline bool checkMoveCapabilityOnTileType(MoveCapability capability, TileType tileType)
 	{
-		return fdk::hasEnumMask(capability, tileType);
+		return !((capability^tileType) & tileType);
 	}
 }}}
 
