@@ -35,14 +35,14 @@ void Actor::tick(float delta)
 	{
 		if (m_astar)
 		{
-			if (!m_astar->hasNextPathLocation())
+			Location location;
+			if (!m_astar->popNextPathLocation(location))
 			{
 				util::output("actor reached");				
 				FDK_DELETE(m_astar);
 			}
 			else
 			{
-				Location location = m_astar->popNextPathLocation();
 				move(location, m_moveSpeed);
 			}
 		}

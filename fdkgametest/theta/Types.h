@@ -15,7 +15,13 @@ typedef fdkgame::Vector2D<float> Velocity;
 
 enum 
 {
-	CELL_COUNT_X = 46,
+	//CELL_COUNT_X = 200,
+	//CELL_COUNT_Y = 140,
+
+	//CELL_SIZE_X = 8,
+	//CELL_SIZE_Y = 8,
+
+	CELL_COUNT_X = 50,
 	CELL_COUNT_Y = 30,
 
 	CELL_SIZE_X = 32,

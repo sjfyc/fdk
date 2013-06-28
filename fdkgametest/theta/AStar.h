@@ -16,6 +16,7 @@ public:
 	size_t getPathLocationCount() const;
 	bool hasNextPathLocation() const;
 	Location popNextPathLocation();
+	bool popNextPathLocation(Location& location);
 	void render();
 private:
 	typedef fdkgame::navi::AStar Navigator;
@@ -25,9 +26,11 @@ private:
 	Location m_targetLocation;
 
 	std::vector<VertexCoord> m_vertexCoordPath;
-	std::vector<Location> m_locationPath; 	
+	std::vector<Location> m_locationPath;
+	std::vector<int> m_path;
+	int m_lastReachedNodeID;
 
-	fdkgame::navi::AStar* m_navigator;
+	fdkgame::navi::AStar* m_navigator;	
 };
 
 #endif
