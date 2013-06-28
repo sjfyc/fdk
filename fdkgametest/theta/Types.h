@@ -15,11 +15,11 @@ typedef fdkgame::Vector2D<float> Velocity;
 
 enum 
 {
-	CELL_COUNT_X = 180,
-	CELL_COUNT_Y = 100,
+	CELL_COUNT_X = 46,
+	CELL_COUNT_Y = 30,
 
-	CELL_SIZE_X = 8,
-	CELL_SIZE_Y = 8,
+	CELL_SIZE_X = 32,
+	CELL_SIZE_Y = 32,
 
 	HALF_CELL_SIZE_X = CELL_SIZE_X/2,
 	HALF_CELL_SIZE_Y = CELL_SIZE_Y/2,
@@ -46,24 +46,58 @@ enum EunmTile
 typedef unsigned char TileType;
 inline DWORD getTileColor(TileType tile)
 {
-	DWORD colors[] =
+	if (tile == (1<<Tile_None))
 	{
-		MyColor_White,
-		0xFF222222,
-		ARGB(255, 0, 128, 255),
-	};
-	return colors[tile];
+		return MyColor_White;
+	}
+	else if (tile == (1<<Tile_Block))
+	{
+		return 0xFF222222;
+	}
+	else if (tile == (1<<Tile_Water))
+	{
+		return ARGB(255, 0, 128, 255);
+	}
+	else 
+	{
+		return 0;
+	}
+
+	//DWORD colors[] =
+	//{
+	//	MyColor_White,
+	//	0xFF222222,
+	//	ARGB(255, 0, 128, 255),
+	//};
+	//return colors[tile];
 }
 
 inline const char* getTileName(TileType tile)
 {
-	const char* names[] =
+	if (tile == (1<<Tile_None))
 	{
-		"none",
-		"block",
-		"water",
-	};
-	return names[tile];
+		return "none";
+	}
+	else if (tile == (1<<Tile_Block))
+	{
+		return "block";
+	}
+	else if (tile == (1<<Tile_Water))
+	{
+		return "water";
+	}
+	else 
+	{
+		return "";
+	}
+
+	//const char* names[] =
+	//{
+	//	"none",
+	//	"block",
+	//	"water",
+	//};
+	//return names[tile];
 }
 
 #endif

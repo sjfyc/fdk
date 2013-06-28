@@ -66,8 +66,8 @@ bool AStar::search()
 	const fdkgame::navi::VertexMap& vertexMap = g_MapManager.getVertexMap(m_actor.getMoveCapability(), m_actor.getUnitSize());
 
 	const Location& startLocation = m_actor.getLocation();
-	const VertexCoord& startVertexCoord = util::locationToNearestVertexCoord(startLocation);
-	const VertexCoord& targetVertexCoord = util::locationToNearestVertexCoord(m_targetLocation);	
+	VertexCoord startVertexCoord = util::locationToNearestVertexCoord(startLocation);
+	VertexCoord targetVertexCoord = util::locationToNearestVertexCoord(m_targetLocation);	
 
 	if (!vertexMap.isValidNodeCoord(startVertexCoord) ||
 		!vertexMap.isValidNodeCoord(targetVertexCoord))
@@ -96,11 +96,23 @@ bool AStar::search()
 	
 	if (vertexMap.isBlock(startVertexCoord))
 	{
-		util::output("start vertex(%d/%d) is block, go directly",
-			startVertexCoord.x, startVertexCoord.y);
+		util::output("start vertex(%d/%d) is block, bump out", startVertexCoord.x, startVertexCoord.y);
 		//g_Game.pauseGame();
 
-		// when stuck with other unit, navigator will success with the target location returned
+		//VertexCoord vertex;
+		//vertexMap.getFirstReachableVertex(vertex, startVertexCoord, targetVertexCoord);
+		//if ((vertex-startVertexCoord).length() > 10)
+		//{
+		//	return false;
+		//}
+
+		//else 
+		//{
+		//	// 直接弹出来
+		//	m_actor.teleport(util::vertexCoordToLocation(vertex));
+		//	startVertexCoord = vertex;
+		//}
+		//// when stuck with other unit, navigator will success with the target location returned
 		m_locationPath.push_back(m_targetLocation);
 
 		return true;
@@ -110,7 +122,16 @@ bool AStar::search()
 		util::output("target vertex(%d/%d) is block",
 			targetVertexCoord.x, targetVertexCoord.y);
 		//g_Game.pauseGame();
-		return false;
+
+		VertexCoord vertex;
+		if (!vertexMap.getFirstReachableVertex(vertex, targetVertexCoord, startVertexCoord))
+		{
+			util::output("target vertex(%d/%d) is block & can't find a nonblock in line",
+				targetVertexCoord.x, targetVertexCoord.y);
+			return false;
+		}
+		targetVertexCoord = vertex;
+		m_targetLocation = util::vertexCoordToLocation(targetVertexCoord);
 	}
 
 	int startVertexID = vertexMap.toNodeID(startVertexCoord);

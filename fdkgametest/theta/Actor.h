@@ -12,6 +12,7 @@ public:
 	void draw();
 	void stopMove();
 	void move(const Location& location, float speed);
+	void teleport(const Location& location);
 	int getID() const;
 	float getRadius() const;
 	int getMoveCapability() const;

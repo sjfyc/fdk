@@ -244,7 +244,7 @@ void GameModeMapEdit::update(Game& game, float delta)
 	}
 	m_lastMouseCoord = mouseCoord;
 
-	g_TileMap.setTileType(mouseCoord, g_Option.getBrush());
+	g_TileMap.setTileType(mouseCoord, 1<<g_Option.getBrush());
 }
 
 void GameModePause::enter(Game& game)

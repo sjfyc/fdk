@@ -195,3 +195,9 @@ void Actor::drawOccupiedVertexs()
 		}
 	}
 }
+
+void Actor::teleport(const Location& location)
+{
+	stopMove();
+	m_location = location;
+}

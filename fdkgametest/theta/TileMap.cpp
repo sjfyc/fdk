@@ -6,7 +6,7 @@
 
 TileMap::TileMap()
 {
-	reset(CELL_COUNT_X, CELL_COUNT_Y, Tile_None);
+	reset(CELL_COUNT_X, CELL_COUNT_Y, 1<<Tile_None);
 }
 
 TileMap::~TileMap()
