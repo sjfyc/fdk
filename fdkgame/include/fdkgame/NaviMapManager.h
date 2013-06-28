@@ -38,6 +38,8 @@ namespace fdk { namespace game { namespace navi
 		const VertexMap& getVertexMap(MoveCapability moveCapability, UnitSize unitSize) const;		
 		void rebuildAfterTileMapReset();
 		void changeTileType(const CellCoord& cellCoord, TileType tileType);
+		void increExtraTileType(const CellCoord& cellCoord, TileType tileType, ExtraTileCountType count=1);
+		void decreExtraTileType(const CellCoord& cellCoord, TileType tileType, ExtraTileCountType count=1);
 		void plotUnit(const VertexCoord& vertexCoord, UnitSize unitSize, bool bPlot);
 		void allowModify(const VertexCoord& vertexCoord, UnitSize unitSize, bool bAllow);
 	private:
@@ -50,6 +52,7 @@ namespace fdk { namespace game { namespace navi
 		typedef std::map<VertexMapType, VertexMap*> VertexMaps;		
 		const BlockMap* findBlockMap(MoveCapability moveCapability) const;
 		const VertexMap* findVertexMap(MoveCapability moveCapability, UnitSize unitSize) const;
+		void onTileChange(const CellCoord& cellCoord);
 		TileMap& m_tileMap;
 		BlockMaps m_blockMaps; // key by unit size
 		VertexMaps m_vertexMaps;

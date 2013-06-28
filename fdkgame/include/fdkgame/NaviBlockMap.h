@@ -21,6 +21,7 @@ namespace fdk { namespace game { namespace navi
 		void setBlock(const CellCoord& cellCoord, bool bSet=true);
 		bool isBlock(const CellCoord& cellCoord) const;
 	private:
+		bool checkCapabilityOnTile(const CellCoord& cellCoord) const;
 		TileMap& m_tileMap;
 		MoveCapability m_moveCapability;
 		Array2D<bool> m_data;

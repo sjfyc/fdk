@@ -105,19 +105,54 @@ namespace fdk { namespace game { namespace navi
 		}
 		m_tileMap.setTileType(cellCoord, tileType);
 		
+		onTileChange(cellCoord);
+	}
+
+	void MapManager::increExtraTileType(const CellCoord& cellCoord, TileType tileType, ExtraTileCountType count)
+	{
+		m_tileMap.increExtraTileType(cellCoord, tileType, count);
+		onTileChange(cellCoord);
+	}
+
+	void MapManager::decreExtraTileType(const CellCoord& cellCoord, TileType tileType, ExtraTileCountType count)
+	{
+		m_tileMap.decreExtraTileType(cellCoord, tileType, count);
+		onTileChange(cellCoord);
+	}
+
+	void MapManager::plotUnit(const VertexCoord& vertexCoord, UnitSize unitSize, bool bPlot)
+	{
+		for (VertexMaps::iterator it = m_vertexMaps.begin(); it != m_vertexMaps.end(); ++it)
+		{
+			VertexMap* vertexMap = it->second;
+			vertexMap->onPlotUnit(vertexCoord, unitSize, bPlot);
+		}
+	}
+
+	void MapManager::allowModify(const VertexCoord& vertexCoord, UnitSize unitSize, bool bAllow)
+	{
+		for (VertexMaps::iterator it = m_vertexMaps.begin(); it != m_vertexMaps.end(); ++it)
+		{
+			VertexMap* vertexMap = it->second;
+			vertexMap->allowModify(vertexCoord, unitSize, bAllow);
+		}
+	}
+
+	void MapManager::onTileChange(const CellCoord& cellCoord)
+	{
 		for (BlockMaps::iterator it = m_blockMaps.begin(); it != m_blockMaps.end(); ++it)
 		{
 			BlockMap* blockMap = *it;
 			bool bChange = false;
-			bool bSet = false;
-			if (blockMap->isBlock(cellCoord) && fdk::hasEnumMask(blockMap->getMoveCapability(), tileType))				
-			{
+			bool bSet = false;			
+			if (blockMap->isBlock(cellCoord) && blockMap->checkCapabilityOnTile(cellCoord))				
+			{// 之前不可走，现在可走
 				blockMap->setBlock(cellCoord, false);
 				bChange = true;
 				bSet = false;
 			}
-			else if (!blockMap->isBlock(cellCoord) && !fdk::hasEnumMask(blockMap->getMoveCapability(), tileType))
-			{
+			else if (!blockMap->isBlock(cellCoord) && !blockMap->checkCapabilityOnTile(cellCoord))
+			{// 之前可走，现在不可走
 				blockMap->setBlock(cellCoord, true);
 				bChange = true;
 				bSet = true;
@@ -138,24 +173,6 @@ namespace fdk { namespace game { namespace navi
 		}
 	}
 
-	void MapManager::plotUnit(const VertexCoord& vertexCoord, UnitSize unitSize, bool bPlot)
-	{
-		for (VertexMaps::iterator it = m_vertexMaps.begin(); it != m_vertexMaps.end(); ++it)
-		{
-			VertexMap* vertexMap = it->second;
-			vertexMap->onPlotUnit(vertexCoord, unitSize, bPlot);
-		}
-	}
-
-	void MapManager::allowModify(const VertexCoord& vertexCoord, UnitSize unitSize, bool bAllow)
-	{
-		for (VertexMaps::iterator it = m_vertexMaps.begin(); it != m_vertexMaps.end(); ++it)
-		{
-			VertexMap* vertexMap = it->second;
-			vertexMap->allowModify(vertexCoord, unitSize, bAllow);
-		}
-	}
-	
 	MapManager::AutoPlotUnits::AutoPlotUnits(MapManager& mapManager, const std::vector<PlotUnitArgument>& units, const PlotUnitArgument* subtract, bool bPolt)
 		: m_mapManager(mapManager)
 		, m_units(units)

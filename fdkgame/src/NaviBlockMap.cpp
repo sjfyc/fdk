@@ -10,12 +10,29 @@ namespace fdk { namespace game { namespace navi
 		{
 			for (size_t x = 0; x < m_data.size_x(); ++x)
 			{
-				if (!fdk::hasEnumMask(m_moveCapability, m_tileMap.getTileType(CellCoord(x, y)) ) )
+				if (!checkCapabilityOnTile(CellCoord(x, y) ) )
 				{
 					m_data(x, y) = true;
 				}				
 			}
 		}
 	}
-	
+
+	bool BlockMap::checkCapabilityOnTile(const CellCoord& cellCoord) const
+	{
+		if (!checkMoveCapabilityOnTileType(m_moveCapability, m_tileMap.getTileType(cellCoord) ) )
+		{
+			return false;
+		}
+		const TileMap::ExtraTileData& extraTileData = m_tileMap.getExtraTileData(cellCoord);
+		for (size_t i = 0; i < extraTileData.tileCounters.size(); ++i)
+		{
+			const TileMap::ExtraTileCounter& extraTileCounter = extraTileData.tileCounters[i];
+			if (extraTileCounter.count > 0 && !checkMoveCapabilityOnTileType(m_moveCapability, extraTileCounter.tileType) )
+			{
+				return false;
+			}
+		}
+		return true;
+	}
 }}}
