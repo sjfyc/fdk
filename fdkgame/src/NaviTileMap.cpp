@@ -27,7 +27,7 @@ namespace fdk { namespace game { namespace navi
 		ExtraTileCounter* extraTileCounter = extraData.findCounter(tileType);
 		if (extraTileCounter)
 		{
-			extraTileCounter->tileType += count;
+			extraTileCounter->count += count;
 		}
 		else
 		{
@@ -45,7 +45,7 @@ namespace fdk { namespace game { namespace navi
 		if (extraTileCounter)
 		{
 			FDK_ASSERT(extraTileCounter->count >= count);
-			extraTileCounter->tileType -= count;
+			extraTileCounter->count -= count;
 		}
 		else
 		{
