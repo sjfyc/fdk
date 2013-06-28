@@ -126,7 +126,6 @@ bool AStar::search()
 			targetVertexCoord.x, targetVertexCoord.y);
 		//g_Game.pauseGame();
 
-		VertexCoord vertex;
 		int middleNodeID = vertexMap.getFirstDirectlyReachableNode(targetVertexID, startVertexID);
 		if (middleNodeID == fdkgame::navi::INVALID_NODEID)
 		{
@@ -134,6 +133,7 @@ bool AStar::search()
 				targetVertexCoord.x, targetVertexCoord.y);
 			return false;
 		}
+		targetVertexID = middleNodeID;
 		targetVertexCoord = vertexMap.toNodeCoord(middleNodeID);
 		m_targetLocation = util::vertexCoordToLocation(targetVertexCoord);
 	}
@@ -187,26 +187,20 @@ bool AStar::search()
 	}
 
 	FDK_ASSERT(searchResult == Navigator::SearchResult_Completed);
-		
-	//double pathConstructStartTime = util::getSeconds();
 
-	//const std::vector<int>& path = m_navigator->getPath();
-	//for (size_t i = 0; i < path.size(); ++i)
-	//{
-	//	if (i == 0 || i == path.size()-1)
-	//	{
-	//		continue;// ignore start vertex and target vertex
-	//	}
-	//	VertexCoord vertexCoord = vertexMap.toNodeCoord(path[i]);
-	//	m_vertexCoordPath.push_back(vertexCoord);
-	//	Location location = util::vertexCoordToLocation(vertexCoord);
-	//	m_locationPath.push_back(location);	
-	//	m_path.push_back(path[i]);
-	//}
-
-	//double pathConstructEndTime = util::getSeconds();
-	//util::output("path construct cost %lf seconds", pathConstructEndTime - pathConstructStartTime);
-
+	const std::vector<int>& path = m_navigator->getPath();
+	for (size_t i = 0; i < path.size(); ++i)
+	{
+		if (i == 0 || i == path.size()-1)
+		{
+			continue;// ignore start vertex and target vertex
+		}
+		VertexCoord vertexCoord = vertexMap.toNodeCoord(path[i]);
+		m_vertexCoordPath.push_back(vertexCoord);
+		Location location = util::vertexCoordToLocation(vertexCoord);
+		m_locationPath.push_back(location);	
+	}
+	
 	m_path = m_navigator->getPath();
 	m_lastReachedNodeID = m_path.back();
 	m_path.pop_back();
