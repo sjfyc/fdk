@@ -65,9 +65,19 @@ void Game::render()
 	float x1 = util::cellCoordToLocation(m_targetCoord).x;
 	float y1 = util::cellCoordToLocation(m_targetCoord).y;
 	CellCoord offset = m_targetCoord-m_startCoord;
+	
+	util::fillCell(m_startCoord, COLOR_CELL_FROM);
+	util::fillCell(m_targetCoord, COLOR_CELL_TO);
+
+	if (g_Option.isOn(Option::Toggle_ShowCenterVertex))
+	{
+		g_Board.drawCenterVertex();
+	}	
 
 	if (g_Option.isOn(Option::Toggle_ShowConnectLine) )
 	{
+		g_HGE->Gfx_RenderLine(x0+HALF_CELL_SIZE_X,y0+HALF_CELL_SIZE_Y,x1+HALF_CELL_SIZE_X,y1+HALF_CELL_SIZE_Y,MyColor_Blue);
+
 		if (offset.x > 0 && offset.y < 0)
 		{
 			g_HGE->Gfx_RenderLine(x0,y0,x1,y1,MyColor_Blue);
@@ -89,15 +99,6 @@ void Game::render()
 			g_HGE->Gfx_RenderLine(x1+CELL_SIZE_X,y1+CELL_SIZE_Y,x0+CELL_SIZE_X,y0+CELL_SIZE_Y,MyColor_Blue);
 		}
 	}
-	
-
-	util::fillCell(m_startCoord, COLOR_CELL_FROM);
-	util::fillCell(m_targetCoord, COLOR_CELL_TO);
-
-	if (g_Option.isOn(Option::Toggle_ShowCenterVertex))
-	{
-		g_Board.drawCenterVertex();
-	}	
 	m_mode->render(*this);
 }
 

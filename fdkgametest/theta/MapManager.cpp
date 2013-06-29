@@ -64,5 +64,30 @@ void MapManager::draw()
 bool MapManager::isLocationReachable(Actor& actor, const Location& location)
 {
 	const fdkgame::navi::VertexMap& vertexMap = getVertexMap(actor.getMoveCapability(), actor.getUnitSize());
-	return !vertexMap.isBlock(util::locationToNearestVertexCoord(location));
+	VertexCoord testVertexCoord = util::locationToNearestVertexCoord(location);
+	if (!vertexMap.isBlock(testVertexCoord) )
+	{
+		return true;
+	}
+
+	//const Velocity& velocity = actor.getVelocity();
+	//if ((velocity.x > 0 && velocity.y > 0) || // 右下
+	//	(velocity.x < 0 && velocity.y < 0) ) // 左上
+	//{
+	//	if (!vertexMap.isBlock(testVertexCoord+VertexCoord(1, -1)) || // 右上角可走
+	//		!vertexMap.isBlock(testVertexCoord+VertexCoord(-1, 1)) ) // 左下角可走
+	//	{
+	//		return true;
+	//	}
+	//}
+	//else if ((velocity.x > 0 && velocity.y < 0) || // 右上
+	//	(velocity.x < 0 && velocity.y > 0) ) // 左下
+	//{
+	//	if (!vertexMap.isBlock(testVertexCoord+VertexCoord(1, 1)) || // 右下角可走
+	//		!vertexMap.isBlock(testVertexCoord+VertexCoord(-1, -1)) ) // 左上角可走
+	//	{
+	//		return true;
+	//	}
+	//}
+	return false;
 }

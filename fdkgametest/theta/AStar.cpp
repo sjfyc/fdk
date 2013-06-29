@@ -8,6 +8,23 @@
 #include "ActorBank.h"
 #include "MapManager.h"
 
+void plotAroundActors(Actor& actor, std::vector<fdkgame::navi::MapManager::PlotUnitArgument>& plotArounds)
+{
+	std::vector<Actor*> aroundActors;
+	g_ActorBank.getActors(aroundActors, actor.getLocation(), actor.getRadius()*4, &actor);
+	for (size_t i = 0; i < aroundActors.size(); ++i)
+	{
+		Actor* aroundActor = aroundActors[i];
+		fdkgame::navi::MapManager::PlotUnitArgument pua;
+		pua.vertexCoord = util::locationToNearestVertexCoord(aroundActor->getLocation());
+		pua.unitSize = aroundActor->getUnitSize();
+		plotArounds.push_back(pua);
+	}
+	fdkgame::navi::MapManager::PlotUnitArgument subtract;
+	subtract.vertexCoord = util::locationToNearestVertexCoord(actor.getLocation());
+	subtract.unitSize = actor.getUnitSize();	
+}
+
 AStar::AStar(Actor& actor, const Location& targetLocation)
 	: m_actor(actor)
 	, m_targetLocation(targetLocation)
@@ -82,21 +99,9 @@ bool AStar::search()
 	int targetVertexID = vertexMap.toNodeID(targetVertexCoord);
 
 	std::vector<fdkgame::navi::MapManager::PlotUnitArgument> plotArounds;
-	std::vector<Actor*> aroundActors;
-	g_ActorBank.getActors(aroundActors, m_actor.getLocation(), m_actor.getRadius()*8, &m_actor);
-	for (size_t i = 0; i < aroundActors.size(); ++i)
-	{
-		Actor* aroundActor = aroundActors[i];
-		fdkgame::navi::MapManager::PlotUnitArgument pua;
-		pua.vertexCoord = util::locationToNearestVertexCoord(aroundActor->getLocation());
-		pua.unitSize = aroundActor->getUnitSize();
-		plotArounds.push_back(pua);
-	}
-	fdkgame::navi::MapManager::PlotUnitArgument subtract;
-	subtract.vertexCoord = util::locationToNearestVertexCoord(m_actor.getLocation());
-	subtract.unitSize = m_actor.getUnitSize();	
+	plotAroundActors(m_actor, plotArounds);
 	fdkgame::navi::MapManager::AutoPlotUnits _AutoPlotUnits(g_MapManager, plotArounds);
-	
+
 	if (vertexMap.isBlock(startVertexCoord))
 	{
 		util::output("start vertex(%d/%d) is block, bump out", startVertexCoord.x, startVertexCoord.y);
@@ -230,6 +235,10 @@ bool AStar::popNextPathLocation(Location& location)
 	{
 		return false;
 	}
+
+	std::vector<fdkgame::navi::MapManager::PlotUnitArgument> plotArounds;
+	plotAroundActors(m_actor, plotArounds);
+	fdkgame::navi::MapManager::AutoPlotUnits _AutoPlotUnits(g_MapManager, plotArounds);
 
 	const fdkgame::navi::VertexMap& vertexMap = g_MapManager.getVertexMap(m_actor.getMoveCapability(), m_actor.getUnitSize());
 	
