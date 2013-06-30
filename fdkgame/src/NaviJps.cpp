@@ -3,7 +3,7 @@
 
 namespace fdk { namespace game { namespace navi
 {
-	typedef GridBasedEnv::NodeCoord NodeCoord;
+	typedef GridEnv::NodeCoord NodeCoord;
 
 	class JpsDef
 	{
@@ -13,7 +13,7 @@ namespace fdk { namespace game { namespace navi
 		enum { EMPTY_DIRECTIONS = 0, FULL_DIRECTIONS = 255 } ;
 		typedef unsigned char Direction;
 		typedef unsigned char Directions;
-		typedef GridBasedEnv::NodeCoord NodeCoord;
+		typedef GridEnv::NodeCoord NodeCoord;
 	};
 
 	class JpsUtil
@@ -26,8 +26,8 @@ namespace fdk { namespace game { namespace navi
 		static Direction getDirectionFromParent(const NodeCoord* parentNodeCoord, const NodeCoord& nodeCoord);
 		static NodeCoord getNeighbourNodeCoordInDirection(const NodeCoord& nodeCoord, Direction direction);
 		static Directions getNaturalNeighbourDirections(Direction direction);
-		static Directions getForcedNeighbourDirections(const GridBasedEnv& env, const NodeCoord& nodeCoord, Direction direction);
-		static bool isNeighbourInDirectionReachable(const GridBasedEnv& env, const NodeCoord& nodeCoord, Direction direction);		
+		static Directions getForcedNeighbourDirections(const GridEnv& env, const NodeCoord& nodeCoord, Direction direction);
+		static bool isNeighbourInDirectionReachable(const GridEnv& env, const NodeCoord& nodeCoord, Direction direction);		
 	};
 
 	class JpsImpl
@@ -48,7 +48,7 @@ namespace fdk { namespace game { namespace navi
 			bool operator<(const SavedJumpInfo& other) const;
 		};		
 		typedef std::set<SavedJumpInfo> SavedJumps;
-		int jump(const GridBasedEnv& env, int targetNodeID, const NodeCoord& nodeCoord, Direction direction, const JpsImpl::SavedJumpInfo* savedJumpInfo=0);
+		int jump(const GridEnv& env, int targetNodeID, const NodeCoord& nodeCoord, Direction direction, const JpsImpl::SavedJumpInfo* savedJumpInfo=0);
 		SavedJumpInfo* findSavedJumpInfo(int nodeID);
 	private:
 		SavedJumps m_savedJumps;
@@ -70,7 +70,7 @@ namespace fdk { namespace game { namespace navi
 		return nodeID < other.nodeID;
 	}
 
-	int JpsImpl::jump(const GridBasedEnv& env, int targetNodeID, const NodeCoord& nodeCoord, Direction direction, const JpsImpl::SavedJumpInfo* savedJumpInfo)
+	int JpsImpl::jump(const GridEnv& env, int targetNodeID, const NodeCoord& nodeCoord, Direction direction, const JpsImpl::SavedJumpInfo* savedJumpInfo)
 	{
 		const bool bDiagonal = JpsUtil::isDiagonalDirection(direction);
 
@@ -151,7 +151,7 @@ namespace fdk { namespace game { namespace navi
 		return const_cast<JpsImpl::SavedJumpInfo*>(&*it);
 	}
 	
-	Jps::Jps(const GridBasedEnv& env, int startNodeID, int targetNodeID)
+	Jps::Jps(const GridEnv& env, int startNodeID, int targetNodeID)
 		: _Base(env, startNodeID, targetNodeID)
 		, m_impl(*new JpsImpl)
 	{
@@ -164,10 +164,10 @@ namespace fdk { namespace game { namespace navi
 
 	void Jps::getSuccessorNodes(const Environment& l_env, int nodeID, int parentNodeID, std::vector<SuccessorNodeInfo>& result)
 	{
-		const GridBasedEnv& env = static_cast<const GridBasedEnv&>(l_env);
-		GridBasedEnv::NodeCoord nodeCoord = env.toNodeCoord(nodeID);
-		GridBasedEnv::NodeCoord* pParentNodeCoord = 0;
-		GridBasedEnv::NodeCoord parentNodeCoord;
+		const GridEnv& env = static_cast<const GridEnv&>(l_env);
+		GridEnv::NodeCoord nodeCoord = env.toNodeCoord(nodeID);
+		GridEnv::NodeCoord* pParentNodeCoord = 0;
+		GridEnv::NodeCoord parentNodeCoord;
 		if (parentNodeID != INVALID_NODEID)
 		{
 			parentNodeCoord = env.toNodeCoord(parentNodeID);
@@ -188,8 +188,8 @@ namespace fdk { namespace game { namespace navi
 			{
 				continue;
 			}
-			GridBasedEnv::NodeCoord successorNodeCoord = env.toNodeCoord(successorNodeID);			
-			GridBasedEnv::NodeCoord offset = successorNodeCoord-nodeCoord;
+			GridEnv::NodeCoord successorNodeCoord = env.toNodeCoord(successorNodeID);			
+			GridEnv::NodeCoord offset = successorNodeCoord-nodeCoord;
 			SuccessorNodeInfo info;
 			info.nodeID = successorNodeID;
 			
@@ -307,7 +307,7 @@ namespace fdk { namespace game { namespace navi
 		return directions;
 	}
 	
-	JpsUtil::Directions JpsUtil::getForcedNeighbourDirections(const GridBasedEnv& env, const NodeCoord& nodeCoord, Direction direction)
+	JpsUtil::Directions JpsUtil::getForcedNeighbourDirections(const GridEnv& env, const NodeCoord& nodeCoord, Direction direction)
 	{
 		if (direction == NO_DIRECTION) 
 		{
@@ -346,7 +346,7 @@ namespace fdk { namespace game { namespace navi
 		return directions;
 	}
 
-	bool JpsUtil::isNeighbourInDirectionReachable(const GridBasedEnv& env, const NodeCoord& nodeCoord, Direction direction)
+	bool JpsUtil::isNeighbourInDirectionReachable(const GridEnv& env, const NodeCoord& nodeCoord, Direction direction)
 	{
 		if (isDiagonalDirection(direction))
 		{

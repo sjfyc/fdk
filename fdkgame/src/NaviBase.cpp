@@ -2,27 +2,27 @@
 
 namespace fdk { namespace game { namespace navi
 {
-	const GridBasedEnv* Environment::toGridBaseEnv() const
+	const GridEnv* Environment::toGridEnv() const
 	{
 		return 0;
 	}
 
-	GridBasedEnv* Environment::toGridBaseEnv()
+	GridEnv* Environment::toGridEnv()
 	{
 		return 0;
 	}
 
-	int GridBasedEnv::getNodeSpaceSize() const
+	int GridEnv::getNodeSpaceSize() const
 	{
 		return getSizeX() * getSizeY();
 	}
 	
-	const GridBasedEnv* GridBasedEnv::toGridBaseEnv() const
+	const GridEnv* GridEnv::toGridEnv() const
 	{
 		return this;
 	}
 
-	GridBasedEnv* GridBasedEnv::toGridBaseEnv()
+	GridEnv* GridEnv::toGridEnv()
 	{
 		return this;
 	}	

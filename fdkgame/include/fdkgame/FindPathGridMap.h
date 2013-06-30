@@ -7,7 +7,7 @@
 namespace fdk { namespace game { namespace findpath
 {
 	class FDKGAME_API GridMap
-		: public GridBasedEnv
+		: public GridEnv
 	{
 	public:		
 		struct Node
@@ -35,7 +35,7 @@ namespace fdk { namespace game { namespace findpath
 		
 		bool isDirectlyReachable(int startNodeID, int targetNodeID, EnvironmentChecker* envChecker=0) const;
 
-		// GridBasedEnv interfaces
+		// GridEnv interfaces
 		virtual int getSizeX() const;
 		virtual int getSizeY() const;
 

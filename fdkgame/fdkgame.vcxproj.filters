@@ -60,7 +60,7 @@
     <ClInclude Include="include\fdkgame\NaviJpsPlus.h">
       <Filter>include</Filter>
     </ClInclude>
-    <ClInclude Include="include\fdkgame\NaviGridBasedEnvUtil.h">
+    <ClInclude Include="include\fdkgame\NaviGridEnvUtil.h">
       <Filter>include</Filter>
     </ClInclude>
   </ItemGroup>
@@ -110,7 +110,7 @@
     <ClCompile Include="src\NaviJpsPlus.cpp">
       <Filter>src</Filter>
     </ClCompile>
-    <ClCompile Include="src\NaviGridBasedEnvUtil.cpp">
+    <ClCompile Include="src\NaviGridEnvUtil.cpp">
       <Filter>src</Filter>
     </ClCompile>
   </ItemGroup>

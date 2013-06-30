@@ -8,7 +8,7 @@
 namespace fdk { namespace game { namespace navi
 {
 	class FDKGAME_API GridMap
-		: public GridBasedEnv
+		: public GridEnv
 	{
 	public:		
 		struct Node
@@ -32,7 +32,7 @@ namespace fdk { namespace game { namespace navi
 		bool meetMinClearanceValueRequired(int nodeID) const;
 		int getClearanceValue(int nodeID) const;				
 	
-		// GridBasedEnv interfaces
+		// GridEnv interfaces
 		virtual int getSizeX() const;
 		virtual int getSizeY() const;		
 

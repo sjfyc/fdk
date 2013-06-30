@@ -7,7 +7,7 @@
 namespace fdk { namespace game { namespace navi
 {
 	class Environment;
-	class GridBasedEnv;
+	class GridEnv;
 	class Navigator;
 
 	const int INVALID_NODEID = -1;
@@ -29,16 +29,16 @@ namespace fdk { namespace game { namespace navi
 		virtual int getHeuristic(int startNodeID, int targetNodeID) const = 0;
 		virtual void getSuccessorNodes(Navigator& navigator, int nodeID, std::vector<SuccessorNodeInfo>& result) const = 0;
 		virtual bool isNodeReachable(int nodeID) const = 0;
-		virtual const GridBasedEnv* toGridBaseEnv() const;
-		virtual GridBasedEnv* toGridBaseEnv();
+		virtual const GridEnv* toGridEnv() const;
+		virtual GridEnv* toGridEnv();
 	};
 
-	class FDKGAME_API GridBasedEnv
+	class FDKGAME_API GridEnv
 		: public Environment
 	{
 	public:
 		typedef Vector2D<int> NodeCoord;
-		virtual ~GridBasedEnv() {}
+		virtual ~GridEnv() {}
 		virtual int getSizeX() const = 0;
 		virtual int getSizeY() const = 0;
 		int toNodeID(const NodeCoord& nodeCoord) const;
@@ -47,8 +47,8 @@ namespace fdk { namespace game { namespace navi
 		bool isNodeWithCoordReachable(const NodeCoord& nodeCoord) const;
 		// Environment interfaces
 		virtual int getNodeSpaceSize() const;
-		virtual const GridBasedEnv* toGridBaseEnv() const;
-		virtual GridBasedEnv* toGridBaseEnv();
+		virtual const GridEnv* toGridEnv() const;
+		virtual GridEnv* toGridEnv();
 	};
 
 	class FDKGAME_API Navigator
@@ -63,25 +63,25 @@ namespace fdk { namespace game { namespace navi
 		return nodeID >= 0 && nodeID < getNodeSpaceSize();
 	}
 
-	inline int GridBasedEnv::toNodeID(const NodeCoord& nodeCoord) const
+	inline int GridEnv::toNodeID(const NodeCoord& nodeCoord) const
 	{
 		FDK_ASSERT(isValidNodeCoord(nodeCoord));
 		return nodeCoord.y * getSizeX() + nodeCoord.x;
 	}
 
-	inline GridBasedEnv::NodeCoord GridBasedEnv::toNodeCoord(int nodeID) const
+	inline GridEnv::NodeCoord GridEnv::toNodeCoord(int nodeID) const
 	{
 		FDK_ASSERT(isValidNodeID(nodeID));
 		return NodeCoord(nodeID % getSizeX(), nodeID / getSizeX());
 	}
 
-	inline bool GridBasedEnv::isValidNodeCoord(const NodeCoord& nodeCoord) const
+	inline bool GridEnv::isValidNodeCoord(const NodeCoord& nodeCoord) const
 	{
 		return nodeCoord.x >= 0 && nodeCoord.x < getSizeX()
 			&& nodeCoord.y >= 0 && nodeCoord.y < getSizeY();
 	}
 
-	inline bool GridBasedEnv::isNodeWithCoordReachable(const NodeCoord& nodeCoord) const
+	inline bool GridEnv::isNodeWithCoordReachable(const NodeCoord& nodeCoord) const
 	{
 		return isNodeReachable(toNodeID(nodeCoord));
 	}

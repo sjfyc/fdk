@@ -153,14 +153,14 @@ namespace fdk { namespace game { namespace navi
 	}
 
 	void AStar::buildPath()
-	{
+	{// 包含起点和终点, 并且起点放在最后
 		FDK_ASSERT(m_path.empty());
 		int nodeID = m_targetNodeID;
 
-		const GridBasedEnv* pGridBaseEnv = m_env.toGridBaseEnv();
-		if (pGridBaseEnv)
+		const GridEnv* pGridEnv = m_env.toGridEnv();
+		if (pGridEnv)
 		{
-			const int width = pGridBaseEnv->getSizeX();
+			const int width = pGridEnv->getSizeX();
 			while (1)
 			{
 				m_path.push_back(nodeID);

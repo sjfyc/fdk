@@ -1,6 +1,6 @@
 #include "AStar.h"
 #include <fdkgame/NaviVertexMap.h>
-#include <fdkgame/NaviGridBasedEnvUtil.h>
+#include <fdkgame/NaviGridEnvUtil.h>
 #include "Util.h"
 #include "Option.h"
 #include "Game.h"

@@ -10,7 +10,7 @@ namespace fdk { namespace game { namespace navi
 
 	// 对应某种尺寸单位的顶点地图：每个顶点存储对于该尺寸单位的碰撞数量
 	class FDKGAME_API VertexMap
-		: public GridBasedEnv
+		: public GridEnv
 	{
 	public:
 		VertexMap(BlockMap& blockMap, UnitSize unitSize);
@@ -24,7 +24,7 @@ namespace fdk { namespace game { namespace navi
 		void onPlotUnit(const VertexCoord& vertexCoord, UnitSize unitSize, bool bPlot);
 		void allowModify(const VertexCoord& vertexCoord, UnitSize unitSize, bool bAllow);
 
-		// GridBasedEnv interfaces
+		// GridEnv interfaces
 		virtual int getSizeX() const;
 		virtual int getSizeY() const;		
 

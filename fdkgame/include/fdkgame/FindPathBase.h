@@ -34,12 +34,12 @@ namespace fdk { namespace game { namespace findpath
 		virtual bool isObstacle(int nodeID) const = 0;
 	};
 
-	class FDKGAME_API GridBasedEnv
+	class FDKGAME_API GridEnv
 		: public Environment
 	{
 	public:
 		typedef Vector2D<int> NodeCoord;
-		virtual ~GridBasedEnv() {}
+		virtual ~GridEnv() {}
 		virtual int getSizeX() const = 0;
 		virtual int getSizeY() const = 0;
 		int toNodeID(const NodeCoord& nodeCoord) const;

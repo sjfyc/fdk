@@ -3,7 +3,7 @@
 
 namespace fdk { namespace game { namespace navi
 {
-	typedef GridBasedEnv::NodeCoord NodeCoord;
+	typedef GridEnv::NodeCoord NodeCoord;
 
 	class JpsPlusDef
 	{
@@ -13,7 +13,7 @@ namespace fdk { namespace game { namespace navi
 		enum { EMPTY_DIRECTIONS = 0, FULL_DIRECTIONS = 255 } ;
 		typedef unsigned char Direction;
 		typedef unsigned char Directions;
-		typedef GridBasedEnv::NodeCoord NodeCoord;
+		typedef GridEnv::NodeCoord NodeCoord;
 	};
 
 	class JpsPlusUtil
@@ -26,13 +26,13 @@ namespace fdk { namespace game { namespace navi
 		static Direction getDirectionFromParent(const NodeCoord* parentNodeCoord, const NodeCoord& nodeCoord);
 		static NodeCoord getNeighbourNodeCoordInDirection(const NodeCoord& nodeCoord, Direction direction);
 		static Directions getNaturalNeighbourDirections(Direction direction);
-		static Directions getForcedNeighbourDirections(const GridBasedEnv& env, const NodeCoord& nodeCoord, Direction direction);
-		static bool isNeighbourInDirectionReachable(const GridBasedEnv& env, const NodeCoord& nodeCoord, Direction direction, bool bDiagonal);
-		static int jump(const GridBasedEnv& env, int targetNodeID, const NodeCoord& nodeCoord, Direction direction);
+		static Directions getForcedNeighbourDirections(const GridEnv& env, const NodeCoord& nodeCoord, Direction direction);
+		static bool isNeighbourInDirectionReachable(const GridEnv& env, const NodeCoord& nodeCoord, Direction direction, bool bDiagonal);
+		static int jump(const GridEnv& env, int targetNodeID, const NodeCoord& nodeCoord, Direction direction);
 	};
 
 	
-	JpsPlus::JpsPlus(const GridBasedEnv& env, int startNodeID, int targetNodeID)
+	JpsPlus::JpsPlus(const GridEnv& env, int startNodeID, int targetNodeID)
 		: _Base(env, startNodeID, targetNodeID)
 	{
 	}
@@ -43,10 +43,10 @@ namespace fdk { namespace game { namespace navi
 
 	void JpsPlus::getSuccessorNodes(const Environment& l_env, int nodeID, int parentNodeID, std::vector<SuccessorNodeInfo>& result)
 	{
-		const GridBasedEnv& env = static_cast<const GridBasedEnv&>(l_env);
-		GridBasedEnv::NodeCoord nodeCoord = env.toNodeCoord(nodeID);
-		GridBasedEnv::NodeCoord* pParentNodeCoord = 0;
-		GridBasedEnv::NodeCoord parentNodeCoord;
+		const GridEnv& env = static_cast<const GridEnv&>(l_env);
+		GridEnv::NodeCoord nodeCoord = env.toNodeCoord(nodeID);
+		GridEnv::NodeCoord* pParentNodeCoord = 0;
+		GridEnv::NodeCoord parentNodeCoord;
 		if (parentNodeID != INVALID_NODEID)
 		{
 			parentNodeCoord = env.toNodeCoord(parentNodeID);
@@ -66,8 +66,8 @@ namespace fdk { namespace game { namespace navi
 			{
 				continue;
 			}
-			GridBasedEnv::NodeCoord successorNodeCoord = env.toNodeCoord(successorNodeID);
-			GridBasedEnv::NodeCoord offset = successorNodeCoord-nodeCoord;
+			GridEnv::NodeCoord successorNodeCoord = env.toNodeCoord(successorNodeID);
+			GridEnv::NodeCoord offset = successorNodeCoord-nodeCoord;
 			SuccessorNodeInfo info;
 			info.nodeID = successorNodeID;
 			
@@ -185,7 +185,7 @@ namespace fdk { namespace game { namespace navi
 		return directions;
 	}
 	
-	JpsPlusUtil::Directions JpsPlusUtil::getForcedNeighbourDirections(const GridBasedEnv& env, const NodeCoord& nodeCoord, Direction direction)
+	JpsPlusUtil::Directions JpsPlusUtil::getForcedNeighbourDirections(const GridEnv& env, const NodeCoord& nodeCoord, Direction direction)
 	{
 		if (direction == NO_DIRECTION) 
 		{
@@ -224,7 +224,7 @@ namespace fdk { namespace game { namespace navi
 		return directions;
 	}
 
-	bool JpsPlusUtil::isNeighbourInDirectionReachable(const GridBasedEnv& env, const NodeCoord& nodeCoord, Direction direction, bool bDiagonal)
+	bool JpsPlusUtil::isNeighbourInDirectionReachable(const GridEnv& env, const NodeCoord& nodeCoord, Direction direction, bool bDiagonal)
 	{
 		if (bDiagonal)
 		{
@@ -242,7 +242,7 @@ namespace fdk { namespace game { namespace navi
 		return env.isNodeReachable(env.toNodeID(neighbourNodeCoord));		
 	}
 
-	int JpsPlusUtil::jump(const GridBasedEnv& env, int targetNodeID, const NodeCoord& nodeCoord, Direction direction)
+	int JpsPlusUtil::jump(const GridEnv& env, int targetNodeID, const NodeCoord& nodeCoord, Direction direction)
 	{
 		const bool bDiagonal = isDiagonalDirection(direction);
 

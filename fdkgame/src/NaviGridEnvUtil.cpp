@@ -1,10 +1,10 @@
-#include <fdkgame/NaviGridBasedEnvUtil.h>
+#include <fdkgame/NaviGridEnvUtil.h>
 
 namespace fdk { namespace game { namespace navi
 {
-	typedef GridBasedEnv::NodeCoord NodeCoord;
+	typedef GridEnv::NodeCoord NodeCoord;
 
-	bool isDirectlyReachable(const GridBasedEnv& env, int startNodeID, int targetNodeID)
+	bool isDirectlyReachable(const GridEnv& env, int startNodeID, int targetNodeID)
 	{
 		if (startNodeID == targetNodeID)
 		{
@@ -135,7 +135,7 @@ namespace fdk { namespace game { namespace navi
 		return true;
 	}
 
-	int getFirstDirectlyReachableNode(const GridBasedEnv& env, int startNodeID, int targetNodeID)
+	int getFirstDirectlyReachableNode(const GridEnv& env, int startNodeID, int targetNodeID)
 	{
 		if (startNodeID == targetNodeID)
 		{
