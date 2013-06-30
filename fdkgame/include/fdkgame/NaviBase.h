@@ -45,8 +45,6 @@ namespace fdk { namespace game { namespace navi
 		NodeCoord toNodeCoord(int nodeID) const;
 		bool isValidNodeCoord(const NodeCoord& nodeCoord) const;
 		bool isNodeWithCoordReachable(const NodeCoord& nodeCoord) const;
-		bool isDirectlyReachable(int startNodeID, int targetNodeID) const;
-		int getFirstDirectlyReachableNode(int startNodeID, int targetNodeID) const;
 		// Environment interfaces
 		virtual int getNodeSpaceSize() const;
 		virtual const GridBasedEnv* toGridBaseEnv() const;

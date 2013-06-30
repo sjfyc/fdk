@@ -1,5 +1,6 @@
 #include "AStar.h"
 #include <fdkgame/NaviVertexMap.h>
+#include <fdkgame/NaviGridBasedEnvUtil.h>
 #include "Util.h"
 #include "Option.h"
 #include "Game.h"
@@ -131,7 +132,7 @@ bool AStar::search()
 			targetVertexCoord.x, targetVertexCoord.y);
 		//g_Game.pauseGame();
 
-		int middleNodeID = vertexMap.getFirstDirectlyReachableNode(targetVertexID, startVertexID);
+		int middleNodeID = getFirstDirectlyReachableNode(vertexMap, targetVertexID, startVertexID);
 		if (middleNodeID == fdkgame::navi::INVALID_NODEID)
 		{
 			util::output("target vertex(%d/%d) is block & can't find a nonblock in line",
@@ -154,7 +155,7 @@ bool AStar::search()
 		return true;
 	}
 
-	if (vertexMap.isDirectlyReachable(startVertexID, targetVertexID))
+	if (isDirectlyReachable(vertexMap, startVertexID, targetVertexID))
 	{
 		util::output("start vertex(%d/%d) can directly reach to target vertex(%d/%d)",
 			startVertexCoord.x, startVertexCoord.y,
@@ -253,7 +254,7 @@ bool AStar::popNextPathLocation(Location& location)
 			return true;
 		}
 		int nodeID = m_path.back();
-		if (!vertexMap.isDirectlyReachable(m_lastReachedNodeID, nodeID))
+		if (!isDirectlyReachable(vertexMap, m_lastReachedNodeID, nodeID))
 		{
 			break;
 		}
