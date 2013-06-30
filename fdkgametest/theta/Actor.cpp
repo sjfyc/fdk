@@ -46,6 +46,15 @@ void Actor::tick(float delta)
 				move(location, m_moveSpeed);
 			}
 		}
+		else
+		{
+			if (g_Option.isOn(Option::Toggle_RandomMove))
+			{
+				Location loc(fdk::rand(CELL_SIZE_X*MAX_UNIT_SIZE,CELL_SIZE_X*CELL_COUNT_X-CELL_SIZE_X*MAX_UNIT_SIZE)*1.f, 
+					fdk::rand(CELL_SIZE_Y*MAX_UNIT_SIZE,CELL_SIZE_Y*CELL_COUNT_Y-CELL_SIZE_Y*MAX_UNIT_SIZE)*1.f);
+				searchPath(loc, false);
+			}
+		}
 	}
 	tickMove(delta);
 }
@@ -94,19 +103,6 @@ void Actor::tickMove(float delta)
 		bReachWayPoint = true;
 	}
 		
-	if (!g_MapManager.isLocationReachable(*this, nextLocation))
-	{// 下个位置直接不可走
-		if (searchPath(m_lastAstarTargetLocation))
-		{
-			if (m_astar->getPathLocationCount() == 1)
-			{
-				util::output("stop move 0");
-				stopMove();
-			}
-		}
-		return;
-	}
-	
 	bool isLocationReachable = false;
 	{		
 		std::vector<fdkgame::navi::MapManager::PlotUnitArgument> plotArounds;
@@ -122,27 +118,11 @@ void Actor::tickMove(float delta)
 		}
 		fdkgame::navi::MapManager::AutoPlotUnits _AutoPlotUnits(g_MapManager, plotArounds);
 
-		if (g_MapManager.isLocationReachable(*this, getLocation()))
-		{
-			isLocationReachable = g_MapManager.isLocationReachable(*this, nextLocation);
-		}
-		else
-		{
-			util::output("stop move 1");
-			isLocationReachable = true;
-			//g_Game.pauseGame();
-		}
+		isLocationReachable = g_MapManager.isLocationReachable(*this, nextLocation);
 	}
 	if (!isLocationReachable)
 	{
-		if (searchPath(m_lastAstarTargetLocation))
-		{
-			if (m_astar->getPathLocationCount() == 1)
-			{
-				util::output("stop move 2");
-				stopMove();
-			}
-		}
+		searchPath(m_lastAstarTargetLocation, true);
 		return;
 	}
 
@@ -155,12 +135,12 @@ void Actor::tickMove(float delta)
 	}
 }
 
-bool Actor::searchPath(const Location& targetLocation)
+bool Actor::searchPath(const Location& targetLocation, bool bRefind)
 {
 	m_velocity.reset();
 	m_moveLocation = m_location;
 
-	m_astar = new AStar(*this, targetLocation);
+	m_astar = new AStar(*this, targetLocation, bRefind);
 	if (!m_astar->search())
 	{
 		util::output("actor(%d) can't find path", getID());

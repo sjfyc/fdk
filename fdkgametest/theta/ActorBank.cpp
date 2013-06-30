@@ -133,7 +133,7 @@ void ActorBank::onEvent(int eventType, void* params)
 			g_HGE->Input_GetMousePos(&mouseLocation.x, &mouseLocation.y);
 			if (m_currentActor)
 			{
-				m_currentActor->searchPath(mouseLocation);
+				m_currentActor->searchPath(mouseLocation, false);
 			}
 		}
 	}

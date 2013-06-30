@@ -20,7 +20,7 @@ public:
 	const Location& getLocation() const;
 	const Velocity& getVelocity() const;	
 	BoundingBox getBoundingBox() const;
-	bool searchPath(const Location& targetLocation);
+	bool searchPath(const Location& targetLocation, bool bRefind);
 	const Location& getLastAstarTargetLocation() const;
 private:
 	Actor(const Location& location, int moveCapability, int unitSize);

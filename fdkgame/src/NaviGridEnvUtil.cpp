@@ -387,6 +387,7 @@ namespace fdk { namespace game { namespace navi
 			return m_currentNodeID;
 		}
 
+		int initNodeID = m_currentNodeID;
 		while (1)
 		{
 			m_currentNodeID = nextNodeID;
@@ -396,7 +397,7 @@ namespace fdk { namespace game { namespace navi
 				break;
 			}
 			nextNodeID = *m_it;
-			if (!isDirectlyReachable(m_env, m_currentNodeID, nextNodeID))
+			if (!isDirectlyReachable(m_env, initNodeID, nextNodeID))
 			{
 				break;
 			}

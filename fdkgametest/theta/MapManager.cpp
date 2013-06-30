@@ -36,9 +36,10 @@ MapManager::~MapManager()
 
 void MapManager::draw()
 {
+	const fdkgame::navi::VertexMap& vertexMap = getVertexMap(g_Option.getMoveCapability(), g_Option.getUnitSize());
+
 	if (g_Option.isOn(Option::Toggle_ShowVertex))
-	{
-		const fdkgame::navi::VertexMap& vertexMap = getVertexMap(g_Option.getMoveCapability(), g_Option.getUnitSize());
+	{		
 		for (int y = 0; y < vertexMap.getSizeY(); ++y)
 		{
 			for (int x = 0; x < vertexMap.getSizeX(); ++x)
@@ -59,6 +60,18 @@ void MapManager::draw()
 
 		g_Font.printf(mouseLocation.x-20.0f,mouseLocation.y-20.0f,HGETEXT_LEFT,"%d,%d", vertexCoord.x, vertexCoord.y);
 	}	
+	if (g_Option.isOn(Option::Toggle_ShowVertexIDInMouse))
+	{
+		Location mouseLocation;
+		g_HGE->Input_GetMousePos(&mouseLocation.x, &mouseLocation.y);
+
+		VertexCoord vertexCoord = util::locationToNearestVertexCoord(mouseLocation);
+
+		if (vertexMap.isValidNodeCoord(vertexCoord))
+		{
+			g_Font.printf(mouseLocation.x-20.0f,mouseLocation.y-20.0f,HGETEXT_LEFT,"%d", vertexMap.toNodeID(vertexCoord) );
+		}		
+	}
 }
 
 bool MapManager::isLocationReachable(Actor& actor, const Location& location)

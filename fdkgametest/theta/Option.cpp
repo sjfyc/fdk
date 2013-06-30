@@ -48,6 +48,16 @@ void Option::onEvent(int eventType, void* params)
 			toggle(Toggle_ShowVertexCoordInMouse);
 			util::output("%s vertex coord in mouse", isOn(Toggle_ShowVertexCoordInMouse) ? "show" : "hide");
 		}
+		else if (key == HGEK_6)
+		{
+			toggle(Toggle_ShowVertexIDInMouse);
+			util::output("%s vertex id in mouse", isOn(Toggle_ShowVertexIDInMouse) ? "show" : "hide");
+		}
+		else if (key == HGEK_7)
+		{
+			toggle(Toggle_ShowPath);
+			util::output("%s path", isOn(Toggle_ShowPath) ? "show" : "hide");
+		}
 		else if (key == HGEK_F1)
 		{
 			++m_brush;
@@ -78,6 +88,11 @@ void Option::onEvent(int eventType, void* params)
 				m_navigatorType = 0;
 			}
 			util::output("navigator type change to %d", m_navigatorType);
+		}
+		else if (key == HGEK_F5)
+		{
+			toggle(Toggle_RandomMove);
+			util::output("random move %s", isOn(Toggle_RandomMove) ? "on" : "off");
 		}
 		else if (key == HGEK_ADD)
 		{
@@ -148,9 +163,12 @@ void Option::outputUsage()
 	util::output("3: show/hide vertex");
 	util::output("4: show/hide actor vertex");
 	util::output("5: show/hide vertex coord in mouse");
+	util::output("5: show/hide vertex id in mouse");
+	util::output("7: show/hide path");
 	util::output("F1: change brush");
 	util::output("F2: change move capability");
 	util::output("F3: change navigator");
+	util::output("F5: random move on/off");
 	util::output("+: increase unit size");
 	util::output("-: decrease unit size");
 	util::output("up: time rate x 2");

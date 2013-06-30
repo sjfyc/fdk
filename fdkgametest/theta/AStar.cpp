@@ -12,7 +12,7 @@
 void plotAroundActors(Actor& actor, std::vector<fdkgame::navi::MapManager::PlotUnitArgument>& plotArounds)
 {
 	std::vector<Actor*> aroundActors;
-	g_ActorBank.getActors(aroundActors, actor.getLocation(), actor.getRadius()*4, &actor);
+	g_ActorBank.getActors(aroundActors, actor.getLocation(), (actor.getRadius()+(MAX_UNIT_SIZE+1)*HALF_CELL_SIZE_X)*1.5f, &actor);
 	for (size_t i = 0; i < aroundActors.size(); ++i)
 	{
 		Actor* aroundActor = aroundActors[i];
@@ -26,10 +26,33 @@ void plotAroundActors(Actor& actor, std::vector<fdkgame::navi::MapManager::PlotU
 	subtract.unitSize = actor.getUnitSize();	
 }
 
-AStar::AStar(Actor& actor, const Location& targetLocation)
+VertexCoord simpleOffset(const VertexCoord& coord)
+{
+	VertexCoord result;
+	if (coord.x > 0)
+	{
+		result.x = 1;
+	}
+	else if (coord.x < 0)
+	{
+		result.x = -1;
+	}
+	if (coord.y > 0)
+	{
+		result.y = 1;
+	}
+	else if (coord.y < 0)
+	{
+		result.y = -1;
+	}
+	return result;
+}
+
+AStar::AStar(Actor& actor, const Location& targetLocation, bool bRefind)
 	: m_actor(actor)
 	, m_targetLocation(targetLocation)
 	, m_navigator(0)
+	, m_bRefind(bRefind)
 {	
 }
 
@@ -40,6 +63,11 @@ AStar::~AStar()
 
 void AStar::render()
 {
+	if (!g_Option.isOn(Option::Toggle_ShowPath))
+	{
+		return;
+	}
+
 	// 绘制实际行走路径
 	Location prevLocation = m_actor.getLocation();
 	for (std::list<Location>::iterator it = m_locationPath.begin(); it != m_locationPath.end(); ++it)
@@ -190,13 +218,64 @@ bool AStar::search()
 	FDK_ASSERT(searchResult == Navigator::SearchResult_Completed);
 
 	{// 实际直连的行走路线
-		fdkgame::navi::GridEnvOctPathPopDirectlyReachableNode directlyReachableNodes(vertexMap, pathWithOutStartTarget, false);
-		while (!directlyReachableNodes.empty())
+		if (!m_bRefind)
 		{
-			int nodeID = directlyReachableNodes.pop();
-			Location location = util::vertexCoordToLocation(vertexMap.toNodeCoord(nodeID));
-			m_locationPath.push_back(location);	
+			// 把起点终点加入产生一条由转向点构成的路径
+			if (pathWithOutStartTarget.empty())
+			{
+				pathWithOutStartTarget.push_front(startVertexID);
+				pathWithOutStartTarget.push_front(targetVertexID);
+			}
+			else if (pathWithOutStartTarget.size() >= 2)
+			{
+				VertexCoord dir1 = simpleOffset(
+					vertexMap.toNodeCoord(*++pathWithOutStartTarget.begin()) - vertexMap.toNodeCoord(*pathWithOutStartTarget.begin())
+					);
+				
+				if (simpleOffset( vertexMap.toNodeCoord(pathWithOutStartTarget.front()) - startVertexCoord ) == dir1)
+				{
+					pathWithOutStartTarget.pop_front();
+					pathWithOutStartTarget.push_front(startVertexID);
+				}
+				
+				VertexCoord dir2 = simpleOffset(
+					vertexMap.toNodeCoord(pathWithOutStartTarget.back()) - vertexMap.toNodeCoord(* --(--pathWithOutStartTarget.end()) )
+					);
+				if (simpleOffset( targetVertexCoord - vertexMap.toNodeCoord(pathWithOutStartTarget.back() ) ) == dir2)
+				{
+					pathWithOutStartTarget.pop_back();
+					pathWithOutStartTarget.push_back(targetVertexID);
+				}
+			}
+			else
+			{
+				FDK_ASSERT(0);
+			}
+			
+			fdkgame::navi::GridEnvOctPathPopDirectlyReachableNode directlyReachableNodes(vertexMap, pathWithOutStartTarget, false);
+			directlyReachableNodes.pop(); // 忽略起点
+			
+			while (!directlyReachableNodes.empty())
+			{
+				int nodeID = directlyReachableNodes.pop();
+				if (!directlyReachableNodes.empty())  // 忽略终点
+				{
+					Location location = util::vertexCoordToLocation(vertexMap.toNodeCoord(nodeID));
+					m_locationPath.push_back(location);	
+				}
+			}
 		}
+		else// refind时使用安全路线
+		{
+			fdkgame::navi::GridEnvOctPathPopDirectlyReachableNode directlyReachableNodes(vertexMap, pathWithOutStartTarget, false);
+			while (!directlyReachableNodes.empty())
+			{
+				int nodeID = directlyReachableNodes.pop();
+				Location location = util::vertexCoordToLocation(vertexMap.toNodeCoord(nodeID));
+				m_locationPath.push_back(location);	
+			}
+		}
+		
 		m_locationPath.push_back(m_targetLocation);
 	}
 		

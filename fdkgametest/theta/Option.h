@@ -24,6 +24,9 @@ public:
 		Toggle_ShowVertex,
 		Toggle_ShowActorVertex,	
 		Toggle_ShowVertexCoordInMouse,
+		Toggle_ShowVertexIDInMouse,
+		Toggle_ShowPath,
+		Toggle_RandomMove,
 		Toggle_Brush,
 	};
 	void start();

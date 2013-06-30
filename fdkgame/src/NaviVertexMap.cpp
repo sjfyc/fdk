@@ -65,19 +65,19 @@ namespace fdk { namespace game { namespace navi
 		const bool bRight = tryAddSuccessorNode(navigator, result, VertexCoord(coord.x+1,coord.y), COST_STRAIGHT, nodeID);
 		const bool bBottom = tryAddSuccessorNode(navigator, result, VertexCoord(coord.x,coord.y+1), COST_STRAIGHT, nodeID);
 
-		if (bLeft || bTop)
+		if (bLeft && bTop)
 		{
 			tryAddSuccessorNode(navigator, result, VertexCoord(coord.x-1,coord.y-1), COST_DIAGONAL, nodeID);
 		}
-		if (bTop || bRight)
+		if (bTop && bRight)
 		{
 			tryAddSuccessorNode(navigator, result, VertexCoord(coord.x+1,coord.y-1), COST_DIAGONAL, nodeID);
 		}
-		if (bRight || bBottom)
+		if (bRight && bBottom)
 		{
 			tryAddSuccessorNode(navigator, result, VertexCoord(coord.x+1,coord.y+1), COST_DIAGONAL, nodeID);
 		}
-		if (bBottom || bLeft)
+		if (bBottom && bLeft)
 		{
 			tryAddSuccessorNode(navigator, result, VertexCoord(coord.x-1,coord.y+1), COST_DIAGONAL, nodeID);
 		}

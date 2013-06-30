@@ -12,7 +12,7 @@ class Actor;
 class AStar 	
 {
 public:
-	AStar(Actor& actor, const Location& targetLocation);
+	AStar(Actor& actor, const Location& targetLocation, bool bRefind);
 	~AStar();
 	bool search();
 	size_t getPathLocationCount() const;
@@ -24,6 +24,7 @@ private:
 	typedef std::set<VertexCoord> Vertexs;
 	Actor& m_actor;
 	Location m_targetLocation;
+	bool m_bRefind;
 	fdkgame::navi::AStar* m_navigator;
 	std::vector<VertexCoord> m_vertexCoordPath;
 	std::list<Location> m_locationPath;// 实际行走路线
