@@ -13,6 +13,7 @@ namespace fdk { namespace game { namespace navi
 		typedef GridEnv::NodeCoord NodeCoord;
 		typedef NodeCoord Direction;
 		virtual int pop() = 0;
+		virtual bool empty() const = 0;
 	protected:
 		GridEnvOctPathPop(const GridEnv& env, const std::vector<int>& path, bool bCopy);
 		virtual ~GridEnvOctPathPop();
@@ -28,13 +29,28 @@ namespace fdk { namespace game { namespace navi
 		typedef GridEnvOctPathPop _Base;
 	public:
 		GridEnvOctPathPopEachNode(const GridEnv& env, const std::vector<int>& path, bool bCopy=true);
-		~GridEnvOctPathPopEachNode();
+		~GridEnvOctPathPopEachNode();		
 		virtual int pop();
+		virtual bool empty() const;
 	private:
 		int m_index;
 		NodeCoord m_currentNodeCoord;
 		NodeCoord m_nextPortNodeCoord;
 		Direction m_nextDirection;
+	};
+
+	class GridEnvOctPathPopDirectlyReachableNode
+		: public GridEnvOctPathPop
+	{
+		typedef GridEnvOctPathPop _Base;
+	public:
+		GridEnvOctPathPopDirectlyReachableNode(const GridEnv& env, const std::vector<int>& path, bool bCopy=true);
+		~GridEnvOctPathPopDirectlyReachableNode();		
+		virtual int pop();
+		virtual bool empty() const;
+	private:
+		int m_index;
+		int m_currentNodeID;
 	};
 }}}
 

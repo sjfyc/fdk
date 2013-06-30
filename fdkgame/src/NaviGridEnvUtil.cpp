@@ -322,10 +322,7 @@ namespace fdk { namespace game { namespace navi
 
 	int GridEnvOctPathPopEachNode::pop()
 	{
-		if (m_index == -1)
-		{
-			return INVALID_NODEID;
-		}
+		FDK_ASSERT(!empty());
 
 		bool bReachPort = false;
 
@@ -354,5 +351,63 @@ namespace fdk { namespace game { namespace navi
 		}		
 
 		return m_env.toNodeID(m_currentNodeCoord);
+	}
+
+	bool GridEnvOctPathPopEachNode::empty() const
+	{
+		return m_index == -1;
+	}
+
+	GridEnvOctPathPopDirectlyReachableNode::GridEnvOctPathPopDirectlyReachableNode(const GridEnv& env, const std::vector<int>& path, bool bCopy)
+		: _Base(env, path, bCopy)
+		, m_index(path.empty() ? -1 : (path.size()-1) )
+		, m_currentNodeID(INVALID_NODEID)
+	{
+	}
+
+	GridEnvOctPathPopDirectlyReachableNode::~GridEnvOctPathPopDirectlyReachableNode()
+	{
+	}
+
+	int GridEnvOctPathPopDirectlyReachableNode::pop()
+	{
+		FDK_ASSERT(!empty());
+
+		if (m_index == m_path.size()-1)
+		{
+			m_currentNodeID = m_path[m_index];
+			--m_index;
+			return m_currentNodeID;
+		}
+				
+		int nextNodeID = m_path[m_index];
+		if (!isDirectlyReachable(m_env, m_currentNodeID, nextNodeID))
+		{
+			m_currentNodeID = nextNodeID;
+			--m_index;
+			return m_currentNodeID;
+		}
+
+		while (1)
+		{
+			m_currentNodeID = nextNodeID;
+			--m_index;
+			if (m_index == -1)
+			{
+				break;
+			}
+			nextNodeID = m_path[m_index];
+			if (!isDirectlyReachable(m_env, m_currentNodeID, nextNodeID))
+			{
+				break;
+			}
+		}
+
+		return m_currentNodeID;
+	}
+
+	bool GridEnvOctPathPopDirectlyReachableNode::empty() const
+	{
+		return m_index == -1;
 	}
 }}}
