@@ -7,7 +7,6 @@
 namespace fdk { namespace game { namespace navi
 {
 	class Environment;
-	class EnvironmentChecker;
 	class GridBasedEnv;
 	class Navigator;
 
@@ -54,46 +53,13 @@ namespace fdk { namespace game { namespace navi
 		virtual GridBasedEnv* toGridBaseEnv();
 	};
 
-	class FDKGAME_API EnvironmentChecker
-	{
-	public:
-		//virtual void onSearchBegining(const GridMap& env, int startNodeID, int endNodeID) {}
-		//virtual void onSearchEnded(const GridMap& env, int startNodeID, int endNodeID) {}
-		//virtual bool checkSuccessorNode(const GridMap& env, int nodeID, int parentNodeID) const { return true; }
-
-		//virtual void onSearchBegining(const HpaMap& env, int startNodeID, int endNodeID) {}
-		//virtual void onSearchEnded(const HpaMap& env, int startNodeID, int endNodeID) {}
-		//virtual bool checkSuccessorNode(const HpaMap& env, int nodeID, int parentNodeID) const { return true; }
-
-		//virtual void onSearchBegining(const HpaCluster& env, int startNodeID, int endNodeID) {}
-		//virtual void onSearchEnded(const HpaCluster& env, int startNodeID, int endNodeID) {}
-		//virtual bool checkSuccessorNode(const HpaCluster& env, int nodeID, int parentNodeID) const { return true; }
-	};
-
 	class FDKGAME_API Navigator
 	{
-	public:
-		EnvironmentChecker* setEnvironmentChecker(EnvironmentChecker* checker);
-		EnvironmentChecker* getEnvironmentChecker() const;
 	protected:
 		Navigator();
 		virtual ~Navigator();
-	private:
-		EnvironmentChecker* m_environmentChecker;
 	};
 	
-	inline EnvironmentChecker* Navigator::setEnvironmentChecker(EnvironmentChecker* checker)
-	{
-		EnvironmentChecker* old = m_environmentChecker;
-		m_environmentChecker = checker;
-		return old;
-	}
-
-	inline EnvironmentChecker* Navigator::getEnvironmentChecker() const
-	{
-		return m_environmentChecker;
-	}
-
 	inline bool Environment::isValidNodeID(int nodeID) const
 	{
 		return nodeID >= 0 && nodeID < getNodeSpaceSize();
@@ -123,7 +89,6 @@ namespace fdk { namespace game { namespace navi
 	}
 
 	inline Navigator::Navigator()
-		: m_environmentChecker(0)
 	{
 	}
 
