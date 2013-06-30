@@ -194,14 +194,25 @@ bool AStar::search()
 
 	FDK_ASSERT(searchResult == Navigator::SearchResult_Completed);
 
-	const std::vector<int>& path = m_navigator->getPath();
-	for (size_t i = 0; i < path.size(); ++i)
+	std::vector<int> eachNodePath;
+	// 精化为逐个路点
+	fdkgame::navi::GridEnvOctPathPopEachNode popEachNode(vertexMap, m_navigator->getPath(), false);
+	while (1)
 	{
-		if (i == 0 || i == path.size()-1)
+		int nodeID = popEachNode.pop();
+		if (nodeID == fdkgame::navi::INVALID_NODEID)
+		{
+			break;
+		}
+		eachNodePath.insert(eachNodePath.begin(), nodeID);
+	}
+	for (size_t i = 0; i < eachNodePath.size(); ++i)
+	{
+		if (i == 0 || i == eachNodePath.size()-1)
 		{
 			continue;// ignore start vertex and target vertex
 		}
-		VertexCoord vertexCoord = vertexMap.toNodeCoord(path[i]);
+		VertexCoord vertexCoord = vertexMap.toNodeCoord(eachNodePath[i]);
 		m_vertexCoordPath.push_back(vertexCoord);
 		Location location = util::vertexCoordToLocation(vertexCoord);
 		m_locationPath.push_back(location);	
@@ -212,22 +223,6 @@ bool AStar::search()
 	m_path.pop_back();
 
 	return true;
-}
-
-bool AStar::hasNextPathLocation() const
-{
-	return !m_locationPath.empty();
-}
-
-Location AStar::popNextPathLocation()
-{
-	//如果是第一次，那么返回起点的下一个节点
-	const fdkgame::navi::VertexMap& vertexMap = g_MapManager.getVertexMap(m_actor.getMoveCapability(), m_actor.getUnitSize());
-
-	FDK_ASSERT(hasNextPathLocation());
-	Location result = m_locationPath.back();
-	m_locationPath.pop_back();
-	return result;	
 }
 
 bool AStar::popNextPathLocation(Location& location)

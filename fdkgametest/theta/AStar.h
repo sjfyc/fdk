@@ -14,8 +14,6 @@ public:
 	~AStar();
 	bool search();
 	size_t getPathLocationCount() const;
-	bool hasNextPathLocation() const;
-	Location popNextPathLocation();
 	bool popNextPathLocation(Location& location);
 	void render();
 private:
