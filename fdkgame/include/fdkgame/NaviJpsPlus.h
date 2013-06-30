@@ -11,7 +11,7 @@ namespace fdk { namespace game { namespace navi
 	{
 		typedef AStar _Base;
 	public:
-		JpsPlus(const GridEnv& env, int startNodeID, int targetNodeID);
+		JpsPlus(const GridEnv& env, int startNodeID, int targetNodeID, std::list<int>& outputPath);
 		virtual ~JpsPlus();
 		// AStar interfaces
 		virtual void getSuccessorNodes(const Environment& env, int nodeID, int parentNodeID, std::vector<SuccessorNodeInfo>& result);		

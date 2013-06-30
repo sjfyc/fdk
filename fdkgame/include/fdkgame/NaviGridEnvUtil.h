@@ -1,6 +1,7 @@
 #ifndef __FDKGAME_NAVIGRIDBASEDENVUTIL_H_INCLUDE__
 #define __FDKGAME_NAVIGRIDBASEDENVUTIL_H_INCLUDE__
 #include "NaviBase.h"
+#include <list>
 
 namespace fdk { namespace game { namespace navi
 {
@@ -15,11 +16,11 @@ namespace fdk { namespace game { namespace navi
 		virtual int pop() = 0;
 		virtual bool empty() const = 0;
 	protected:
-		GridEnvOctPathPop(const GridEnv& env, const std::vector<int>& path, bool bCopy);
+		GridEnvOctPathPop(const GridEnv& env, const std::list<int>& path, bool bCopy);
 		virtual ~GridEnvOctPathPop();
 		Direction getDirection(const NodeCoord& startNodeCoord, const NodeCoord& targetNodeCoord);
 		const GridEnv& m_env;
-		const std::vector<int>& m_path;
+		const std::list<int>& m_path;
 		bool m_bCopy;
 	};
 
@@ -28,12 +29,12 @@ namespace fdk { namespace game { namespace navi
 	{
 		typedef GridEnvOctPathPop _Base;
 	public:
-		GridEnvOctPathPopEachNode(const GridEnv& env, const std::vector<int>& path, bool bCopy=true);
+		GridEnvOctPathPopEachNode(const GridEnv& env, const std::list<int>& path, bool bCopy=true);
 		virtual ~GridEnvOctPathPopEachNode();		
 		virtual int pop();
 		virtual bool empty() const;
 	private:
-		int m_index;
+		std::list<int>::const_iterator m_it;
 		NodeCoord m_currentNodeCoord;
 		NodeCoord m_nextPortNodeCoord;
 		Direction m_nextDirection;
@@ -44,12 +45,12 @@ namespace fdk { namespace game { namespace navi
 	{
 		typedef GridEnvOctPathPop _Base;
 	public:
-		GridEnvOctPathPopDirectlyReachableNode(const GridEnv& env, const std::vector<int>& path, bool bCopy=true);
+		GridEnvOctPathPopDirectlyReachableNode(const GridEnv& env, const std::list<int>& path, bool bCopy=true);
 		virtual ~GridEnvOctPathPopDirectlyReachableNode();		
 		virtual int pop();
 		virtual bool empty() const;
 	private:
-		int m_index;
+		std::list<int>::const_iterator m_it;
 		int m_currentNodeID;
 	};
 }}}

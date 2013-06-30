@@ -30,8 +30,6 @@ AStar::AStar(Actor& actor, const Location& targetLocation)
 	: m_actor(actor)
 	, m_targetLocation(targetLocation)
 	, m_navigator(0)
-	, m_pTargetLocation(0)
-	, m_popDirectNode(0)
 {	
 }
 
@@ -42,28 +40,19 @@ AStar::~AStar()
 
 void AStar::render()
 {
-	// 绘制路径
-	if (!m_locationPath.empty())
+	// 绘制实际行走路径
+	Location prevLocation = m_actor.getLocation();
+	for (std::list<Location>::iterator it = m_locationPath.begin(); it != m_locationPath.end(); ++it)
 	{
-		Location prevLocation = m_actor.getLocation();
-		for (int i = (int)m_locationPath.size()-1; i >= 0; --i)
-		{
-			Location currentCenterLocation = m_locationPath[i];
+		Location currentCenterLocation = *it;
 
-			g_HGE->Gfx_RenderLine(prevLocation.x, prevLocation.y, 
-				currentCenterLocation.x, currentCenterLocation.y,
-				MyColor_Blue
-				);
-			prevLocation = currentCenterLocation;
-		}
-	}
-	else
-	{
-		g_HGE->Gfx_RenderLine(m_actor.getLocation().x, m_actor.getLocation().y, 
-			m_targetLocation.x, m_targetLocation.y,
+		g_HGE->Gfx_RenderLine(prevLocation.x, prevLocation.y, 
+			currentCenterLocation.x, currentCenterLocation.y,
 			MyColor_Blue
 			);
+		prevLocation = currentCenterLocation;
 	}
+
 	// 绘制路径上的顶点
 	for (size_t i = 0; i < m_vertexCoordPath.size(); ++i)
 	{
@@ -83,7 +72,7 @@ bool AStar::search()
 {
 	util::output("start path finding..");
 
-	const fdkgame::navi::VertexMap& vertexMap = g_MapManager.getVertexMap(m_actor.getMoveCapability(), m_actor.getUnitSize());
+	const fdkgame::navi::VertexMap& vertexMap = getVertexMap();
 
 	const Location& startLocation = m_actor.getLocation();
 	VertexCoord startVertexCoord = util::locationToNearestVertexCoord(startLocation);
@@ -126,14 +115,13 @@ bool AStar::search()
 		//// when stuck with other unit, navigator will success with the target location returned
 		//m_locationPath.push_back(m_targetLocation);
 		// 弹出来重新寻路
-		return true;
+		return false;
 	}
 	
 	if (vertexMap.isBlock(targetVertexCoord) )
 	{
 		util::output("target vertex(%d/%d) is block",
 			targetVertexCoord.x, targetVertexCoord.y);
-		//g_Game.pauseGame();
 
 		int middleNodeID = getFirstDirectlyReachableNode(vertexMap, targetVertexID, startVertexID);
 		if (middleNodeID == fdkgame::navi::INVALID_NODEID)
@@ -142,23 +130,20 @@ bool AStar::search()
 				targetVertexCoord.x, targetVertexCoord.y);
 			return false;
 		}
+
 		targetVertexID = middleNodeID;
 		targetVertexCoord = vertexMap.toNodeCoord(middleNodeID);
 		m_targetLocation = util::vertexCoordToLocation(targetVertexCoord);
 	}
-
-	m_startVertexID = startVertexID;
-	m_targetVertexID = targetVertexID;
-
-	m_locationPath.push_back(m_targetLocation);
-
-	m_pTargetLocation = &m_targetLocation;
-
+	
 	if (startVertexID == targetVertexID)
 	{
 		util::output("start vertex(%d/%d) equal to target vertex(%d/%d)",
 			startVertexCoord.x, startVertexCoord.y,
 			targetVertexCoord.x, targetVertexCoord.y);
+		m_vertexCoordPath.push_back(startVertexCoord);
+		m_vertexCoordPath.push_back(targetVertexCoord);
+		m_locationPath.push_back(m_targetLocation);
 		return true;
 	}
 
@@ -167,20 +152,24 @@ bool AStar::search()
 		util::output("start vertex(%d/%d) can directly reach to target vertex(%d/%d)",
 			startVertexCoord.x, startVertexCoord.y,
 			targetVertexCoord.x, targetVertexCoord.y);
+		m_vertexCoordPath.push_back(startVertexCoord);
+		m_vertexCoordPath.push_back(targetVertexCoord);
+		m_locationPath.push_back(m_targetLocation);
 		return true;
 	}
 	
+	std::list<int> pathWithOutStartTarget;
 	if (g_Option.getNavigatorType() == Option::NavigatorType_AStar)
 	{
-		m_navigator = new fdkgame::navi::AStar(vertexMap, startVertexID, targetVertexID);
+		m_navigator = new fdkgame::navi::AStar(vertexMap, startVertexID, targetVertexID, pathWithOutStartTarget);
 	}
 	else if (g_Option.getNavigatorType() == Option::NavigatorType_Jps)
 	{
-		m_navigator = new fdkgame::navi::Jps(vertexMap, startVertexID, targetVertexID);
+		m_navigator = new fdkgame::navi::Jps(vertexMap, startVertexID, targetVertexID, pathWithOutStartTarget);
 	}
 	else if (g_Option.getNavigatorType() == Option::NavigatorType_JpsPlus)
 	{
-		m_navigator = new fdkgame::navi::JpsPlus(vertexMap, startVertexID, targetVertexID);
+		m_navigator = new fdkgame::navi::JpsPlus(vertexMap, startVertexID, targetVertexID, pathWithOutStartTarget);
 	}
 	else 
 	{
@@ -195,64 +184,57 @@ bool AStar::search()
 		util::output("no path between start vertex(%d/%d) and target vertex(%d/%d)",
 			startVertexCoord.x, startVertexCoord.y,
 			targetVertexCoord.x, targetVertexCoord.y);
-		m_pTargetLocation = 0;
 		return false;
 	}
 
 	FDK_ASSERT(searchResult == Navigator::SearchResult_Completed);
 
-	std::vector<int> eachNodePath;
-	// 精化为逐个路点
-	fdkgame::navi::GridEnvOctPathPopEachNode popEachNode(vertexMap, m_navigator->getPath(), false);
-	while (!popEachNode.empty())
-	{
-		int nodeID = popEachNode.pop();
-		eachNodePath.insert(eachNodePath.begin(), nodeID);
+	{// 实际直连的行走路线
+		fdkgame::navi::GridEnvOctPathPopDirectlyReachableNode directlyReachableNodes(vertexMap, pathWithOutStartTarget, false);
+		while (!directlyReachableNodes.empty())
+		{
+			int nodeID = directlyReachableNodes.pop();
+			Location location = util::vertexCoordToLocation(vertexMap.toNodeCoord(nodeID));
+			m_locationPath.push_back(location);	
+		}
+		m_locationPath.push_back(m_targetLocation);
 	}
-	for (size_t i = 0; i < eachNodePath.size(); ++i)
-	{
-		VertexCoord vertexCoord = vertexMap.toNodeCoord(eachNodePath[i]);
-		m_vertexCoordPath.push_back(vertexCoord);
-		Location location = util::vertexCoordToLocation(vertexCoord);
-		m_locationPath.push_back(location);	
+		
+	{// 精化为每个路点
+		m_vertexCoordPath.push_back(startVertexCoord);
+		std::vector<int> eachNodePath;
+		eachNodePath.push_back(startVertexID);
+		fdkgame::navi::GridEnvOctPathPopEachNode popEachNode(vertexMap, pathWithOutStartTarget, false);
+		while (!popEachNode.empty())
+		{
+			int nodeID = popEachNode.pop();			
+			VertexCoord vertexCoord = vertexMap.toNodeCoord(nodeID);
+			m_vertexCoordPath.push_back(vertexCoord);
+		}
+		m_vertexCoordPath.push_back(targetVertexCoord);
 	}
-	
-	m_popDirectNode = new fdkgame::navi::GridEnvOctPathPopDirectlyReachableNode(vertexMap, m_navigator->getPath(), false);
-	m_popDirectNode->pop(); // 去掉起点
+
 	return true;
 }
 
 bool AStar::popNextPathLocation(Location& location)
 {
-	if (!m_popDirectNode)
+	if (m_locationPath.empty())
 	{
-		if (m_pTargetLocation)
-		{
-			location = *m_pTargetLocation;
-			m_pTargetLocation = 0;
-			return true;
-		}
 		return false;
 	}
-	const fdkgame::navi::VertexMap& vertexMap = g_MapManager.getVertexMap(m_actor.getMoveCapability(), m_actor.getUnitSize());
-
-	std::vector<fdkgame::navi::MapManager::PlotUnitArgument> plotArounds;
-	plotAroundActors(m_actor, plotArounds);
-	fdkgame::navi::MapManager::AutoPlotUnits _AutoPlotUnits(g_MapManager, plotArounds);
-
-	
-	int vertexID = m_popDirectNode->pop();
-	if (!m_popDirectNode->empty())
-	{
-		location = util::vertexCoordToLocation(vertexMap.toNodeCoord(vertexID));
-		return true;
-	}
-	delete m_popDirectNode;
-	m_popDirectNode = 0;
-	return popNextPathLocation(location);
+	location = m_locationPath.front();
+	m_locationPath.pop_front();
+	return true;
 }
 
 size_t AStar::getPathLocationCount() const
 {
 	return m_locationPath.size();
 }
+
+const fdkgame::navi::VertexMap& AStar::getVertexMap() const
+{
+	return g_MapManager.getVertexMap(m_actor.getMoveCapability(), m_actor.getUnitSize());
+}
+

@@ -268,9 +268,9 @@ namespace fdk { namespace game { namespace navi
 	}
 
 
-	GridEnvOctPathPop::GridEnvOctPathPop(const GridEnv& env, const std::vector<int>& path, bool bCopy)
+	GridEnvOctPathPop::GridEnvOctPathPop(const GridEnv& env, const std::list<int>& path, bool bCopy)
 		: m_env(env)
-		, m_path(bCopy ? *new std::vector<int>(path) : path)
+		, m_path(bCopy ? *new std::list<int>(path) : path)
 		, m_bCopy(bCopy)
 	{
 	}
@@ -307,9 +307,9 @@ namespace fdk { namespace game { namespace navi
 		return Direction(dx, dy);
 	}
 
-	GridEnvOctPathPopEachNode::GridEnvOctPathPopEachNode(const GridEnv& env, const std::vector<int>& path, bool bCopy)
+	GridEnvOctPathPopEachNode::GridEnvOctPathPopEachNode(const GridEnv& env, const std::list<int>& path, bool bCopy)
 		: _Base(env, path, bCopy)
-		, m_index(path.empty() ? -1 : (path.size()-1) )
+		, m_it(m_path.begin())
 		, m_currentNodeCoord()
 		, m_nextDirection()
 	{			
@@ -325,9 +325,9 @@ namespace fdk { namespace game { namespace navi
 
 		bool bReachPort = false;
 
-		if (m_index == m_path.size()-1)
+		if (m_it == m_path.begin())
 		{
-			m_currentNodeCoord = m_env.toNodeCoord(m_path[m_index]);
+			m_currentNodeCoord = m_env.toNodeCoord(*m_it);
 			bReachPort = true;
 		}
 		else
@@ -341,10 +341,10 @@ namespace fdk { namespace game { namespace navi
 		
 		if (bReachPort)
 		{
-			--m_index;
-			if (m_index != -1)
+			++m_it;
+			if (m_it != m_path.end())
 			{
-				m_nextPortNodeCoord = m_env.toNodeCoord(m_path[m_index]);
+				m_nextPortNodeCoord = m_env.toNodeCoord(*m_it);
 				m_nextDirection = getDirection(m_currentNodeCoord, m_nextPortNodeCoord);
 			}
 		}		
@@ -354,12 +354,12 @@ namespace fdk { namespace game { namespace navi
 
 	bool GridEnvOctPathPopEachNode::empty() const
 	{
-		return m_index == -1;
+		return m_it == m_path.end();
 	}
 
-	GridEnvOctPathPopDirectlyReachableNode::GridEnvOctPathPopDirectlyReachableNode(const GridEnv& env, const std::vector<int>& path, bool bCopy)
+	GridEnvOctPathPopDirectlyReachableNode::GridEnvOctPathPopDirectlyReachableNode(const GridEnv& env, const std::list<int>& path, bool bCopy)
 		: _Base(env, path, bCopy)
-		, m_index(path.empty() ? -1 : (path.size()-1) )
+		, m_it(m_path.begin())
 		, m_currentNodeID(INVALID_NODEID)
 	{
 	}
@@ -372,30 +372,30 @@ namespace fdk { namespace game { namespace navi
 	{
 		FDK_ASSERT(!empty());
 
-		if (m_index == m_path.size()-1)
+		if (m_it == m_path.begin())
 		{
-			m_currentNodeID = m_path[m_index];
-			--m_index;
+			m_currentNodeID = *m_it;
+			++m_it;
 			return m_currentNodeID;
 		}
 				
-		int nextNodeID = m_path[m_index];
+		int nextNodeID = *m_it;
 		if (!isDirectlyReachable(m_env, m_currentNodeID, nextNodeID))
 		{
 			m_currentNodeID = nextNodeID;
-			--m_index;
+			++m_it;
 			return m_currentNodeID;
 		}
 
 		while (1)
 		{
 			m_currentNodeID = nextNodeID;
-			--m_index;
-			if (m_index == -1)
+			++m_it;
+			if (m_it == m_path.end())
 			{
 				break;
 			}
-			nextNodeID = m_path[m_index];
+			nextNodeID = *m_it;
 			if (!isDirectlyReachable(m_env, m_currentNodeID, nextNodeID))
 			{
 				break;
@@ -407,6 +407,6 @@ namespace fdk { namespace game { namespace navi
 
 	bool GridEnvOctPathPopDirectlyReachableNode::empty() const
 	{
-		return m_index == -1;
+		return m_it == m_path.end();
 	}
 }}}

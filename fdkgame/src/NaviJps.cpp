@@ -151,8 +151,8 @@ namespace fdk { namespace game { namespace navi
 		return const_cast<JpsImpl::SavedJumpInfo*>(&*it);
 	}
 	
-	Jps::Jps(const GridEnv& env, int startNodeID, int targetNodeID)
-		: _Base(env, startNodeID, targetNodeID)
+	Jps::Jps(const GridEnv& env, int startNodeID, int targetNodeID, std::list<int>& outputPath)
+		: _Base(env, startNodeID, targetNodeID, outputPath)
 		, m_impl(*new JpsImpl)
 	{
 	}

@@ -1,6 +1,7 @@
 #ifndef __FDKGAME_NAVIASTAR_H_INCLUDE__
 #define __FDKGAME_NAVIASTAR_H_INCLUDE__
 #include "NaviBase.h"
+#include <list>
 #include <fdk/BinaryHeap.h>
 
 namespace fdk { namespace game { namespace navi
@@ -23,11 +24,10 @@ namespace fdk { namespace game { namespace navi
 			SearchResult_Completed,
 			SearchResult_PathUnexist,
 		};		
-		AStar(const Environment& env, int startNodeID, int targetNodeID);
+		AStar(const Environment& env, int startNodeID, int targetNodeID, std::list<int>& outputPath);
 		virtual ~AStar();
 		SearchResult search(int step=-1);
 		SearchResult getSearchResult() const;
-		const std::vector<int>& getPath() const;
 		int getPathCost() const;
 		const Environment& getEnvironment() const;
 		int getStartNodeID() const;
@@ -65,7 +65,7 @@ namespace fdk { namespace game { namespace navi
 		NodeData* m_nodeDatas;
 		OpenList m_openList;
 		SearchResult m_searchResult;
-		std::vector<int> m_path;
+		std::list<int>& m_path;
 		int m_pathCost;
 		AStarRecorder* m_recorder;
 		bool m_bInitedInspect;
@@ -84,11 +84,6 @@ namespace fdk { namespace game { namespace navi
 	inline AStar::SearchResult AStar::getSearchResult() const
 	{
 		return m_searchResult;
-	}
-
-	inline const std::vector<int>& AStar::getPath() const
-	{
-		return m_path;
 	}
 	
 	inline int AStar::getPathCost() const

@@ -26,7 +26,7 @@ namespace fdk { namespace game { namespace navi
 		}
 	}	
 
-	AStar::AStar(const Environment& env, int startNodeID, int targetNodeID)
+	AStar::AStar(const Environment& env, int startNodeID, int targetNodeID, std::list<int>& outputPath)
 		: m_env(env)
 		, m_startNodeID(startNodeID)
 		, m_targetNodeID(targetNodeID)
@@ -34,7 +34,7 @@ namespace fdk { namespace game { namespace navi
 		, m_nodeDatas(0)
 		, m_openList()
 		, m_searchResult(SearchResult_Proceeding)
-		, m_path()
+		, m_path(outputPath)
 		, m_pathCost(PATHUNEXIST_COST)
 		, m_recorder(0)
 		, m_bInitedInspect(false)
@@ -151,48 +151,51 @@ namespace fdk { namespace game { namespace navi
 			FDK_ASSERT(0);
 		}
 	}
-
+	
 	void AStar::buildPath()
-	{// 包含起点和终点, 并且起点放在最后
+	{// 不包含起点和终点
 		FDK_ASSERT(m_path.empty());
-		int nodeID = m_targetNodeID;
 
 		const GridEnv* pGridEnv = m_env.toGridEnv();
 		if (pGridEnv)
 		{
 			const int width = pGridEnv->getSizeX();
+
+			int portNodeID = m_nodeDatas[m_targetNodeID].parentNodeID;
+			if (portNodeID == m_startNodeID)
+			{
+				return;
+			}
+			m_path.push_front(portNodeID);
+			
 			while (1)
 			{
-				m_path.push_back(nodeID);
-				int parentNodeID = m_nodeDatas[nodeID].parentNodeID;
-				if (parentNodeID == INVALID_NODEID)
+				int nextNodeID = m_nodeDatas[portNodeID].parentNodeID;
+				if (nextNodeID == m_startNodeID)
 				{
 					break;
 				}
-				const unsigned char dir = getDirectionFromParent(width, nodeID, parentNodeID);
+				const unsigned char dir = getDirectionFromParent(width, portNodeID, nextNodeID);
 				while (1)
 				{
-					nodeID = parentNodeID;
-					parentNodeID = m_nodeDatas[nodeID].parentNodeID;
-					if (parentNodeID == INVALID_NODEID || 
-						getDirectionFromParent(width, nodeID, parentNodeID) != dir)
+					portNodeID = nextNodeID;
+					nextNodeID = m_nodeDatas[portNodeID].parentNodeID;
+					if (nextNodeID == m_startNodeID || 
+						getDirectionFromParent(width, portNodeID, nextNodeID) != dir)
 					{
 						break;
 					}
 				}
+				m_path.push_front(portNodeID);
 			}
 		}
 		else
 		{
-			while (1)
+			int nodeID = m_nodeDatas[m_targetNodeID].parentNodeID;
+			while (nodeID != m_startNodeID)
 			{
-				m_path.push_back(nodeID);
-				const int parentNodeID = m_nodeDatas[nodeID].parentNodeID;
-				if (parentNodeID == INVALID_NODEID)
-				{
-					break;
-				}
-				nodeID = parentNodeID;
+				m_path.push_front(nodeID);
+				nodeID = m_nodeDatas[nodeID].parentNodeID;
 			}
 		}
 	}
