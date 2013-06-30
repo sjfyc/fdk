@@ -312,8 +312,7 @@ namespace fdk { namespace game { namespace navi
 		, m_index(path.empty() ? -1 : (path.size()-1) )
 		, m_currentNodeCoord()
 		, m_nextDirection()
-	{
-			
+	{			
 	}
 
 	GridEnvOctPathPopEachNode::~GridEnvOctPathPopEachNode()
