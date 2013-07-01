@@ -29,13 +29,9 @@ namespace fdk { namespace game { namespace navi
 		virtual int getSizeY() const;		
 
 		// Environment interfaces
-		virtual int getHeuristic(int startNodeID, int targetNodeID) const;
-		virtual void getSuccessorNodes(Navigator& navigator, int nodeID, std::vector<SuccessorNodeInfo>& result) const;
 		virtual bool isNodeReachable(int nodeID) const;
 	private:
 		typedef Array2D<int> MapData;
-		bool tryAddSuccessorNode(Navigator& navigator, std::vector<SuccessorNodeInfo>& result, const VertexCoord& vertexCoord, int cost, int parentNodeID) const;
-		int getHeuristic(const VertexCoord& startVertexCoord, const VertexCoord& targetVertexCoord) const;
 		BlockMap& m_blockMap;
 		UnitSize m_unitSize;
 		MapData m_data;

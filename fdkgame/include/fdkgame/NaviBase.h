@@ -10,7 +10,9 @@ namespace fdk { namespace game { namespace navi
 	class GridEnv;
 	class Navigator;
 
-	const int INVALID_NODEID = -1;
+	const int INVALID_NODEID = -1;	
+	const int COST_STRAIGHT = 100;
+	const int COST_DIAGONAL = 142;
 	const int PATHUNEXIST_COST = -1;
 
 	struct SuccessorNodeInfo
@@ -47,8 +49,16 @@ namespace fdk { namespace game { namespace navi
 		bool isNodeWithCoordReachable(const NodeCoord& nodeCoord) const;
 		// Environment interfaces
 		virtual int getNodeSpaceSize() const;
+		virtual int getHeuristic(int startNodeID, int targetNodeID) const;
+		virtual void getSuccessorNodes(Navigator& navigator, int nodeID, std::vector<SuccessorNodeInfo>& result) const;
 		virtual const GridEnv* toGridEnv() const;
 		virtual GridEnv* toGridEnv();
+	protected:
+		int getHeuristicManhattan(int startNodeID, int targetNodeID) const;
+		int getHeuristicChebyshev(int startNodeID, int targetNodeID) const;
+		int getHeuristicEuclidean(int startNodeID, int targetNodeID) const;
+	private:
+		bool tryAddSuccessorNode(Navigator& navigator, std::vector<SuccessorNodeInfo>& result, const NodeCoord& nodeCoord, int cost, int parentNodeID) const;
 	};
 
 	class FDKGAME_API Navigator

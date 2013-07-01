@@ -13,8 +13,6 @@ namespace fdk { namespace game { namespace navi
 	typedef int MoveCapability;
 	typedef int UnitSize;
 	typedef std::pair<MoveCapability, UnitSize> VertexMapType;
-	static const int COST_STRAIGHT = 1000;	
-	static const int COST_DIAGONAL = 1414;
 	
 	inline bool checkMoveCapabilityOnTileType(MoveCapability capability, TileType tileType)
 	{
