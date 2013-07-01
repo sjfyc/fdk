@@ -12,6 +12,7 @@ namespace fdk { namespace game { namespace navi
 	class FDKGAME_API VertexMap
 		: public GridEnv
 	{
+		typedef GridEnv _Base;
 	public:
 		VertexMap(BlockMap& blockMap, UnitSize unitSize);
 		~VertexMap();		
@@ -30,6 +31,7 @@ namespace fdk { namespace game { namespace navi
 
 		// Environment interfaces
 		virtual bool isNodeReachable(int nodeID) const;
+		virtual void getSuccessorNodes(Navigator& navigator, int nodeID, std::vector<SuccessorNodeInfo>& result) const;
 	private:
 		typedef Array2D<int> MapData;
 		BlockMap& m_blockMap;

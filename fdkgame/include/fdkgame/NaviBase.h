@@ -57,6 +57,7 @@ namespace fdk { namespace game { namespace navi
 		int getHeuristicManhattan(int startNodeID, int targetNodeID) const;
 		int getHeuristicChebyshev(int startNodeID, int targetNodeID) const;
 		int getHeuristicEuclidean(int startNodeID, int targetNodeID) const;
+		void getSuccessorNodes(Navigator& navigator, int nodeID, std::vector<SuccessorNodeInfo>& result, bool bCutCorner) const;
 	private:
 		bool tryAddSuccessorNode(Navigator& navigator, std::vector<SuccessorNodeInfo>& result, const NodeCoord& nodeCoord, int cost, int parentNodeID) const;
 	};

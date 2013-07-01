@@ -20,6 +20,15 @@ namespace fdk { namespace game { namespace navi
 	
 	void GridEnv::getSuccessorNodes(Navigator& navigator, int nodeID, std::vector<SuccessorNodeInfo>& result) const
 	{
+		getSuccessorNodes(navigator, nodeID, result, false);
+	}
+
+	inline bool cutCornerOp(bool bCutCorner, bool a, bool b)
+	{
+		return bCutCorner ? (a && b) : (a || b);
+	}
+	void GridEnv::getSuccessorNodes(Navigator& navigator, int nodeID, std::vector<SuccessorNodeInfo>& result, bool bCutCorner) const
+	{
 		NodeCoord coord = toNodeCoord(nodeID);
 
 		const bool bLeft = tryAddSuccessorNode(navigator, result, NodeCoord(coord.x-1,coord.y), COST_STRAIGHT, nodeID);		
@@ -27,19 +36,19 @@ namespace fdk { namespace game { namespace navi
 		const bool bRight = tryAddSuccessorNode(navigator, result, NodeCoord(coord.x+1,coord.y), COST_STRAIGHT, nodeID);
 		const bool bBottom = tryAddSuccessorNode(navigator, result, NodeCoord(coord.x,coord.y+1), COST_STRAIGHT, nodeID);
 
-		if (bLeft && bTop)
+		if (cutCornerOp(bCutCorner, bLeft, bTop))
 		{
 			tryAddSuccessorNode(navigator, result, NodeCoord(coord.x-1,coord.y-1), COST_DIAGONAL, nodeID);
 		}
-		if (bTop && bRight)
+		if (cutCornerOp(bCutCorner, bTop, bRight))
 		{
 			tryAddSuccessorNode(navigator, result, NodeCoord(coord.x+1,coord.y-1), COST_DIAGONAL, nodeID);
 		}
-		if (bRight && bBottom)
+		if (cutCornerOp(bCutCorner, bRight, bBottom))
 		{
 			tryAddSuccessorNode(navigator, result, NodeCoord(coord.x+1,coord.y+1), COST_DIAGONAL, nodeID);
 		}
-		if (bBottom && bLeft)
+		if (cutCornerOp(bCutCorner, bBottom, bLeft))
 		{
 			tryAddSuccessorNode(navigator, result, NodeCoord(coord.x-1,coord.y+1), COST_DIAGONAL, nodeID);
 		}

@@ -91,4 +91,9 @@ namespace fdk { namespace game { namespace navi
 	{
 		return (int)m_data.size_y();
 	}
+	
+	void VertexMap::getSuccessorNodes(Navigator& navigator, int nodeID, std::vector<SuccessorNodeInfo>& result) const
+	{
+		return _Base::getSuccessorNodes(navigator, nodeID, result, true);
+	}
 }}}
