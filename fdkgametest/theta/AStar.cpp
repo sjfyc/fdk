@@ -186,18 +186,18 @@ bool AStar::search()
 		return true;
 	}
 	
-	std::list<int> pathWithOutStartTarget;
+	
 	if (g_Option.getNavigatorType() == Option::NavigatorType_AStar)
 	{
-		m_navigator = new fdkgame::navi::AStar(vertexMap, startVertexID, targetVertexID, pathWithOutStartTarget);
+		m_navigator = new fdkgame::navi::AStar(vertexMap, startVertexID, targetVertexID);
 	}
 	else if (g_Option.getNavigatorType() == Option::NavigatorType_Jps)
 	{
-		m_navigator = new fdkgame::navi::Jps(vertexMap, startVertexID, targetVertexID, pathWithOutStartTarget);
+		m_navigator = new fdkgame::navi::Jps(vertexMap, startVertexID, targetVertexID);
 	}
 	else if (g_Option.getNavigatorType() == Option::NavigatorType_JpsPlus)
 	{
-		m_navigator = new fdkgame::navi::JpsPlus(vertexMap, startVertexID, targetVertexID, pathWithOutStartTarget);
+		m_navigator = new fdkgame::navi::JpsPlus(vertexMap, startVertexID, targetVertexID);
 	}
 	else 
 	{
@@ -216,6 +216,8 @@ bool AStar::search()
 	}
 
 	FDK_ASSERT(searchResult == Navigator::SearchResult_Completed);
+	std::list<int> pathWithOutStartTarget;
+	m_navigator->getPath(pathWithOutStartTarget);
 
 	{// 实际直连的行走路线
 		if (!m_bRefind)

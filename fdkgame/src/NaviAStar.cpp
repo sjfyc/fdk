@@ -26,7 +26,7 @@ namespace fdk { namespace game { namespace navi
 		}
 	}	
 
-	AStar::AStar(const Environment& env, int startNodeID, int targetNodeID, std::list<int>& outputPath)
+	AStar::AStar(const Environment& env, int startNodeID, int targetNodeID)
 		: m_env(env)
 		, m_startNodeID(startNodeID)
 		, m_targetNodeID(targetNodeID)
@@ -34,8 +34,7 @@ namespace fdk { namespace game { namespace navi
 		, m_nodeDatas(0)
 		, m_openList()
 		, m_searchResult(SearchResult_Proceeding)
-		, m_path(outputPath)
-		, m_pathCost(PATHUNEXIST_COST)
+		, m_currentClosed()
 		, m_recorder(0)
 		, m_bInitedInspect(false)
 	{
@@ -82,6 +81,7 @@ namespace fdk { namespace game { namespace navi
 			}
 
 			m_nodeStates[current.nodeID] = NodeState_Closed;
+			m_currentClosed = current;
 			if (m_recorder)
 			{
 				m_recorder->onCloseNode(m_env, current.nodeID);
@@ -89,8 +89,7 @@ namespace fdk { namespace game { namespace navi
 
 			if (current.nodeID == m_targetNodeID)
 			{
-				buildPath();
-				m_pathCost = current.fValue;
+				//buildPath();
 				m_searchResult = SearchResult_Completed;
 				return SearchResult_Completed;
 			}			
@@ -124,7 +123,7 @@ namespace fdk { namespace game { namespace navi
 				m_nodeDatas[nodeID].parentNodeID = parentNodeID;
 				m_nodeDatas[nodeID].gValue = gValue;
 				m_nodeDatas[nodeID].hValue = m_env.getHeuristic(nodeID, m_targetNodeID);			
-				OpenListItem openListItem = { nodeID, m_nodeDatas[nodeID].fValue() };
+				OpenListItem openListItem(nodeID, m_nodeDatas[nodeID].fValue() );
 				m_openList.insert(openListItem);
 				if (m_recorder)
 				{
@@ -137,7 +136,7 @@ namespace fdk { namespace game { namespace navi
 			{
 				m_nodeDatas[nodeID].parentNodeID = parentNodeID;
 				m_nodeDatas[nodeID].gValue = gValue;
-				OpenListItem openListItem = { nodeID, m_nodeDatas[nodeID].fValue() };				
+				OpenListItem openListItem(nodeID, m_nodeDatas[nodeID].fValue() );
 				m_openList.insert(openListItem); // 不需要删除旧项，新项必将被先从Open变Close，而旧项由于Close将被跳过
 				if (m_recorder)
 				{
@@ -152,22 +151,20 @@ namespace fdk { namespace game { namespace navi
 		}
 	}
 	
-	void AStar::buildPath()
-	{// 不包含起点和终点
-		FDK_ASSERT(m_path.empty());
-
+	void AStar::getPath(std::list<int>& output) const
+	{
 		const GridEnv* pGridEnv = m_env.toGridEnv();
 		if (pGridEnv)
 		{
 			const int width = pGridEnv->getSizeX();
 
-			int portNodeID = m_nodeDatas[m_targetNodeID].parentNodeID;
+			int portNodeID = m_nodeDatas[m_currentClosed.nodeID].parentNodeID;
 			if (portNodeID == m_startNodeID)
 			{
 				return;
 			}
-			m_path.push_front(portNodeID);
-			
+			output.push_front(portNodeID);
+
 			while (1)
 			{
 				int nextNodeID = m_nodeDatas[portNodeID].parentNodeID;
@@ -186,18 +183,23 @@ namespace fdk { namespace game { namespace navi
 						break;
 					}
 				}
-				m_path.push_front(portNodeID);
+				output.push_front(portNodeID);
 			}
 		}
 		else
 		{
-			int nodeID = m_nodeDatas[m_targetNodeID].parentNodeID;
+			int nodeID = m_nodeDatas[m_currentClosed.nodeID].parentNodeID;
 			while (nodeID != m_startNodeID)
 			{
-				m_path.push_front(nodeID);
+				output.push_front(nodeID);
 				nodeID = m_nodeDatas[nodeID].parentNodeID;
 			}
 		}
+	}
+	
+	int AStar::getPathCost() const
+	{
+		return m_currentClosed.fValue;
 	}
 
 	void AStar::getSuccessorNodes(const Environment& env, int nodeID, int parentNodeID, std::vector<SuccessorNodeInfo>& result)

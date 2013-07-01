@@ -24,11 +24,12 @@ namespace fdk { namespace game { namespace navi
 			SearchResult_Completed,
 			SearchResult_PathUnexist,
 		};		
-		AStar(const Environment& env, int startNodeID, int targetNodeID, std::list<int>& outputPath);
+		AStar(const Environment& env, int startNodeID, int targetNodeID);
 		virtual ~AStar();
 		SearchResult search(int step=-1);
 		SearchResult getSearchResult() const;
-		int getPathCost() const;
+		void getPath(std::list<int>& output) const;
+		int getPathCost() const;		
 		const Environment& getEnvironment() const;
 		int getStartNodeID() const;
 		int getTargetNodeID() const;
@@ -50,14 +51,15 @@ namespace fdk { namespace game { namespace navi
 			int fValue() const;
 		};
 		struct OpenListItem
-		{
+		{			
 			int nodeID;
 			int fValue;
+			OpenListItem();
+			OpenListItem(int nodeID, int fValue);
 			bool operator<(const OpenListItem& other) const;
 		};
 		typedef fdk::BinaryHeap<OpenListItem> OpenList;
 		void inspectNode(int nodeID, int parentNodeID, int gValue);
-		void buildPath();
 		const Environment& m_env;
 		int m_startNodeID;
 		int m_targetNodeID;
@@ -65,8 +67,7 @@ namespace fdk { namespace game { namespace navi
 		NodeData* m_nodeDatas;
 		OpenList m_openList;
 		SearchResult m_searchResult;
-		std::list<int>& m_path;
-		int m_pathCost;
+		OpenListItem m_currentClosed;
 		AStarRecorder* m_recorder;
 		bool m_bInitedInspect;
 	};
@@ -81,14 +82,21 @@ namespace fdk { namespace game { namespace navi
 		return fValue < other.fValue;
 	}
 
+	inline AStar::OpenListItem::OpenListItem()
+		: nodeID(INVALID_NODEID)
+		, fValue(0)
+	{
+	}
+	
+	inline AStar::OpenListItem::OpenListItem(int l_nodeID, int l_fValue)
+		: nodeID(l_nodeID)
+		, fValue(l_fValue)
+	{
+	}
+
 	inline AStar::SearchResult AStar::getSearchResult() const
 	{
 		return m_searchResult;
-	}
-	
-	inline int AStar::getPathCost() const
-	{
-		return m_pathCost;
 	}
 
 	inline const Environment& AStar::getEnvironment() const

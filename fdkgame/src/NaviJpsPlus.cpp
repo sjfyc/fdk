@@ -32,8 +32,8 @@ namespace fdk { namespace game { namespace navi
 	};
 
 	
-	JpsPlus::JpsPlus(const GridEnv& env, int startNodeID, int targetNodeID, std::list<int>& outputPath)
-		: _Base(env, startNodeID, targetNodeID, outputPath)
+	JpsPlus::JpsPlus(const GridEnv& env, int startNodeID, int targetNodeID)
+		: _Base(env, startNodeID, targetNodeID)
 	{
 	}
 
