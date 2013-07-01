@@ -22,15 +22,13 @@ namespace fdk { namespace game { namespace navi
 		};
 		struct AutoPlotUnits
 		{
-			AutoPlotUnits(MapManager& mapManager, const std::vector<PlotUnitArgument>& units, MoveCapability* moveCapability, const PlotUnitArgument* subtract=0, bool bPolt=true);
+			AutoPlotUnits(MapManager& mapManager, const std::vector<PlotUnitArgument>& units, MoveCapability* moveCapability);
 			~AutoPlotUnits();
 		private:
 			MapManager& m_mapManager;
 			bool m_bMoveCapability;
 			MoveCapability m_moveCapability;
-			std::vector<PlotUnitArgument> m_units;			
-			bool m_bPlot;
-			PlotUnitArgument m_subtractUnit;
+			std::vector<PlotUnitArgument> m_units;
 		};
 		MapManager(TileMap& tileMap, 
 			const std::set<MoveCapability>& moveCapabilities, 

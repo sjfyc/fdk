@@ -181,30 +181,18 @@ namespace fdk { namespace game { namespace navi
 	MapManager::AutoPlotUnits::AutoPlotUnits(
 		MapManager& mapManager, 
 		const std::vector<PlotUnitArgument>& units,
-		MoveCapability* moveCapability, 
-		const PlotUnitArgument* subtract, 
-		bool bPolt)
+		MoveCapability* moveCapability)
 		: m_mapManager(mapManager)
 		, m_bMoveCapability(moveCapability ? true : false)
 		, m_moveCapability(moveCapability ? *moveCapability : 0)
 		, m_units(units)
-		, m_bPlot(bPolt)
-		, m_subtractUnit()
 	{
 		if (!m_units.empty())
-		{
-			if (subtract)
-			{
-				m_subtractUnit = *subtract;
-			}
-			if (m_subtractUnit.unitSize > 0)
-			{
-				m_mapManager.allowModify(m_subtractUnit.vertexCoord, m_subtractUnit.unitSize, false);
-			}
+		{			
 			for (size_t i = 0; i < m_units.size(); ++i)
 			{
 				const PlotUnitArgument& arg = m_units[i];
-				m_mapManager.plotUnit(arg.vertexCoord, arg.unitSize, m_bPlot, m_bMoveCapability ? &m_moveCapability : 0);
+				m_mapManager.plotUnit(arg.vertexCoord, arg.unitSize, true, m_bMoveCapability ? &m_moveCapability : 0);
 			}
 		}		
 	}
@@ -216,12 +204,8 @@ namespace fdk { namespace game { namespace navi
 			for (size_t i = 0; i < m_units.size(); ++i)
 			{
 				const PlotUnitArgument& arg = m_units[i];
-				m_mapManager.plotUnit(arg.vertexCoord, arg.unitSize, !m_bPlot, m_bMoveCapability ? &m_moveCapability : 0);
+				m_mapManager.plotUnit(arg.vertexCoord, arg.unitSize, false, m_bMoveCapability ? &m_moveCapability : 0);
 			}
-			if (m_subtractUnit.unitSize > 0)
-			{
-				m_mapManager.allowModify(m_subtractUnit.vertexCoord, m_subtractUnit.unitSize, true);
-			}
-		}		
+		}
 	}
 }}}
