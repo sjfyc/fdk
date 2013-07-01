@@ -35,7 +35,6 @@ namespace fdk { namespace game { namespace navi
 		, m_openList()
 		, m_searchResult(SearchResult_Proceeding)
 		, m_currentClosed()
-		, m_recorder(0)
 		, m_bInitedInspect(false)
 	{
 		FDK_ASSERT(m_env.isValidNodeID(startNodeID));
@@ -57,11 +56,11 @@ namespace fdk { namespace game { namespace navi
 		//FDK_DELETE_ARRAY(m_nodeDatas);
 	}	
 
-	AStar::SearchResult AStar::search(int step)
+	AStar::SearchResult AStar::search(int step, AStarRecorder* recorder)
 	{
 		if (!m_bInitedInspect)
 		{
-			inspectNode(m_startNodeID, INVALID_NODEID, 0);
+			inspectNode(m_startNodeID, INVALID_NODEID, 0, recorder);
 			m_bInitedInspect = true;
 		}
 		if (m_searchResult != SearchResult_Proceeding)
@@ -82,9 +81,9 @@ namespace fdk { namespace game { namespace navi
 
 			m_nodeStates[current.nodeID] = NodeState_Closed;
 			m_currentClosed = current;
-			if (m_recorder)
+			if (recorder)
 			{
-				m_recorder->onCloseNode(m_env, current.nodeID);
+				recorder->onCloseNode(m_env, current.nodeID);
 			}
 
 			if (current.nodeID == m_targetNodeID)
@@ -100,7 +99,7 @@ namespace fdk { namespace game { namespace navi
 			{
 				SuccessorNodeInfo& successor = successors[i];
 				inspectNode(successor.nodeID, current.nodeID,
-					m_nodeDatas[current.nodeID].gValue+successor.cost);
+					m_nodeDatas[current.nodeID].gValue+successor.cost, recorder);
 			}
 
 			++proceededStep;
@@ -113,7 +112,7 @@ namespace fdk { namespace game { namespace navi
 		return SearchResult_PathUnexist;
 	}
 
-	void AStar::inspectNode(int nodeID, int parentNodeID, int gValue)
+	void AStar::inspectNode(int nodeID, int parentNodeID, int gValue, AStarRecorder* recorder)
 	{
 		switch (m_nodeStates[nodeID])
 		{
@@ -125,9 +124,9 @@ namespace fdk { namespace game { namespace navi
 				m_nodeDatas[nodeID].hValue = m_env.getHeuristic(nodeID, m_targetNodeID);			
 				OpenListItem openListItem(nodeID, m_nodeDatas[nodeID].fValue() );
 				m_openList.insert(openListItem);
-				if (m_recorder)
+				if (recorder)
 				{
-					m_recorder->onOpenNode(m_env, nodeID, parentNodeID, false);
+					recorder->onOpenNode(m_env, nodeID, parentNodeID, false);
 				}
 			}			
 			break;
@@ -138,9 +137,9 @@ namespace fdk { namespace game { namespace navi
 				m_nodeDatas[nodeID].gValue = gValue;
 				OpenListItem openListItem(nodeID, m_nodeDatas[nodeID].fValue() );
 				m_openList.insert(openListItem); // 不需要删除旧项，新项必将被先从Open变Close，而旧项由于Close将被跳过
-				if (m_recorder)
+				if (recorder)
 				{
-					m_recorder->onOpenNode(m_env, nodeID, parentNodeID, true);
+					recorder->onOpenNode(m_env, nodeID, parentNodeID, true);
 				}
 			}
 			break;

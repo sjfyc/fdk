@@ -85,8 +85,6 @@ AStar::AStar(int startNodeID, int targetNodeID)
 	{
 		m_navigator = new fdkgame::navi::JpsPlus(g_Board, startNodeID, targetNodeID);
 	}
-
-	m_navigator->setRecorder(this);
 }
 
 AStar::~AStar()

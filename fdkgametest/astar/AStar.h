@@ -40,7 +40,7 @@ public:
 	typedef fdkgame::navi::AStar Navigator;
 	AStar(int startNodeID, int targetNodeID);
 	~AStar();
-	Navigator::SearchResult search(int step=-1) { return m_navigator->search(step); }
+	Navigator::SearchResult search(int step=-1) { return m_navigator->search(step, this); }
 	Navigator::SearchResult getSearchResult() const { return m_navigator->getSearchResult(); }
 	void getPath(std::list<int>& output) const { m_navigator->getPath(output); }
 	void render();
