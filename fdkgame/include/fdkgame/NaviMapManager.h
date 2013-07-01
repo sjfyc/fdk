@@ -22,32 +22,24 @@ namespace fdk { namespace game { namespace navi
 		};
 		struct AutoPlotUnits
 		{
-			AutoPlotUnits(MapManager& mapManager, const std::vector<PlotUnitArgument>& units, MoveCapability* moveCapability);
+			AutoPlotUnits(MapManager& mapManager, const VertexMapType& vertexMapType, const std::vector<PlotUnitArgument>& units);
 			~AutoPlotUnits();
 		private:
 			MapManager& m_mapManager;
-			bool m_bMoveCapability;
-			MoveCapability m_moveCapability;
+			VertexMapType m_vertexMapType;
 			std::vector<PlotUnitArgument> m_units;
-		};
-		struct VertexMapType
-		{
-			MoveCapability moveCapability;
-			UnitSize unitSize;
-			VertexMapType(MoveCapability moveCapability, UnitSize unitSize);
-			bool operator<(const VertexMapType& other) const;
 		};
 		MapManager(TileMap& tileMap, 
 			const std::set<MoveCapability>& moveCapabilities, 
 			UnitSize minUnitSize, UnitSize maxUnitSize);
 		~MapManager();
 		const BlockMap& getBlockMap(MoveCapability moveCapability) const;
-		const VertexMap& getVertexMap(MoveCapability moveCapability, UnitSize unitSize) const;		
+		const VertexMap& getVertexMap(const VertexMapType& vertexMapType) const;
 		void rebuildAfterTileMapReset();
 		void changeTileType(const CellCoord& cellCoord, TileType tileType);
 		void increExtraTileType(const CellCoord& cellCoord, TileType tileType, ExtraTileCountType count=1);
 		void decreExtraTileType(const CellCoord& cellCoord, TileType tileType, ExtraTileCountType count=1);
-		void plotUnit(const VertexCoord& vertexCoord, UnitSize unitSize, bool bPlot, MoveCapability* moveCapability=0);
+		void plotUnit(const VertexMapType& vertexMapType, const VertexCoord& vertexCoord, UnitSize unitSize, bool bPlot);
 		void allowModify(const VertexCoord& vertexCoord, UnitSize unitSize, bool bAllow);
 	private:
 		struct CmpBlockMap
@@ -57,7 +49,9 @@ namespace fdk { namespace game { namespace navi
 		typedef std::set<BlockMap*, CmpBlockMap> BlockMaps;
 		typedef std::map<VertexMapType, VertexMap*> VertexMaps;		
 		const BlockMap* findBlockMap(MoveCapability moveCapability) const;
-		const VertexMap* findVertexMap(MoveCapability moveCapability, UnitSize unitSize) const;
+		VertexMap* findVertexMap(const VertexMapType& vertexMapType);
+		const VertexMap* findVertexMap(const VertexMapType& vertexMapType) const;
+		VertexMap& getVertexMapForOperate(const VertexMapType& vertexMapType);
 		void onTileChange(const CellCoord& cellCoord);
 		TileMap& m_tileMap;
 		BlockMaps m_blockMaps; // key by unit size
@@ -69,21 +63,6 @@ namespace fdk { namespace game { namespace navi
 		: vertexCoord()
 		, unitSize(-1)
 	{
-	}
-
-	inline MapManager::VertexMapType::VertexMapType(MoveCapability l_moveCapability, UnitSize l_unitSize)
-		: moveCapability(l_moveCapability)
-		, unitSize(l_unitSize)
-	{
-	}
-
-	inline bool MapManager::VertexMapType::operator<(const VertexMapType& other) const
-	{
-		if (moveCapability != other.moveCapability)
-		{
-			return moveCapability < other.moveCapability;
-		}
-		return unitSize < other.unitSize;
 	}
 }}}
 

@@ -70,9 +70,14 @@ namespace fdk { namespace game { namespace navi
 		return *findBlockMap(moveCapability); 
 	}
 
-	const VertexMap& MapManager::getVertexMap(MoveCapability moveCapability, UnitSize unitSize) const
+	const VertexMap& MapManager::getVertexMap(const VertexMapType& vertexMapType) const
 	{
-		return *findVertexMap(moveCapability, unitSize);
+		return *findVertexMap(vertexMapType);
+	}
+
+	VertexMap& MapManager::getVertexMapForOperate(const VertexMapType& vertexMapType)
+	{
+		return *findVertexMap(vertexMapType);
 	}
 
 	const BlockMap* MapManager::findBlockMap(MoveCapability moveCapability) const
@@ -87,14 +92,21 @@ namespace fdk { namespace game { namespace navi
 		return *it;
 	}
 
-	const VertexMap* MapManager::findVertexMap(MoveCapability moveCapability, UnitSize unitSize) const
+	const VertexMap* MapManager::findVertexMap(const VertexMapType& vertexMapType) const
 	{
-		VertexMaps::const_iterator it = m_vertexMaps.find(VertexMapType(moveCapability, unitSize) );
+		VertexMaps::const_iterator it = m_vertexMaps.find(vertexMapType);
 		if (it == m_vertexMaps.end())
 		{
 			return 0;
 		}
 		return it->second;
+	}
+
+	VertexMap* MapManager::findVertexMap(const VertexMapType& vertexMapType)
+	{
+		return const_cast<VertexMap*>(
+			static_cast<const MapManager*>(this)->findVertexMap(vertexMapType)
+			);
 	}
 
 	void MapManager::changeTileType(const CellCoord& cellCoord, TileType tileType)
@@ -120,18 +132,9 @@ namespace fdk { namespace game { namespace navi
 		onTileChange(cellCoord);
 	}
 
-	void MapManager::plotUnit(const VertexCoord& vertexCoord, UnitSize unitSize, bool bPlot, MoveCapability* moveCapability)
+	void MapManager::plotUnit(const VertexMapType& vertexMapType, const VertexCoord& vertexCoord, UnitSize unitSize, bool bPlot)
 	{
-		for (VertexMaps::iterator it = m_vertexMaps.begin(); it != m_vertexMaps.end(); ++it)
-		{
-			VertexMapType vertexMapType = it->first;
-			VertexMap* vertexMap = it->second;
-			if (moveCapability && vertexMapType.moveCapability != *moveCapability)
-			{
-				continue;
-			}
-			vertexMap->onPlotUnit(vertexCoord, unitSize, bPlot);
-		}
+		getVertexMapForOperate(vertexMapType).onPlotUnit(vertexCoord, unitSize, bPlot);
 	}
 
 	void MapManager::allowModify(const VertexCoord& vertexCoord, UnitSize unitSize, bool bAllow)
@@ -180,11 +183,11 @@ namespace fdk { namespace game { namespace navi
 
 	MapManager::AutoPlotUnits::AutoPlotUnits(
 		MapManager& mapManager, 
-		const std::vector<PlotUnitArgument>& units,
-		MoveCapability* moveCapability)
+		const VertexMapType& vertexMapType, 
+		const std::vector<PlotUnitArgument>& units
+		)
 		: m_mapManager(mapManager)
-		, m_bMoveCapability(moveCapability ? true : false)
-		, m_moveCapability(moveCapability ? *moveCapability : 0)
+		, m_vertexMapType(vertexMapType)
 		, m_units(units)
 	{
 		if (!m_units.empty())
@@ -192,7 +195,7 @@ namespace fdk { namespace game { namespace navi
 			for (size_t i = 0; i < m_units.size(); ++i)
 			{
 				const PlotUnitArgument& arg = m_units[i];
-				m_mapManager.plotUnit(arg.vertexCoord, arg.unitSize, true, m_bMoveCapability ? &m_moveCapability : 0);
+				m_mapManager.plotUnit(m_vertexMapType, arg.vertexCoord, arg.unitSize, true);
 			}
 		}		
 	}
@@ -204,7 +207,7 @@ namespace fdk { namespace game { namespace navi
 			for (size_t i = 0; i < m_units.size(); ++i)
 			{
 				const PlotUnitArgument& arg = m_units[i];
-				m_mapManager.plotUnit(arg.vertexCoord, arg.unitSize, false, m_bMoveCapability ? &m_moveCapability : 0);
+				m_mapManager.plotUnit(m_vertexMapType, arg.vertexCoord, arg.unitSize, false);
 			}
 		}
 	}

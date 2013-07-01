@@ -121,7 +121,9 @@ bool AStar::search()
 	std::vector<fdkgame::navi::MapManager::PlotUnitArgument> plotArounds;
 	plotAroundActors(m_actor, plotArounds);
 	int moveCapability = m_actor.getMoveCapability();
-	fdkgame::navi::MapManager::AutoPlotUnits _AutoPlotUnits(g_MapManager, plotArounds, &moveCapability);
+	fdkgame::navi::MapManager::AutoPlotUnits _AutoPlotUnits(g_MapManager, 
+		fdkgame::navi::VertexMapType(m_actor.getMoveCapability(), m_actor.getUnitSize()),
+		plotArounds);
 
 	if (vertexMap.isBlock(startVertexCoord))
 	{
@@ -285,6 +287,6 @@ size_t AStar::getPathLocationCount() const
 
 const fdkgame::navi::VertexMap& AStar::getVertexMap() const
 {
-	return g_MapManager.getVertexMap(m_actor.getMoveCapability(), m_actor.getUnitSize());
+	return g_MapManager.getVertexMap(fdkgame::navi::VertexMapType(m_actor.getMoveCapability(), m_actor.getUnitSize()) );
 }
 

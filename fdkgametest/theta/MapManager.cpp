@@ -36,7 +36,9 @@ MapManager::~MapManager()
 
 void MapManager::draw()
 {
-	const fdkgame::navi::VertexMap& vertexMap = getVertexMap(g_Option.getMoveCapability(), g_Option.getUnitSize());
+	const fdkgame::navi::VertexMap& vertexMap = getVertexMap(
+		fdkgame::navi::VertexMapType(g_Option.getMoveCapability(), g_Option.getUnitSize())
+		);
 
 	if (g_Option.isOn(Option::Toggle_ShowVertex))
 	{		
@@ -76,7 +78,9 @@ void MapManager::draw()
 
 bool MapManager::isLocationReachable(Actor& actor, const Location& location)
 {
-	const fdkgame::navi::VertexMap& vertexMap = getVertexMap(actor.getMoveCapability(), actor.getUnitSize());
+	const fdkgame::navi::VertexMap& vertexMap = getVertexMap(
+		fdkgame::navi::VertexMapType( actor.getMoveCapability(), actor.getUnitSize() )
+		);
 	VertexCoord testVertexCoord = util::locationToNearestVertexCoord(location);
 	if (!vertexMap.isBlock(testVertexCoord) )
 	{
