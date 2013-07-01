@@ -21,9 +21,9 @@ void plotAroundActors(Actor& actor, std::vector<fdkgame::navi::MapManager::PlotU
 		pua.unitSize = aroundActor->getUnitSize();
 		plotArounds.push_back(pua);
 	}
-	fdkgame::navi::MapManager::PlotUnitArgument subtract;
-	subtract.vertexCoord = util::locationToNearestVertexCoord(actor.getLocation());
-	subtract.unitSize = actor.getUnitSize();	
+	//fdkgame::navi::MapManager::PlotUnitArgument subtract;
+	//subtract.vertexCoord = util::locationToNearestVertexCoord(actor.getLocation());
+	//subtract.unitSize = actor.getUnitSize();	
 }
 
 VertexCoord simpleOffset(const VertexCoord& coord)
@@ -160,7 +160,7 @@ bool AStar::search()
 		}
 
 		targetVertexID = middleNodeID;
-		targetVertexCoord = vertexMap.toNodeCoord(middleNodeID);
+		targetVertexCoord = vertexMap.toNodeCoord(targetVertexID);
 		m_targetLocation = util::vertexCoordToLocation(targetVertexCoord);
 	}
 	
