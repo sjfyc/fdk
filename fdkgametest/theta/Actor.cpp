@@ -116,7 +116,7 @@ void Actor::tickMove(float delta)
 			pua.unitSize = aroundActor->getUnitSize();
 			plotArounds.push_back(pua);
 		}
-		fdkgame::navi::MapManager::AutoPlotUnits _AutoPlotUnits(g_MapManager, plotArounds);
+		fdkgame::navi::MapManager::AutoPlotUnits _AutoPlotUnits(g_MapManager, plotArounds, &m_moveCapability);
 
 		isLocationReachable = g_MapManager.isLocationReachable(*this, nextLocation);
 	}

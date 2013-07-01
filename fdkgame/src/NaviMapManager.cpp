@@ -120,11 +120,16 @@ namespace fdk { namespace game { namespace navi
 		onTileChange(cellCoord);
 	}
 
-	void MapManager::plotUnit(const VertexCoord& vertexCoord, UnitSize unitSize, bool bPlot)
+	void MapManager::plotUnit(const VertexCoord& vertexCoord, UnitSize unitSize, bool bPlot, MoveCapability* moveCapability)
 	{
 		for (VertexMaps::iterator it = m_vertexMaps.begin(); it != m_vertexMaps.end(); ++it)
 		{
+			VertexMapType vertexMapType = it->first;
 			VertexMap* vertexMap = it->second;
+			if (moveCapability && vertexMapType.first != *moveCapability)
+			{
+				continue;
+			}
 			vertexMap->onPlotUnit(vertexCoord, unitSize, bPlot);
 		}
 	}
@@ -173,8 +178,15 @@ namespace fdk { namespace game { namespace navi
 		}
 	}
 
-	MapManager::AutoPlotUnits::AutoPlotUnits(MapManager& mapManager, const std::vector<PlotUnitArgument>& units, const PlotUnitArgument* subtract, bool bPolt)
+	MapManager::AutoPlotUnits::AutoPlotUnits(
+		MapManager& mapManager, 
+		const std::vector<PlotUnitArgument>& units,
+		MoveCapability* moveCapability, 
+		const PlotUnitArgument* subtract, 
+		bool bPolt)
 		: m_mapManager(mapManager)
+		, m_bMoveCapability(moveCapability ? true : false)
+		, m_moveCapability(moveCapability ? *moveCapability : 0)
 		, m_units(units)
 		, m_bPlot(bPolt)
 		, m_subtractUnit()
@@ -192,7 +204,7 @@ namespace fdk { namespace game { namespace navi
 			for (size_t i = 0; i < m_units.size(); ++i)
 			{
 				const PlotUnitArgument& arg = m_units[i];
-				m_mapManager.plotUnit(arg.vertexCoord, arg.unitSize, m_bPlot);
+				m_mapManager.plotUnit(arg.vertexCoord, arg.unitSize, m_bPlot, m_bMoveCapability ? &m_moveCapability : 0);
 			}
 		}		
 	}
@@ -204,7 +216,7 @@ namespace fdk { namespace game { namespace navi
 			for (size_t i = 0; i < m_units.size(); ++i)
 			{
 				const PlotUnitArgument& arg = m_units[i];
-				m_mapManager.plotUnit(arg.vertexCoord, arg.unitSize, !m_bPlot);
+				m_mapManager.plotUnit(arg.vertexCoord, arg.unitSize, !m_bPlot, m_bMoveCapability ? &m_moveCapability : 0);
 			}
 			if (m_subtractUnit.unitSize > 0)
 			{

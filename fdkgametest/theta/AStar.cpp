@@ -120,7 +120,8 @@ bool AStar::search()
 	
 	std::vector<fdkgame::navi::MapManager::PlotUnitArgument> plotArounds;
 	plotAroundActors(m_actor, plotArounds);
-	fdkgame::navi::MapManager::AutoPlotUnits _AutoPlotUnits(g_MapManager, plotArounds);
+	int moveCapability = m_actor.getMoveCapability();
+	fdkgame::navi::MapManager::AutoPlotUnits _AutoPlotUnits(g_MapManager, plotArounds, &moveCapability);
 
 	if (vertexMap.isBlock(startVertexCoord))
 	{
@@ -216,13 +217,13 @@ bool AStar::search()
 	}
 
 	FDK_ASSERT(searchResult == Navigator::SearchResult_Completed);
-	std::list<int> pathWithOutStartTarget;
-	m_navigator->getPath(pathWithOutStartTarget, !m_bRefind ? true : false);
+	std::list<int> roughPath;
+	m_navigator->getPath(roughPath, !m_bRefind ? true : false);
 
 	{// 实际直连的行走路线
 		if (!m_bRefind)
 		{
-			fdkgame::navi::GridEnvOctPathPopDirectlyReachableNode directlyReachableNodes(vertexMap, pathWithOutStartTarget, false);
+			fdkgame::navi::GridEnvOctPathPopDirectlyReachableNode directlyReachableNodes(vertexMap, roughPath, false);
 			directlyReachableNodes.pop(); // 忽略起点
 			
 			while (!directlyReachableNodes.empty())
@@ -237,7 +238,7 @@ bool AStar::search()
 		}
 		else// refind时使用安全路线
 		{
-			fdkgame::navi::GridEnvOctPathPopDirectlyReachableNode directlyReachableNodes(vertexMap, pathWithOutStartTarget, false);
+			fdkgame::navi::GridEnvOctPathPopDirectlyReachableNode directlyReachableNodes(vertexMap, roughPath, false);
 			while (!directlyReachableNodes.empty())
 			{
 				int nodeID = directlyReachableNodes.pop();
@@ -253,7 +254,7 @@ bool AStar::search()
 		m_vertexCoordPath.push_back(startVertexCoord);
 		std::vector<int> eachNodePath;
 		eachNodePath.push_back(startVertexID);
-		fdkgame::navi::GridEnvOctPathPopEachNode popEachNode(vertexMap, pathWithOutStartTarget, false);
+		fdkgame::navi::GridEnvOctPathPopEachNode popEachNode(vertexMap, roughPath, false);
 		while (!popEachNode.empty())
 		{
 			int nodeID = popEachNode.pop();			

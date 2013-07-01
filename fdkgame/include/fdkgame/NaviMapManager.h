@@ -22,11 +22,13 @@ namespace fdk { namespace game { namespace navi
 		};
 		struct AutoPlotUnits
 		{
-			AutoPlotUnits(MapManager& mapManager, const std::vector<PlotUnitArgument>& units, const PlotUnitArgument* subtract=0, bool bPolt=true);
+			AutoPlotUnits(MapManager& mapManager, const std::vector<PlotUnitArgument>& units, MoveCapability* moveCapability, const PlotUnitArgument* subtract=0, bool bPolt=true);
 			~AutoPlotUnits();
 		private:
 			MapManager& m_mapManager;
-			std::vector<PlotUnitArgument> m_units;
+			bool m_bMoveCapability;
+			MoveCapability m_moveCapability;
+			std::vector<PlotUnitArgument> m_units;			
 			bool m_bPlot;
 			PlotUnitArgument m_subtractUnit;
 		};
@@ -40,7 +42,7 @@ namespace fdk { namespace game { namespace navi
 		void changeTileType(const CellCoord& cellCoord, TileType tileType);
 		void increExtraTileType(const CellCoord& cellCoord, TileType tileType, ExtraTileCountType count=1);
 		void decreExtraTileType(const CellCoord& cellCoord, TileType tileType, ExtraTileCountType count=1);
-		void plotUnit(const VertexCoord& vertexCoord, UnitSize unitSize, bool bPlot);
+		void plotUnit(const VertexCoord& vertexCoord, UnitSize unitSize, bool bPlot, MoveCapability* moveCapability=0);
 		void allowModify(const VertexCoord& vertexCoord, UnitSize unitSize, bool bAllow);
 	private:
 		struct CmpBlockMap
