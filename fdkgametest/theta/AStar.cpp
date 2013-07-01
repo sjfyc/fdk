@@ -217,43 +217,11 @@ bool AStar::search()
 
 	FDK_ASSERT(searchResult == Navigator::SearchResult_Completed);
 	std::list<int> pathWithOutStartTarget;
-	m_navigator->getPath(pathWithOutStartTarget);
+	m_navigator->getPath(pathWithOutStartTarget, !m_bRefind ? true : false);
 
 	{// 实际直连的行走路线
 		if (!m_bRefind)
 		{
-			// 把起点终点加入产生一条由转向点构成的路径
-			if (pathWithOutStartTarget.empty())
-			{
-				pathWithOutStartTarget.push_front(startVertexID);
-				pathWithOutStartTarget.push_front(targetVertexID);
-			}
-			else if (pathWithOutStartTarget.size() >= 2)
-			{
-				VertexCoord dir1 = simpleOffset(
-					vertexMap.toNodeCoord(*++pathWithOutStartTarget.begin()) - vertexMap.toNodeCoord(*pathWithOutStartTarget.begin())
-					);
-				
-				if (simpleOffset( vertexMap.toNodeCoord(pathWithOutStartTarget.front()) - startVertexCoord ) == dir1)
-				{
-					pathWithOutStartTarget.pop_front();
-					pathWithOutStartTarget.push_front(startVertexID);
-				}
-				
-				VertexCoord dir2 = simpleOffset(
-					vertexMap.toNodeCoord(pathWithOutStartTarget.back()) - vertexMap.toNodeCoord(* --(--pathWithOutStartTarget.end()) )
-					);
-				if (simpleOffset( targetVertexCoord - vertexMap.toNodeCoord(pathWithOutStartTarget.back() ) ) == dir2)
-				{
-					pathWithOutStartTarget.pop_back();
-					pathWithOutStartTarget.push_back(targetVertexID);
-				}
-			}
-			else
-			{
-				FDK_ASSERT(0);
-			}
-			
 			fdkgame::navi::GridEnvOctPathPopDirectlyReachableNode directlyReachableNodes(vertexMap, pathWithOutStartTarget, false);
 			directlyReachableNodes.pop(); // 忽略起点
 			

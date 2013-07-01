@@ -28,7 +28,7 @@ namespace fdk { namespace game { namespace navi
 		virtual ~AStar();
 		SearchResult search(int step=-1, AStarRecorder* recorder=0);
 		SearchResult getSearchResult() const;
-		void getPath(std::list<int>& output) const;
+		void getPath(std::list<int>& output, bool bWithStartTarget=false) const;
 		int getPathCost() const;		
 		const Environment& getEnvironment() const;
 		int getStartNodeID() const;

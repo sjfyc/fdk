@@ -150,15 +150,16 @@ namespace fdk { namespace game { namespace navi
 		}
 	}
 	
-	void AStar::getPath(std::list<int>& output) const
+	void AStar::getPath(std::list<int>& output, bool bWithStartTarget) const
 	{
 		const GridEnv* pGridEnv = m_env.toGridEnv();
 		if (pGridEnv)
 		{
 			const int width = pGridEnv->getSizeX();
-
-			int portNodeID = m_nodeDatas[m_currentClosed.nodeID].parentNodeID;
-			if (portNodeID == m_startNodeID)
+			
+			int finishNodeID = bWithStartTarget ? INVALID_NODEID : m_startNodeID;
+			int portNodeID = bWithStartTarget ? m_currentClosed.nodeID : m_nodeDatas[m_currentClosed.nodeID].parentNodeID;
+			if (portNodeID == finishNodeID)
 			{
 				return;
 			}
@@ -167,7 +168,7 @@ namespace fdk { namespace game { namespace navi
 			while (1)
 			{
 				int nextNodeID = m_nodeDatas[portNodeID].parentNodeID;
-				if (nextNodeID == m_startNodeID)
+				if (nextNodeID == finishNodeID)
 				{
 					break;
 				}
@@ -176,7 +177,7 @@ namespace fdk { namespace game { namespace navi
 				{
 					portNodeID = nextNodeID;
 					nextNodeID = m_nodeDatas[portNodeID].parentNodeID;
-					if (nextNodeID == m_startNodeID || 
+					if (nextNodeID == finishNodeID || 
 						getDirectionFromParent(width, portNodeID, nextNodeID) != dir)
 					{
 						break;
@@ -192,6 +193,11 @@ namespace fdk { namespace game { namespace navi
 			{
 				output.push_front(nodeID);
 				nodeID = m_nodeDatas[nodeID].parentNodeID;
+			}
+			if (bWithStartTarget)
+			{
+				output.push_front(m_startNodeID);
+				output.push_back(m_currentClosed.nodeID);
 			}
 		}
 	}
