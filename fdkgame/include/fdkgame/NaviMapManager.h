@@ -30,6 +30,13 @@ namespace fdk { namespace game { namespace navi
 			MoveCapability m_moveCapability;
 			std::vector<PlotUnitArgument> m_units;
 		};
+		struct VertexMapType
+		{
+			MoveCapability moveCapability;
+			UnitSize unitSize;
+			VertexMapType(MoveCapability moveCapability, UnitSize unitSize);
+			bool operator<(const VertexMapType& other) const;
+		};
 		MapManager(TileMap& tileMap, 
 			const std::set<MoveCapability>& moveCapabilities, 
 			UnitSize minUnitSize, UnitSize maxUnitSize);
@@ -48,7 +55,6 @@ namespace fdk { namespace game { namespace navi
 			bool operator()(const BlockMap* a, const BlockMap* b) const;
 		};
 		typedef std::set<BlockMap*, CmpBlockMap> BlockMaps;
-		typedef std::pair<MoveCapability, UnitSize> VertexMapType;
 		typedef std::map<VertexMapType, VertexMap*> VertexMaps;		
 		const BlockMap* findBlockMap(MoveCapability moveCapability) const;
 		const VertexMap* findVertexMap(MoveCapability moveCapability, UnitSize unitSize) const;
@@ -63,6 +69,21 @@ namespace fdk { namespace game { namespace navi
 		: vertexCoord()
 		, unitSize(-1)
 	{
+	}
+
+	inline MapManager::VertexMapType::VertexMapType(MoveCapability l_moveCapability, UnitSize l_unitSize)
+		: moveCapability(l_moveCapability)
+		, unitSize(l_unitSize)
+	{
+	}
+
+	inline bool MapManager::VertexMapType::operator<(const VertexMapType& other) const
+	{
+		if (moveCapability != other.moveCapability)
+		{
+			return moveCapability < other.moveCapability;
+		}
+		return unitSize < other.unitSize;
 	}
 }}}
 

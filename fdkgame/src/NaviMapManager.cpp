@@ -30,7 +30,7 @@ namespace fdk { namespace game { namespace navi
 			for (UnitSize unitSize = minUnitSize; unitSize <= maxUnitSize; ++unitSize)
 			{
 				VertexMap* vertexMap = new VertexMap(*blockMap, unitSize);
-				VertexMapType vertexMapType = std::make_pair(blockMap->getMoveCapability(), unitSize);
+				VertexMapType vertexMapType(blockMap->getMoveCapability(), unitSize);
 				bool result = m_vertexMaps.insert(std::make_pair(vertexMapType, vertexMap)).second;
 				FDK_ASSERT(result);
 			}
@@ -89,7 +89,7 @@ namespace fdk { namespace game { namespace navi
 
 	const VertexMap* MapManager::findVertexMap(MoveCapability moveCapability, UnitSize unitSize) const
 	{
-		VertexMaps::const_iterator it = m_vertexMaps.find(std::make_pair(moveCapability, unitSize) );
+		VertexMaps::const_iterator it = m_vertexMaps.find(VertexMapType(moveCapability, unitSize) );
 		if (it == m_vertexMaps.end())
 		{
 			return 0;
@@ -126,7 +126,7 @@ namespace fdk { namespace game { namespace navi
 		{
 			VertexMapType vertexMapType = it->first;
 			VertexMap* vertexMap = it->second;
-			if (moveCapability && vertexMapType.first != *moveCapability)
+			if (moveCapability && vertexMapType.moveCapability != *moveCapability)
 			{
 				continue;
 			}
@@ -168,7 +168,7 @@ namespace fdk { namespace game { namespace navi
 				{
 					VertexMapType vertexMapType = it->first;
 					VertexMap* vertexMap = it->second;
-					if (vertexMapType.first != blockMap->getMoveCapability())
+					if (vertexMapType.moveCapability != blockMap->getMoveCapability())
 					{
 						continue;
 					}
