@@ -183,3 +183,8 @@ void Actor::teleport(const Location& location)
 	stopMove();
 	m_location = location;
 }
+
+void Actor::forceLocation(const Location& location)
+{
+	m_location = location;
+}

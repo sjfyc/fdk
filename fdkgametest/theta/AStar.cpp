@@ -128,25 +128,18 @@ bool AStar::search()
 	if (vertexMap.isBlock(startVertexCoord))
 	{
 		util::output("start vertex(%d/%d) is block, donothing for now", startVertexCoord.x, startVertexCoord.y);
-		//g_Game.pauseGame();
 
-		//VertexCoord vertex;
-		//vertexMap.getFirstReachableVertex(vertex, startVertexCoord, targetVertexCoord);
-		//if ((vertex-startVertexCoord).length() > 10)
-		//{
-		//	return false;
-		//}
+		int middleNodeID = getFirstDirectlyReachableNode(vertexMap, startVertexID, targetVertexID);
+		if (middleNodeID == fdkgame::navi::INVALID_NODEID)
+		{
+			util::output("start vertex(%d/%d) is block & can't find a nonblock in line",
+				startVertexCoord.x, startVertexCoord.y);
+			return false;
+		}
 
-		//else 
-		//{
-		//	// 直接弹出来
-		//	m_actor.teleport(util::vertexCoordToLocation(vertex));
-		//	startVertexCoord = vertex;
-		//}
-		//// when stuck with other unit, navigator will success with the target location returned
-		//m_locationPath.push_back(m_targetLocation);
-		// 弹出来重新寻路
-		return false;
+		startVertexID = middleNodeID;
+		startVertexCoord = vertexMap.toNodeCoord(startVertexID);
+		m_actor.forceLocation(util::vertexCoordToLocation(startVertexCoord));
 	}
 	
 	if (vertexMap.isBlock(targetVertexCoord) )
