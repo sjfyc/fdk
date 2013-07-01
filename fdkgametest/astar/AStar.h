@@ -42,7 +42,7 @@ public:
 	~AStar();
 	Navigator::SearchResult search(int step=-1) { return m_navigator->search(step); }
 	Navigator::SearchResult getSearchResult() const { return m_navigator->getSearchResult(); }
-	const std::vector<int>& getPath() const { return m_navigator->getPath(); }
+	void getPath(std::list<int>& output) const { m_navigator->getPath(output); }
 	void render();
 private:
 	Navigator* m_navigator;

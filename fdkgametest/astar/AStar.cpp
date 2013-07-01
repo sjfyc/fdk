@@ -101,13 +101,14 @@ void AStar::render()
 	if (m_navigator->getSearchResult() == Navigator::SearchResult_Completed)
 	{
 		CellCoord prevCellCoord = g_Game.getStartCoord();
-		const std::vector<int>& path = m_navigator->getPath();
-		for (int i = (int)path.size()-1; i >= 0; --i)
+		std::list<int> path;
+		m_navigator->getPath(path);
+		for (std::list<int>::iterator it = path.begin(); it != path.end(); ++it)
 		{
 			Location prevCenterLocation = util::cellCoordToLocation(prevCellCoord);
 			prevCenterLocation += Location(CELL_SIZE_X/2, CELL_SIZE_Y/2);
 
-			CellCoord currentCellCoord = g_Board.toNodeCoord(path[i]);
+			CellCoord currentCellCoord = g_Board.toNodeCoord(*it);
 			Location currentCenterLocation = util::cellCoordToLocation(currentCellCoord);
 			currentCenterLocation += Location(CELL_SIZE_X/2, CELL_SIZE_Y/2);
 
