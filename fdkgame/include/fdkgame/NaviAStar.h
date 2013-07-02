@@ -14,6 +14,12 @@ namespace fdk { namespace game { namespace navi
 		virtual void onCloseNode(const Environment& env, int nodeID) = 0;
 	};
 
+	class FDKGAME_API AStarCompleteCondition
+	{
+	public:
+		virtual bool checkCondition(const Environment& env, int startNodeID, int targetNodeID, int nodeID) const = 0;
+	};
+
 	class FDKGAME_API AStar
 		: public Navigator
 	{
@@ -24,7 +30,7 @@ namespace fdk { namespace game { namespace navi
 			SearchResult_Completed,
 			SearchResult_PathUnexist,
 		};		
-		AStar(const Environment& env, int startNodeID, int targetNodeID);
+		AStar(const Environment& env, int startNodeID, int targetNodeID, AStarCompleteCondition* completeCondition=0);
 		virtual ~AStar();
 		SearchResult search(int step=-1, AStarRecorder* recorder=0);
 		SearchResult getSearchResult() const;
@@ -33,6 +39,7 @@ namespace fdk { namespace game { namespace navi
 		const Environment& getEnvironment() const;
 		int getStartNodeID() const;
 		int getTargetNodeID() const;
+		int getCompletedNodeID() const;
 		virtual void getSuccessorNodes(const Environment& env, int nodeID, int parentNodeID, std::vector<SuccessorNodeInfo>& result);
 	private:
 		enum NodeStateEnum
@@ -62,6 +69,7 @@ namespace fdk { namespace game { namespace navi
 		const Environment& m_env;
 		int m_startNodeID;
 		int m_targetNodeID;
+		AStarCompleteCondition* m_completeCondition;
 		NodeState* m_nodeStates;
 		NodeData* m_nodeDatas;
 		OpenList m_openList;
@@ -112,6 +120,15 @@ namespace fdk { namespace game { namespace navi
 		return m_targetNodeID;
 	}
 
+	inline int AStar::getCompletedNodeID() const
+	{
+		return m_currentClosed.nodeID;
+	}
+
+	inline int AStar::getPathCost() const
+	{
+		return m_currentClosed.fValue;
+	}
 }}}
 
 #endif

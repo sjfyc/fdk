@@ -29,8 +29,7 @@ namespace fdk { namespace game { namespace navi
 		virtual bool isValidNodeID(int nodeID) const;
 		virtual int getNodeSpaceSize() const = 0;
 		virtual int getHeuristic(int startNodeID, int targetNodeID) const = 0;
-		virtual void getSuccessorNodes(Navigator& navigator, int nodeID, std::vector<SuccessorNodeInfo>& result) const = 0;
-		virtual bool isNodeReachable(int nodeID) const = 0;
+		virtual void getSuccessorNodes(Navigator& navigator, int nodeID, std::vector<SuccessorNodeInfo>& result) const = 0;		
 		virtual const GridEnv* toGridEnv() const;
 		virtual GridEnv* toGridEnv();
 	};
@@ -43,9 +42,10 @@ namespace fdk { namespace game { namespace navi
 		virtual ~GridEnv() {}
 		virtual int getSizeX() const = 0;
 		virtual int getSizeY() const = 0;
-		int toNodeID(const NodeCoord& nodeCoord) const;
-		NodeCoord toNodeCoord(int nodeID) const;
 		bool isValidNodeCoord(const NodeCoord& nodeCoord) const;
+		int toNodeID(const NodeCoord& nodeCoord) const;
+		NodeCoord toNodeCoord(int nodeID) const;		
+		virtual bool isNodeReachable(int nodeID) const = 0;
 		bool isNodeWithCoordReachable(const NodeCoord& nodeCoord) const;
 		// Environment interfaces
 		virtual int getNodeSpaceSize() const;
@@ -53,6 +53,7 @@ namespace fdk { namespace game { namespace navi
 		virtual void getSuccessorNodes(Navigator& navigator, int nodeID, std::vector<SuccessorNodeInfo>& result) const;
 		virtual const GridEnv* toGridEnv() const;
 		virtual GridEnv* toGridEnv();
+		void getSuccessorNodesWithoutCheck(int nodeID, std::vector<SuccessorNodeInfo>& result) const;
 	protected:
 		int getHeuristicManhattan(int startNodeID, int targetNodeID) const;
 		int getHeuristicChebyshev(int startNodeID, int targetNodeID) const;
@@ -60,8 +61,9 @@ namespace fdk { namespace game { namespace navi
 		void getSuccessorNodes(Navigator& navigator, int nodeID, std::vector<SuccessorNodeInfo>& result, bool bCutCorner) const;
 	private:
 		bool tryAddSuccessorNode(Navigator& navigator, std::vector<SuccessorNodeInfo>& result, const NodeCoord& nodeCoord, int cost, int parentNodeID) const;
+		bool tryAddSuccessorNodeWithoutCheck(std::vector<SuccessorNodeInfo>& result, const NodeCoord& nodeCoord, int cost, int parentNodeID) const;
 	};
-
+	
 	class FDKGAME_API Navigator
 	{
 	protected:
@@ -69,6 +71,12 @@ namespace fdk { namespace game { namespace navi
 		virtual ~Navigator();
 	};
 	
+	inline bool GridEnv::isValidNodeCoord(const NodeCoord& nodeCoord) const
+	{
+		return nodeCoord.x >= 0 && nodeCoord.x < getSizeX()
+			&& nodeCoord.y >= 0 && nodeCoord.y < getSizeY();
+	}
+
 	inline bool Environment::isValidNodeID(int nodeID) const
 	{
 		return nodeID >= 0 && nodeID < getNodeSpaceSize();
@@ -84,12 +92,6 @@ namespace fdk { namespace game { namespace navi
 	{
 		FDK_ASSERT(isValidNodeID(nodeID));
 		return NodeCoord(nodeID % getSizeX(), nodeID / getSizeX());
-	}
-
-	inline bool GridEnv::isValidNodeCoord(const NodeCoord& nodeCoord) const
-	{
-		return nodeCoord.x >= 0 && nodeCoord.x < getSizeX()
-			&& nodeCoord.y >= 0 && nodeCoord.y < getSizeY();
 	}
 
 	inline bool GridEnv::isNodeWithCoordReachable(const NodeCoord& nodeCoord) const

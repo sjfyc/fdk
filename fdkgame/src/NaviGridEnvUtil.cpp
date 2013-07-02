@@ -1,4 +1,5 @@
 #include <fdkgame/NaviGridEnvUtil.h>
+#include <fdkgame/NaviAStar.h>
 
 namespace fdk { namespace game { namespace navi
 {
@@ -267,6 +268,39 @@ namespace fdk { namespace game { namespace navi
 		return INVALID_NODEID;
 	}
 
+
+	int getFirstReachableNode(const GridEnv& env, int startNodeID, int targetNodeID)
+	{
+		struct EnvAdapter
+			: public Environment
+		{
+			EnvAdapter(const GridEnv& env) : m_env(env) {}
+			virtual int getNodeSpaceSize() const { return m_env.getNodeSpaceSize(); }
+			virtual int getHeuristic(int startNodeID, int targetNodeID) const { return 0; }
+			virtual void getSuccessorNodes(Navigator& navigator, int nodeID, std::vector<SuccessorNodeInfo>& result) const
+			{
+				return m_env.getSuccessorNodesWithoutCheck(nodeID, result);
+			}
+			const GridEnv& m_env;
+		} envAdapter(env);
+		
+		struct CompleteCondition
+			: public AStarCompleteCondition
+		{
+			virtual bool checkCondition(const Environment& l_env, int startNodeID, int targetNodeID, int nodeID) const
+			{
+				const GridEnv& env = static_cast<const GridEnv&>(l_env);
+				return env.isNodeReachable(nodeID);
+			}
+		} completeCondition;
+
+		AStar astar(envAdapter, startNodeID, targetNodeID, &completeCondition);
+		if (astar.search() == AStar::SearchResult_PathUnexist)
+		{
+			return INVALID_NODEID;
+		}
+		return astar.getCompletedNodeID();
+	}
 
 	GridEnvOctPathPop::GridEnvOctPathPop(const GridEnv& env, const std::list<int>& path, bool bCopy)
 		: m_env(env)

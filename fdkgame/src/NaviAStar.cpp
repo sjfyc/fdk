@@ -26,10 +26,11 @@ namespace fdk { namespace game { namespace navi
 		}
 	}	
 
-	AStar::AStar(const Environment& env, int startNodeID, int targetNodeID)
+	AStar::AStar(const Environment& env, int startNodeID, int targetNodeID, AStarCompleteCondition* completeCondition)
 		: m_env(env)
 		, m_startNodeID(startNodeID)
 		, m_targetNodeID(targetNodeID)
+		, m_completeCondition(completeCondition)
 		, m_nodeStates(0)
 		, m_nodeDatas(0)
 		, m_openList()
@@ -86,9 +87,17 @@ namespace fdk { namespace game { namespace navi
 				recorder->onCloseNode(m_env, current.nodeID);
 			}
 
-			if (current.nodeID == m_targetNodeID)
+			bool bComplete = false;
+			if (m_completeCondition)
 			{
-				//buildPath();
+				bComplete = m_completeCondition->checkCondition(m_env, m_startNodeID, m_targetNodeID, current.nodeID);
+			}
+			else
+			{
+				bComplete = (current.nodeID == m_targetNodeID);
+			}
+			if (bComplete)
+			{
 				m_searchResult = SearchResult_Completed;
 				return SearchResult_Completed;
 			}			
@@ -202,14 +211,8 @@ namespace fdk { namespace game { namespace navi
 		}
 	}
 	
-	int AStar::getPathCost() const
-	{
-		return m_currentClosed.fValue;
-	}
-
 	void AStar::getSuccessorNodes(const Environment& env, int nodeID, int parentNodeID, std::vector<SuccessorNodeInfo>& result)
 	{
 		env.getSuccessorNodes(*this, nodeID, result);
 	}
-
 }}}

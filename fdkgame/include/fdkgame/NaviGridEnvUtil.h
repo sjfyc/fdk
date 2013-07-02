@@ -7,6 +7,7 @@ namespace fdk { namespace game { namespace navi
 {
 	bool isDirectlyReachable(const GridEnv& env, int startNodeID, int targetNodeID);
 	int getFirstDirectlyReachableNode(const GridEnv& env, int startNodeID, int targetNodeID);
+	int getFirstReachableNode(const GridEnv& env, int startNodeID, int targetNodeID);
 
 	class GridEnvOctPathPop
 	{
