@@ -58,16 +58,74 @@ struct VertexMapRangeByCenter
 	}
 };
 
+class LocationPop
+{
+	typedef fdkgame::navi::GridEnvOctPathPopDirectlyReachableNode Poper;
+	typedef fdkgame::navi::VertexMap Map;
+public:
+	LocationPop(
+		const Map& map,
+		bool bRefind,// refind时使用安全路线
+		const Location& targetLocation
+		)
+		: m_map(map)
+		, m_bRefind(bRefind)
+		, m_targetLocation(targetLocation)
+		, m_bTargetLocationUsed(false)
+		, m_pop(0)
+	{
+	}
+	~LocationPop()
+	{
+		delete m_pop;
+	}
+	std::list<int>& getRoughPathToInit() { return m_roughPath; }
+	void afterRoughPathInited()
+	{
+		FDK_ASSERT(!m_pop);
+		m_pop = new Poper(m_map, m_roughPath, false);
+		if (!m_bRefind)
+		{
+			m_pop->pop(); // 忽略起点
+		}
+	}
+	bool empty() const { return m_bTargetLocationUsed; }
+	Location pop()
+	{
+		FDK_ASSERT(!empty());
+		if (!m_pop || m_pop->empty())
+		{
+			m_bTargetLocationUsed = true;
+			return m_targetLocation;
+		}
+		int nodeID = m_pop->pop();
+		if (!m_bRefind && m_pop->empty()) // 忽略终点
+		{
+			return pop();
+		}
+		return util::vertexCoordToLocation(m_map.toNodeCoord(nodeID));
+	}
+private:
+	std::list<int> m_roughPath;
+	const Map& m_map;
+	bool m_bRefind;	
+	Location m_targetLocation;
+	bool m_bTargetLocationUsed;
+	Poper* m_pop;
+};
+
 AStar::AStar(Actor& actor, const Location& targetLocation, bool bRefind)
 	: m_actor(actor)
 	, m_targetLocation(targetLocation)
 	, m_navigator(0)
 	, m_bRefind(bRefind)
+	, m_locationPop(0)
 {	
 }
 
 AStar::~AStar()
 {
+	delete m_locationPop;
 	delete m_navigator;
 }
 
@@ -178,6 +236,7 @@ bool AStar::search()
 		m_vertexCoordPath.push_back(startVertexCoord);
 		m_vertexCoordPath.push_back(targetVertexCoord);
 		m_locationPath.push_back(m_targetLocation);
+		m_locationPop = new LocationPop(vertexMap, m_bRefind, m_targetLocation);		
 		return true;
 	}
 
@@ -189,6 +248,7 @@ bool AStar::search()
 		m_vertexCoordPath.push_back(startVertexCoord);
 		m_vertexCoordPath.push_back(targetVertexCoord);
 		m_locationPath.push_back(m_targetLocation);
+		m_locationPop = new LocationPop(vertexMap, m_bRefind, m_targetLocation);
 		return true;
 	}
 	
@@ -269,17 +329,27 @@ bool AStar::search()
 		m_vertexCoordPath.push_back(targetVertexCoord);
 	}
 
+	m_locationPop = new LocationPop(vertexMap, m_bRefind, m_targetLocation);
+	m_navigator->getPath(m_locationPop->getRoughPathToInit(), !m_bRefind ? true : false);
+	m_locationPop->afterRoughPathInited();
+
 	return true;
 }
 
 bool AStar::popNextPathLocation(Location& location)
 {
-	if (m_locationPath.empty())
+	//if (m_locationPath.empty())
+	//{
+	//	return false;
+	//}
+	//location = m_locationPath.front();
+	//m_locationPath.pop_front();
+
+	if (!m_locationPop || m_locationPop->empty())
 	{
 		return false;
 	}
-	location = m_locationPath.front();
-	m_locationPath.pop_front();
+	location = m_locationPop->pop();
 	return true;
 }
 

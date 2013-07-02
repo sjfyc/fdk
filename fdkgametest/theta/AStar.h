@@ -9,6 +9,7 @@
 #include "Types.h"
 class Actor;
 
+class LocationPop;
 class AStar 	
 {
 public:
@@ -28,6 +29,7 @@ private:
 	fdkgame::navi::AStar* m_navigator;
 	std::vector<VertexCoord> m_vertexCoordPath;
 	std::list<Location> m_locationPath;// 实际行走路线
+	LocationPop* m_locationPop;
 };
 
 #endif
