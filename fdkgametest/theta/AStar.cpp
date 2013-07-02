@@ -137,12 +137,10 @@ bool AStar::search()
 
 	if (vertexMap.isBlock(startVertexCoord))
 	{
-		util::output("start vertex(%d/%d) is block, donothing for now", startVertexCoord.x, startVertexCoord.y);
-
-		int middleNodeID = getFirstDirectlyReachableNode(vertexMap, startVertexID, targetVertexID);
+		int middleNodeID = getFirstReachableNode(vertexMap, startVertexID, targetVertexID);
 		if (middleNodeID == fdkgame::navi::INVALID_NODEID)
 		{
-			util::output("start vertex(%d/%d) is block & can't find a nonblock in line",
+			util::output("start vertex(%d/%d) is block & can't find a nonblock around",
 				startVertexCoord.x, startVertexCoord.y);
 			return false;
 		}
