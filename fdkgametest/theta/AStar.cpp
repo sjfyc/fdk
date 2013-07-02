@@ -48,6 +48,16 @@ VertexCoord simpleOffset(const VertexCoord& coord)
 	return result;
 }
 
+struct VertexMapRangeByCenter
+	: public fdkgame::navi::GridPartEnv
+{
+	typedef fdkgame::navi::GridPartEnv _Base;
+	VertexMapRangeByCenter(const fdkgame::navi::VertexMap& map, const VertexCoord& center)
+		: _Base(map, _Base::Range::makeRectFromCenter( center, VertexCoord(40, 40) ) )
+	{
+	}
+};
+
 AStar::AStar(Actor& actor, const Location& targetLocation, bool bRefind)
 	: m_actor(actor)
 	, m_targetLocation(targetLocation)
@@ -147,10 +157,12 @@ bool AStar::search()
 		util::output("target vertex(%d/%d) is block",
 			targetVertexCoord.x, targetVertexCoord.y);
 
-		int middleNodeID = getFirstDirectlyReachableNode(vertexMap, targetVertexID, startVertexID);
+		//int middleNodeID = getFirstDirectlyReachableNode(vertexMap, targetVertexID, startVertexID);
+		//VertexMapRangeByCenter vertexMapRange(vertexMap, targetVertexCoord);
+		int middleNodeID = getFirstReachableNode(vertexMap, targetVertexID, startVertexID);
 		if (middleNodeID == fdkgame::navi::INVALID_NODEID)
 		{
-			util::output("target vertex(%d/%d) is block & can't find a nonblock in line",
+			util::output("target vertex(%d/%d) is block & can't find a nonblock around",
 				targetVertexCoord.x, targetVertexCoord.y);
 			return false;
 		}

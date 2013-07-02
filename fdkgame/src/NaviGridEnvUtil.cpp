@@ -272,10 +272,12 @@ namespace fdk { namespace game { namespace navi
 	int getFirstReachableNode(const GridEnv& env, int startNodeID, int targetNodeID)
 	{
 		struct EnvAdapter
-			: public Environment
+			: public GridEnv
 		{
 			EnvAdapter(const GridEnv& env) : m_env(env) {}
-			virtual int getNodeSpaceSize() const { return m_env.getNodeSpaceSize(); }
+			virtual int getSizeX() const { return m_env.getSizeX(); }
+			virtual int getSizeY() const { return m_env.getSizeY(); }
+			virtual bool isNodeReachable(int nodeID) const { return m_env.isNodeReachable(nodeID); }
 			virtual int getHeuristic(int startNodeID, int targetNodeID) const { return 0; }
 			virtual void getSuccessorNodes(Navigator& navigator, int nodeID, std::vector<SuccessorNodeInfo>& result) const
 			{

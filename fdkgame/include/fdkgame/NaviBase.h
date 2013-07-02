@@ -34,6 +34,13 @@ namespace fdk { namespace game { namespace navi
 		virtual GridEnv* toGridEnv();
 	};
 
+	class FDKGAME_API Navigator
+	{
+	protected:
+		Navigator();
+		virtual ~Navigator();
+	};
+
 	class FDKGAME_API GridEnv
 		: public Environment
 	{
@@ -42,11 +49,13 @@ namespace fdk { namespace game { namespace navi
 		virtual ~GridEnv() {}
 		virtual int getSizeX() const = 0;
 		virtual int getSizeY() const = 0;
-		bool isValidNodeCoord(const NodeCoord& nodeCoord) const;
-		int toNodeID(const NodeCoord& nodeCoord) const;
-		NodeCoord toNodeCoord(int nodeID) const;		
+		virtual bool isValidNodeCoord(const NodeCoord& nodeCoord) const;
 		virtual bool isNodeReachable(int nodeID) const = 0;
+
+		int toNodeID(const NodeCoord& nodeCoord) const;
+		NodeCoord toNodeCoord(int nodeID) const;
 		bool isNodeWithCoordReachable(const NodeCoord& nodeCoord) const;
+
 		// Environment interfaces
 		virtual int getNodeSpaceSize() const;
 		virtual int getHeuristic(int startNodeID, int targetNodeID) const;
@@ -64,22 +73,35 @@ namespace fdk { namespace game { namespace navi
 		bool tryAddSuccessorNodeWithoutCheck(std::vector<SuccessorNodeInfo>& result, const NodeCoord& nodeCoord, int cost, int parentNodeID) const;
 	};
 	
-	class FDKGAME_API Navigator
-	{
-	protected:
-		Navigator();
-		virtual ~Navigator();
+	class FDKGAME_API GridPartEnv
+		: public GridEnv
+	{		
+	public:
+		typedef Rect<NodeCoord::ValueType> Range;
+		GridPartEnv(const GridEnv& outer, const Range& range);
+		const GridEnv& getOuter() const;
+		const Range& getRange() const;
+		// GridEnv interfaces
+		virtual int getSizeX() const;
+		virtual int getSizeY() const;
+		virtual bool isValidNodeCoord(const NodeCoord& nodeCoord) const;
+		virtual bool isNodeReachable(int nodeID) const;		
+	private:
+		const GridEnv& m_outer;
+		Range m_range;
 	};
-	
-	inline bool GridEnv::isValidNodeCoord(const NodeCoord& nodeCoord) const
-	{
-		return nodeCoord.x >= 0 && nodeCoord.x < getSizeX()
-			&& nodeCoord.y >= 0 && nodeCoord.y < getSizeY();
-	}
-
+		
 	inline bool Environment::isValidNodeID(int nodeID) const
 	{
 		return nodeID >= 0 && nodeID < getNodeSpaceSize();
+	}
+
+	inline Navigator::Navigator()
+	{
+	}
+
+	inline Navigator::~Navigator()
+	{
 	}
 
 	inline int GridEnv::toNodeID(const NodeCoord& nodeCoord) const
@@ -99,12 +121,20 @@ namespace fdk { namespace game { namespace navi
 		return isNodeReachable(toNodeID(nodeCoord));
 	}
 
-	inline Navigator::Navigator()
+	inline GridPartEnv::GridPartEnv(const GridEnv& outer, const Range& range)
+		: m_outer(outer)
+		, m_range(range)
 	{
 	}
 
-	inline Navigator::~Navigator()
+	inline const GridEnv& GridPartEnv::getOuter() const
 	{
+		return m_outer;
+	}
+
+	inline const GridPartEnv::Range& GridPartEnv::getRange() const
+	{
+		return m_range;
 	}
 }}}
 

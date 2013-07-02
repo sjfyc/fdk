@@ -13,6 +13,13 @@ namespace fdk { namespace game { namespace navi
 		return 0;
 	}
 
+
+	bool GridEnv::isValidNodeCoord(const NodeCoord& nodeCoord) const
+	{
+		return nodeCoord.x >= 0 && nodeCoord.x < getSizeX()
+			&& nodeCoord.y >= 0 && nodeCoord.y < getSizeY();
+	}
+
 	int GridEnv::getNodeSpaceSize() const
 	{
 		return getSizeX() * getSizeY();
@@ -147,5 +154,25 @@ namespace fdk { namespace game { namespace navi
 		info.cost = cost;
 		result.push_back(info);
 		return true;
+	}
+
+	int GridPartEnv::getSizeX() const
+	{
+		return m_outer.getSizeX();
+	}
+
+	int GridPartEnv::getSizeY() const
+	{
+		return m_outer.getSizeY();
+	}
+
+	bool GridPartEnv::isValidNodeCoord(const NodeCoord& nodeCoord) const
+	{
+		return m_range.contain(nodeCoord) && m_outer.isValidNodeCoord(nodeCoord);
+	}
+
+	bool GridPartEnv::isNodeReachable(int nodeID) const
+	{
+		return m_outer.isNodeReachable(nodeID);
 	}
 }}}
