@@ -5,12 +5,12 @@
 
 Board::Board()
 {
-	_Base::resetMap(CELL_COUNT_X, CELL_COUNT_Y);
-	annotateMap();
+	_Base::resetMap(CELL_COUNT_X, CELL_COUNT_Y);	
+	annotateMap();	
 }
 
 Board::~Board()
-{
+{	
 }
 
 bool Board::isValidCoord(const CellCoord& coord) const

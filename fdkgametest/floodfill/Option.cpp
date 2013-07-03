@@ -15,6 +15,11 @@ void Option::onEvent(int eventType, void* params)
 	if (eventType == GAME_SYSTEM_EVENT_KEYUP)
 	{
 		int key = (int)params;
+		if (key == HGEK_0)
+		{
+			toggle(Toggle_ShowCellColor);
+			util::output("%s cell color", isOn(Toggle_ShowCellColor) ? "show" : "hide");
+		}	
 		if (key == HGEK_1)
 		{
 			toggle(Toggle_ShowCellCoord);
@@ -52,6 +57,7 @@ bool Option::isOn(Toggle tog) const
 
 void Option::outputUsage()
 {
+	util::output("0: show/hide cell color");
 	util::output("1: show/hide cell coord");
 	util::output("2: show/hide center vertex");
 	util::output("2: show/hide connect line");

@@ -6,12 +6,15 @@
 Board::Board()
 {
 	_Base::resetMap(CELL_COUNT_X, CELL_COUNT_Y);
-	m_areaID.reset(CELL_COUNT_X, CELL_COUNT_Y, -1);
 	annotateMap();
+	m_colorComponent = new fdkgame::navi::GridEnvColorComponent(*this);
+	m_colorComponent->refill();
 }
 
 Board::~Board()
 {
+	delete m_colorComponent;
+	m_colorComponent = 0;
 }
 
 bool Board::isValidCoord(const CellCoord& coord) const
@@ -43,6 +46,32 @@ void Board::draw()
 	for (int i = 0; i <= CELL_COUNT_X; ++i) // ÊúÏß
 	{
 		g_HGE->Gfx_RenderLine(i*CELL_SIZE_X, 0, i*CELL_SIZE_X, CELL_COUNT_Y*CELL_SIZE_Y, COLOR_BOARD_LINE);
+	}
+	for (short x = 0; x < CELL_COUNT_X; ++x)
+	{
+		for (short y = 0; y < CELL_COUNT_Y; ++y)
+		{
+			if (isBlock(CellCoord(x, y)) )
+			{
+				util::fillCell(CellCoord(x, y), COLOR_CELL_BLOCK);
+			}
+		}
+	}
+}
+
+void Board::drawCellColor()
+{
+	for (int y = 0; y < CELL_COUNT_Y; ++y)
+	{	
+		for (int x = 0; x < CELL_COUNT_X; ++x)
+		{
+			ColorComponent::ColorType color = m_colorComponent->getColorMap()(x, y);
+			if (color != ColorComponent::UNCOLORED)
+			{
+				util::fillCell(CellCoord(x, y), ARGB(255, color * 40, 0, 0));
+				g_Font.printf(x*CELL_SIZE_X+2, y*CELL_SIZE_Y+2, HGETEXT_LEFT, "%d", color);
+			}
+		}
 	}
 }
 

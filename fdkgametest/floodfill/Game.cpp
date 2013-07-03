@@ -52,6 +52,10 @@ void Game::update(float delta)
 void Game::render()
 {
 	g_Board.draw();
+	if (g_Option.isOn(Option::Toggle_ShowCellColor))
+	{
+		g_Board.drawCellColor();
+	}
 	if (g_Option.isOn(Option::Toggle_ShowCellCoord))
 	{
 		g_Board.drawCellCoord();
@@ -130,6 +134,7 @@ void GameModeMapEdit::enter(Game& game)
 void GameModeMapEdit::leave(Game& game)
 {
 	g_Board.annotateMap();
+	g_Board.getColorComponent()->refill();
 }
 
 void GameModeMapEdit::handleEvent(Game& game, int eventType, void* params)
@@ -159,7 +164,12 @@ void GameModeMapEdit::handleEvent(Game& game, int eventType, void* params)
 				{
 					g_Board.setBlock(mouseCoord, false);
 					m_brush = Brush_Erase;
-				}		
+				}
+				else
+				{
+					g_Board.setBlock(mouseCoord, true);
+					m_brush = Brush_Block;
+				}				
 			}
 			m_lastMouseCoord = mouseCoord;
 		}
@@ -178,6 +188,15 @@ void GameModeMapEdit::handleEvent(Game& game, int eventType, void* params)
 				}
 			}
 		}
+		else if (key == HGEK_C)
+		{
+			g_Board.clearBlocks();
+		}
+		else if (key == HGEK_SPACE)
+		{
+			g_Board.annotateMap();
+			g_Board.getColorComponent()->refill();
+		}
 	}
 }
 
@@ -187,7 +206,7 @@ void GameModeMapEdit::update(Game& game, float delta)
 	{
 		return;
 	}
-	
+
 	Location mouseLocation;
 	g_HGE->Input_GetMousePos(&mouseLocation.x, &mouseLocation.y);
 	CellCoord mouseCoord = util::locationToCellCoord(mouseLocation);
@@ -196,8 +215,19 @@ void GameModeMapEdit::update(Game& game, float delta)
 		return;
 	}
 	m_lastMouseCoord = mouseCoord;
-		
-	if (m_brush == Brush_Erase)
+
+	if (m_brush == Brush_Block)
+	{
+		if (mouseCoord == game.m_startCoord || mouseCoord == game.m_targetCoord || g_Board.isBlock(mouseCoord) )
+		{
+			return;
+		}
+		else
+		{
+			g_Board.setBlock(mouseCoord, true);
+		}
+	}
+	else if (m_brush == Brush_Erase)
 	{
 		if (mouseCoord == game.m_startCoord || mouseCoord == game.m_targetCoord || !g_Board.isBlock(mouseCoord) )
 		{

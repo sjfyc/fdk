@@ -10,19 +10,19 @@ class Board
 	friend class fdk::Singleton<Board>;
 	typedef fdkgame::navi::GridMap _Base;
 public:		
+	typedef fdkgame::navi::GridEnvColorComponent ColorComponent;
 	bool isBlock(const CellCoord& coord) const;
 	void setBlock(const CellCoord& coord, bool bBlock);
 	void clearBlocks();
 	void draw();
+	void drawCellColor();
 	void drawCellCoord();
 	void drawCenterVertex();
 	void drawCellClearanceValue();
-	fdk::Array2D<int> m_areaID;
 private:
 	Board();
 	~Board();
 	bool isValidCoord(const CellCoord& coord) const;	
 };
-
 #define g_Board (Board::instance())
 #endif

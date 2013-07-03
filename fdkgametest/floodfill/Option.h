@@ -11,6 +11,7 @@ class Option
 public:	
 	enum Toggle
 	{
+		Toggle_ShowCellColor,
 		Toggle_ShowCellCoord,
 		Toggle_ShowCenterVertex,
 		Toggle_ShowConnectLine,

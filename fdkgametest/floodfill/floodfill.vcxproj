@@ -11,7 +11,6 @@
     </ProjectConfiguration>
   </ItemGroup>
   <ItemGroup>
-    <ClCompile Include="FloodFill.cpp" />
     <ClCompile Include="Board.cpp" />
     <ClCompile Include="Font.cpp" />
     <ClCompile Include="Game.cpp" />
@@ -20,7 +19,6 @@
     <ClCompile Include="main.cpp" />
   </ItemGroup>
   <ItemGroup>
-    <ClInclude Include="FloodFill.h" />
     <ClInclude Include="Board.h" />
     <ClInclude Include="Font.h" />
     <ClInclude Include="Game.h" />
