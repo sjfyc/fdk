@@ -165,9 +165,9 @@ void GameModeGame::search(AStar& astar)
 {
 	clock_t start, end;
 	start = clock();
-	AStar::Navigator::SearchResult result = astar.search();
+	AStar::Navigator::SearchResult result = astar.search(1);
 	end = clock();
-	printf("The time was: %f\n", (double)(end - start) / CLK_TCK);
+	//printf("The time was: %f\n", (double)(end - start) / CLK_TCK);
 	if (result == AStar::Navigator::SearchResult_Completed)
 	{			
 		util::output("search completed");

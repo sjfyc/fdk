@@ -214,7 +214,7 @@ bool AStar::search()
 		util::output("target vertex(%d/%d) is block or in different island",
 			targetVertexCoord.x, targetVertexCoord.y);
 
-		int middleNodeID = getFirstSameColorNode(vertexMap, targetVertexID, startVertexID);
+		int middleNodeID = getFirstSameColorReachableNode(vertexMap, targetVertexID, startVertexID);
 		FDK_ASSERT(middleNodeID != fdkgame::navi::INVALID_NODEID);
 
 		targetVertexID = middleNodeID;

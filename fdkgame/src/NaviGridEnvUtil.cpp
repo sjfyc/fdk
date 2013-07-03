@@ -6,16 +6,111 @@ namespace fdk { namespace game { namespace navi
 	struct GridEnvReachEverywhereAdapter
 		: public GridEnv
 	{
-		GridEnvReachEverywhereAdapter(const GridEnv& env) : m_env(env) {}
+		GridEnvReachEverywhereAdapter(const GridEnv& env, const NodeCoord& startToTarget) : m_env(env), m_startToTarget(startToTarget) {}
 		virtual int getSizeX() const { return m_env.getSizeX(); }
 		virtual int getSizeY() const { return m_env.getSizeY(); }
 		virtual bool isNodeReachable(int nodeID) const { return m_env.isNodeReachable(nodeID); }
 		virtual int getHeuristic(int startNodeID, int targetNodeID) const { return 0; }
 		virtual void getSuccessorNodes(Navigator& navigator, int nodeID, std::vector<SuccessorNodeInfo>& result) const
 		{
-			return m_env.getSuccessorNodesWithoutCheck(nodeID, result);
+			std::vector<SuccessorNodeInfo> temp;
+			m_env.getSuccessorNodesWithoutCheck(nodeID, temp);			
+			int orderArray[8] = { 0, 1, 2, 3, 4, 5, 6, 7 };
+			FDK_ASSERT(temp.size() == FDK_DIM(orderArray));
+			if (m_startToTarget.x > 0)
+			{
+				if (m_startToTarget.y > 0)
+				{
+					if (m_startToTarget.y >= m_startToTarget.x)
+					{
+						int orders[8] = { 6, 3, 2, 7, 5, 0, 1, 4 };
+						memcpy(orderArray, orders, sizeof(orders));
+					}
+					else
+					{
+						int orders[8] = { 6, 2, 3, 5, 7, 1, 0, 4 };
+						memcpy(orderArray, orders, sizeof(orders));
+					}
+				}
+				else if (m_startToTarget.y < 0)
+				{
+					if (-m_startToTarget.y >= m_startToTarget.x)
+					{
+						int orders[8] = { 5, 1, 2, 4, 6, 0, 3, 7 };
+						memcpy(orderArray, orders, sizeof(orders));
+					}
+					else
+					{
+						int orders[8] = { 5, 2, 1, 6, 4, 3, 0, 7 };
+						memcpy(orderArray, orders, sizeof(orders));
+					}
+				}
+				else
+				{
+					int orders[8] = { 2, 5, 6, 1, 3, 4, 7, 0 };
+					memcpy(orderArray, orders, sizeof(orders));
+				}
+			}
+			else if (m_startToTarget.x < 0)
+			{
+				if (m_startToTarget.y > 0)
+				{
+					if (m_startToTarget.y >= -m_startToTarget.x)
+					{
+						int orders[8] = { 7, 3, 0, 6, 4, 2, 1, 5 };
+						memcpy(orderArray, orders, sizeof(orders));
+					}
+					else
+					{
+						int orders[8] = { 7, 0, 3, 4, 6, 1, 2, 5 };
+						memcpy(orderArray, orders, sizeof(orders));
+					}
+				}
+				else if (m_startToTarget.y < 0)
+				{
+					if (-m_startToTarget.y >= -m_startToTarget.x)
+					{
+						int orders[8] = { 4, 1, 0, 5, 7, 2, 3, 6 };
+						memcpy(orderArray, orders, sizeof(orders));
+					}
+					else
+					{
+						int orders[8] = { 4, 0, 1, 7, 5, 3, 2, 6 };
+						memcpy(orderArray, orders, sizeof(orders));
+					}
+				}
+				else
+				{
+					int orders[8] = { 0, 7, 4, 3, 1, 6, 5, 2 };
+					memcpy(orderArray, orders, sizeof(orders));
+				}
+			}
+			else 
+			{
+				if (m_startToTarget.y > 0)
+				{
+					int orders[8] = { 3, 6, 7, 2, 0, 5, 4, 1 };
+					memcpy(orderArray, orders, sizeof(orders));
+				}
+				else if (m_startToTarget.y < 0)
+				{
+					int orders[8] = { 1, 4, 5, 0, 2, 7, 6, 3 };
+					memcpy(orderArray, orders, sizeof(orders));
+				}
+				else
+				{
+					int orders[8] = { 0, 1, 2, 3, 4, 5, 6, 7 };
+					memcpy(orderArray, orders, sizeof(orders));
+				}
+			}		
+
+			for (size_t i = 0; i < FDK_DIM(orderArray); ++i)
+			{
+				result.push_back(temp[orderArray[i]]);
+			}
 		}
 		const GridEnv& m_env;
+		const NodeCoord& m_startToTarget;
 	};
 
 	GridEnvColorComponent::ColorType getColor(const GridEnv& env, int nodeID)
@@ -292,7 +387,7 @@ namespace fdk { namespace game { namespace navi
 	
 	int getFirstReachableNode(const GridEnv& env, int startNodeID, int targetNodeID)
 	{
-		GridEnvReachEverywhereAdapter envAdapter(env);
+		GridEnvReachEverywhereAdapter envAdapter(env, env.toNodeCoord(targetNodeID)-env.toNodeCoord(startNodeID));
 
 		struct CompleteCondition
 			: public AStarCompleteCondition
@@ -312,9 +407,9 @@ namespace fdk { namespace game { namespace navi
 		return astar.getCompletedNodeID();
 	}
 
-	int getFirstSameColorNode(const GridEnv& env, int startNodeID, int targetNodeID)
+	int getFirstSameColorReachableNode(const GridEnv& env, int startNodeID, int targetNodeID)
 	{
-		GridEnvReachEverywhereAdapter envAdapter(env);
+		GridEnvReachEverywhereAdapter envAdapter(env, env.toNodeCoord(targetNodeID)-env.toNodeCoord(startNodeID));
 
 		struct CompleteCondition
 			: public AStarCompleteCondition
