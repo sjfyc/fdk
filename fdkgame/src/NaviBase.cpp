@@ -127,36 +127,7 @@ namespace fdk { namespace game { namespace navi
 	{
 		return this;
 	}
-
-	void GridEnv::getSuccessorNodesWithoutCheck(int nodeID, std::vector<SuccessorNodeInfo>& result) const
-	{
-		NodeCoord coord = toNodeCoord(nodeID);
-
-		const bool bLeft = tryAddSuccessorNodeWithoutCheck(result, NodeCoord(coord.x-1,coord.y), COST_STRAIGHT, nodeID);		
-		const bool bTop = tryAddSuccessorNodeWithoutCheck(result, NodeCoord(coord.x,coord.y-1), COST_STRAIGHT, nodeID);
-		const bool bRight = tryAddSuccessorNodeWithoutCheck(result, NodeCoord(coord.x+1,coord.y), COST_STRAIGHT, nodeID);
-		const bool bBottom = tryAddSuccessorNodeWithoutCheck(result, NodeCoord(coord.x,coord.y+1), COST_STRAIGHT, nodeID);
-
-		tryAddSuccessorNodeWithoutCheck(result, NodeCoord(coord.x-1,coord.y-1), COST_DIAGONAL, nodeID);
-		tryAddSuccessorNodeWithoutCheck(result, NodeCoord(coord.x+1,coord.y-1), COST_DIAGONAL, nodeID);
-		tryAddSuccessorNodeWithoutCheck(result, NodeCoord(coord.x+1,coord.y+1), COST_DIAGONAL, nodeID);
-		tryAddSuccessorNodeWithoutCheck(result, NodeCoord(coord.x-1,coord.y+1), COST_DIAGONAL, nodeID);
-	}
-
-	bool GridEnv::tryAddSuccessorNodeWithoutCheck(std::vector<SuccessorNodeInfo>& result, const NodeCoord& nodeCoord, int cost, int parentNodeID) const
-	{
-		if (!isValidNodeCoord(nodeCoord))
-		{
-			return false;
-		}		
-		const int nodeID = toNodeID(nodeCoord);
-		SuccessorNodeInfo info;
-		info.nodeID = nodeID;
-		info.cost = cost;
-		result.push_back(info);
-		return true;
-	}
-
+	
 	GridEnv::GridEnv()
 		: m_colorComponent(0)
 	{

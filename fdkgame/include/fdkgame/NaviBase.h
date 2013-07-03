@@ -65,7 +65,6 @@ namespace fdk { namespace game { namespace navi
 		virtual void getSuccessorNodes(Navigator& navigator, int nodeID, std::vector<SuccessorNodeInfo>& result) const;
 		virtual const GridEnv* toGridEnv() const;
 		virtual GridEnv* toGridEnv();
-		void getSuccessorNodesWithoutCheck(int nodeID, std::vector<SuccessorNodeInfo>& result) const;
 	protected:
 		GridEnv();
 		virtual ~GridEnv();
@@ -76,7 +75,6 @@ namespace fdk { namespace game { namespace navi
 		GridEnvColorComponent* m_colorComponent;
 	private:
 		bool tryAddSuccessorNode(Navigator& navigator, std::vector<SuccessorNodeInfo>& result, const NodeCoord& nodeCoord, int cost, int parentNodeID) const;
-		bool tryAddSuccessorNodeWithoutCheck(std::vector<SuccessorNodeInfo>& result, const NodeCoord& nodeCoord, int cost, int parentNodeID) const;
 	};
 	
 	class FDKGAME_API GridPartEnv

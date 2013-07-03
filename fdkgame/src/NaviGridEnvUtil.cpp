@@ -13,22 +13,55 @@ namespace fdk { namespace game { namespace navi
 		virtual int getHeuristic(int startNodeID, int targetNodeID) const { return 0; }
 		virtual void getSuccessorNodes(Navigator& navigator, int nodeID, std::vector<SuccessorNodeInfo>& result) const
 		{
-			std::vector<SuccessorNodeInfo> temp;
-			m_env.getSuccessorNodesWithoutCheck(nodeID, temp);			
-			int orderArray[8] = { 0, 1, 2, 3, 4, 5, 6, 7 };
-			FDK_ASSERT(temp.size() == FDK_DIM(orderArray));
+			struct WrapInfo
+			{
+				bool bValid;
+				SuccessorNodeInfo successorNodeInfo;
+			};
+
+			NodeCoord coord = m_env.toNodeCoord(nodeID);	
+			const int maxNeighbourCount = 8;
+			NodeCoord neighbours[maxNeighbourCount] = 
+			{
+				NodeCoord(coord.x-1,coord.y), 
+				NodeCoord(coord.x,coord.y-1), 
+				NodeCoord(coord.x+1,coord.y), 
+				NodeCoord(coord.x,coord.y+1), 
+				NodeCoord(coord.x-1,coord.y-1), 
+				NodeCoord(coord.x+1,coord.y-1),
+				NodeCoord(coord.x+1,coord.y+1), 
+				NodeCoord(coord.x-1,coord.y+1),
+			};
+
+			std::vector<WrapInfo> wrapInfos(maxNeighbourCount);
+			for (size_t i = 0; i < maxNeighbourCount; ++i)
+			{
+				const NodeCoord& neighbour = neighbours[i];
+				if (isValidNodeCoord(neighbour))
+				{
+					wrapInfos[i].bValid = true;
+					wrapInfos[i].successorNodeInfo.nodeID = m_env.toNodeID(neighbour);
+					wrapInfos[i].successorNodeInfo.cost = (i < 4) ? COST_STRAIGHT : COST_DIAGONAL;
+				}
+				else
+				{
+					wrapInfos[i].bValid = false;
+				}
+			}
+			
+			int orderArray[maxNeighbourCount] = { 0, 1, 2, 3, 4, 5, 6, 7 };
 			if (m_startToTarget.x > 0)
 			{
 				if (m_startToTarget.y > 0)
 				{
 					if (m_startToTarget.y >= m_startToTarget.x)
 					{
-						int orders[8] = { 6, 3, 2, 7, 5, 0, 1, 4 };
+						int orders[maxNeighbourCount] = { 6, 3, 2, 7, 5, 0, 1, 4 };
 						memcpy(orderArray, orders, sizeof(orders));
 					}
 					else
 					{
-						int orders[8] = { 6, 2, 3, 5, 7, 1, 0, 4 };
+						int orders[maxNeighbourCount] = { 6, 2, 3, 5, 7, 1, 0, 4 };
 						memcpy(orderArray, orders, sizeof(orders));
 					}
 				}
@@ -36,18 +69,18 @@ namespace fdk { namespace game { namespace navi
 				{
 					if (-m_startToTarget.y >= m_startToTarget.x)
 					{
-						int orders[8] = { 5, 1, 2, 4, 6, 0, 3, 7 };
+						int orders[maxNeighbourCount] = { 5, 1, 2, 4, 6, 0, 3, 7 };
 						memcpy(orderArray, orders, sizeof(orders));
 					}
 					else
 					{
-						int orders[8] = { 5, 2, 1, 6, 4, 3, 0, 7 };
+						int orders[maxNeighbourCount] = { 5, 2, 1, 6, 4, 3, 0, 7 };
 						memcpy(orderArray, orders, sizeof(orders));
 					}
 				}
 				else
 				{
-					int orders[8] = { 2, 5, 6, 1, 3, 4, 7, 0 };
+					int orders[maxNeighbourCount] = { 2, 5, 6, 1, 3, 4, 7, 0 };
 					memcpy(orderArray, orders, sizeof(orders));
 				}
 			}
@@ -57,12 +90,12 @@ namespace fdk { namespace game { namespace navi
 				{
 					if (m_startToTarget.y >= -m_startToTarget.x)
 					{
-						int orders[8] = { 7, 3, 0, 6, 4, 2, 1, 5 };
+						int orders[maxNeighbourCount] = { 7, 3, 0, 6, 4, 2, 1, 5 };
 						memcpy(orderArray, orders, sizeof(orders));
 					}
 					else
 					{
-						int orders[8] = { 7, 0, 3, 4, 6, 1, 2, 5 };
+						int orders[maxNeighbourCount] = { 7, 0, 3, 4, 6, 1, 2, 5 };
 						memcpy(orderArray, orders, sizeof(orders));
 					}
 				}
@@ -70,18 +103,18 @@ namespace fdk { namespace game { namespace navi
 				{
 					if (-m_startToTarget.y >= -m_startToTarget.x)
 					{
-						int orders[8] = { 4, 1, 0, 5, 7, 2, 3, 6 };
+						int orders[maxNeighbourCount] = { 4, 1, 0, 5, 7, 2, 3, 6 };
 						memcpy(orderArray, orders, sizeof(orders));
 					}
 					else
 					{
-						int orders[8] = { 4, 0, 1, 7, 5, 3, 2, 6 };
+						int orders[maxNeighbourCount] = { 4, 0, 1, 7, 5, 3, 2, 6 };
 						memcpy(orderArray, orders, sizeof(orders));
 					}
 				}
 				else
 				{
-					int orders[8] = { 0, 7, 4, 3, 1, 6, 5, 2 };
+					int orders[maxNeighbourCount] = { 0, 7, 4, 3, 1, 6, 5, 2 };
 					memcpy(orderArray, orders, sizeof(orders));
 				}
 			}
@@ -89,24 +122,27 @@ namespace fdk { namespace game { namespace navi
 			{
 				if (m_startToTarget.y > 0)
 				{
-					int orders[8] = { 3, 6, 7, 2, 0, 5, 4, 1 };
+					int orders[maxNeighbourCount] = { 3, 6, 7, 2, 0, 5, 4, 1 };
 					memcpy(orderArray, orders, sizeof(orders));
 				}
 				else if (m_startToTarget.y < 0)
 				{
-					int orders[8] = { 1, 4, 5, 0, 2, 7, 6, 3 };
+					int orders[maxNeighbourCount] = { 1, 4, 5, 0, 2, 7, 6, 3 };
 					memcpy(orderArray, orders, sizeof(orders));
 				}
 				else
 				{
-					int orders[8] = { 0, 1, 2, 3, 4, 5, 6, 7 };
+					int orders[maxNeighbourCount] = { 0, 1, 2, 3, 4, 5, 6, 7 };
 					memcpy(orderArray, orders, sizeof(orders));
 				}
-			}		
+			}
 
-			for (size_t i = 0; i < FDK_DIM(orderArray); ++i)
+			for (size_t i = 0; i < maxNeighbourCount; ++i)
 			{
-				result.push_back(temp[orderArray[i]]);
+				if (wrapInfos[orderArray[i]].bValid)
+				{
+					result.push_back(wrapInfos[orderArray[i]].successorNodeInfo);
+				}				
 			}
 		}
 		const GridEnv& m_env;
