@@ -21,6 +21,8 @@ Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "theta", "theta\theta.vcxpro
 EndProject
 Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "bresenham", "bresenham\bresenham.vcxproj", "{078FDD2F-F368-4895-AA42-09AEE48249C7}"
 EndProject
+Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "floodfill", "floodfill\floodfill.vcxproj", "{43D9A86C-48FB-43C0-9632-2630AAF2A689}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Win32 = Debug|Win32
@@ -55,6 +57,10 @@ Global
 		{078FDD2F-F368-4895-AA42-09AEE48249C7}.Debug|Win32.Build.0 = Debug|Win32
 		{078FDD2F-F368-4895-AA42-09AEE48249C7}.Release|Win32.ActiveCfg = Release|Win32
 		{078FDD2F-F368-4895-AA42-09AEE48249C7}.Release|Win32.Build.0 = Release|Win32
+		{43D9A86C-48FB-43C0-9632-2630AAF2A689}.Debug|Win32.ActiveCfg = Debug|Win32
+		{43D9A86C-48FB-43C0-9632-2630AAF2A689}.Debug|Win32.Build.0 = Debug|Win32
+		{43D9A86C-48FB-43C0-9632-2630AAF2A689}.Release|Win32.ActiveCfg = Release|Win32
+		{43D9A86C-48FB-43C0-9632-2630AAF2A689}.Release|Win32.Build.0 = Release|Win32
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

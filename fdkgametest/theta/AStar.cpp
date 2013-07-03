@@ -338,17 +338,18 @@ bool AStar::search()
 
 bool AStar::popNextPathLocation(Location& location)
 {
-	//if (m_locationPath.empty())
-	//{
-	//	return false;
-	//}
-	//location = m_locationPath.front();
-	//m_locationPath.pop_front();
-
 	if (!m_locationPop || m_locationPop->empty())
 	{
 		return false;
 	}
+
+	std::vector<fdkgame::navi::MapManager::PlotUnitArgument> plotArounds;
+	plotAroundActors(m_actor, plotArounds);
+	int moveCapability = m_actor.getMoveCapability();
+	fdkgame::navi::MapManager::AutoPlotUnits _AutoPlotUnits(g_MapManager, 
+		fdkgame::navi::VertexMapType(m_actor.getMoveCapability(), m_actor.getUnitSize()),
+		plotArounds);
+
 	location = m_locationPop->pop();
 	return true;
 }
