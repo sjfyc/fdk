@@ -21,6 +21,7 @@ namespace fdk
 		void clear();
 		void reset(size_type sizeX, size_type sizeY);
 		void reset(size_type sizeX, size_type sizeY, const T& value);
+		void refill(const T& value=T());
 		Array2D& operator=(const Array2D& other);
 		T& operator()(size_type x, size_type y);
 		const T& operator()(size_type x, size_type y) const;
@@ -132,6 +133,15 @@ namespace fdk
 		catch (...)
 		{
 			throw;
+		}
+	}
+
+	template <class T, class AllocatorT>
+	void Array2D<T, AllocatorT>::refill(const T& value)
+	{
+		for (size_type i = 0; i < count(); ++i)
+		{
+			m_data[i] = value;
 		}
 	}
 
