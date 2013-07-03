@@ -3,6 +3,20 @@
 
 namespace fdk { namespace game { namespace navi
 {
+	VertexMap::VertexMap(BlockMap& blockMap, UnitSize unitSize)
+		: m_blockMap(blockMap)
+		, m_unitSize(unitSize)
+	{
+		FDK_ASSERT(unitSize >= 1);
+
+		m_colorComponent = new GridEnvColorComponent(*this);
+	}
+
+	VertexMap::~VertexMap()
+	{
+		FDK_DELETE(m_colorComponent);
+	}
+
 	void VertexMap::rebuildFromBlockMap()
 	{
 		m_data.reset(m_blockMap.getSizeX()*2-1, m_blockMap.getSizeY()*2-1);
@@ -18,6 +32,7 @@ namespace fdk { namespace game { namespace navi
 				}
 			}
 		}
+		m_colorComponent->refill();
 	}
 
 	void VertexMap::onSetBlock(const CellCoord& cellCoord, bool bSet)

@@ -1,4 +1,5 @@
 #include <fdkgame/NaviBase.h>
+#include <stack>
 #include <fdkgame/NaviTypes.h>
 
 namespace fdk { namespace game { namespace navi
@@ -156,6 +157,16 @@ namespace fdk { namespace game { namespace navi
 		return true;
 	}
 
+	GridEnv::GridEnv()
+		: m_colorComponent(0)
+	{
+	}
+
+	GridEnv::~GridEnv()
+	{
+		FDK_ASSERT(!m_colorComponent);
+	}
+
 	int GridPartEnv::getSizeX() const
 	{
 		return m_outer.getSizeX();
@@ -175,4 +186,71 @@ namespace fdk { namespace game { namespace navi
 	{
 		return m_outer.isNodeReachable(nodeID);
 	}
+
+	GridEnvColorComponent::GridEnvColorComponent(const GridEnv& outer)
+		: m_outer(outer)
+	{
+	}
+
+	GridEnvColorComponent::~GridEnvColorComponent()
+	{
+	}
+
+	void GridEnvColorComponent::refill()
+	{
+		const int sizeX = m_outer.getSizeX();
+		const int sizeY = m_outer.getSizeY();
+		m_colors.reset(sizeX, sizeY, UNCOLORED);
+		
+		ColorType color = 0;
+		for (int y = 0; y < sizeY; ++y)
+		{
+			for (int x = 0; x < sizeX; ++x)
+			{
+				CellCoord cur(x, y);
+				if (m_outer.isNodeWithCoordReachable(cur) &&
+					m_colors(x, y) == UNCOLORED)
+				{
+					floodFill(cur, color++);
+				}
+			}
+		}
+	}
+
+	void GridEnvColorComponent::floodFill(const NodeCoord& nodeCoord, ColorType color)
+	{
+		std::stack<NodeCoord> pending;
+		pending.push(nodeCoord);
+		while (!pending.empty())
+		{
+			NodeCoord cur = pending.top();
+			pending.pop();
+			if (m_colors(cur.x, cur.y) != UNCOLORED)
+			{
+				continue;
+			}
+			
+			m_colors(cur.x, cur.y) = color;
+
+			const NodeCoord neighbours[] =
+			{
+				NodeCoord(cur.x-1, cur.y),
+				NodeCoord(cur.x+1, cur.y),
+				NodeCoord(cur.x, cur.y-1),
+				NodeCoord(cur.x, cur.y+1),
+			};
+
+			for (size_t i = 0; i < FDK_DIM(neighbours); ++i)
+			{
+				const NodeCoord& neighbour = neighbours[i];
+				if (m_outer.isValidNodeCoord(neighbour) &&
+					m_outer.isNodeWithCoordReachable(neighbour) &&
+					m_colors(neighbour.x, neighbour.y) == UNCOLORED)
+				{
+					pending.push(neighbour); // 斜角的节点可能被重复添加
+				}
+			}
+		}
+	}
+
 }}}

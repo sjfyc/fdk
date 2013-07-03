@@ -3,6 +3,28 @@
 
 namespace fdk { namespace game { namespace navi
 {
+	struct GridEnvReachEverywhereAdapter
+		: public GridEnv
+	{
+		GridEnvReachEverywhereAdapter(const GridEnv& env) : m_env(env) {}
+		virtual int getSizeX() const { return m_env.getSizeX(); }
+		virtual int getSizeY() const { return m_env.getSizeY(); }
+		virtual bool isNodeReachable(int nodeID) const { return m_env.isNodeReachable(nodeID); }
+		virtual int getHeuristic(int startNodeID, int targetNodeID) const { return 0; }
+		virtual void getSuccessorNodes(Navigator& navigator, int nodeID, std::vector<SuccessorNodeInfo>& result) const
+		{
+			return m_env.getSuccessorNodesWithoutCheck(nodeID, result);
+		}
+		const GridEnv& m_env;
+	};
+
+	GridEnvColorComponent::ColorType getColor(const GridEnv& env, int nodeID)
+	{
+		return env.getColorComponent()
+			? env.getColorComponent()->getColor(env.toNodeCoord(nodeID))
+			: GridEnvColorComponent::UNCOLORED;
+	}
+
 	bool isDirectlyReachable(const GridEnv& env, int startNodeID, int targetNodeID)
 	{
 		typedef GridEnv::NodeCoord NodeCoord;
@@ -267,25 +289,11 @@ namespace fdk { namespace game { namespace navi
 		}
 		return INVALID_NODEID;
 	}
-
-
+	
 	int getFirstReachableNode(const GridEnv& env, int startNodeID, int targetNodeID)
 	{
-		struct EnvAdapter
-			: public GridEnv
-		{
-			EnvAdapter(const GridEnv& env) : m_env(env) {}
-			virtual int getSizeX() const { return m_env.getSizeX(); }
-			virtual int getSizeY() const { return m_env.getSizeY(); }
-			virtual bool isNodeReachable(int nodeID) const { return m_env.isNodeReachable(nodeID); }
-			virtual int getHeuristic(int startNodeID, int targetNodeID) const { return 0; }
-			virtual void getSuccessorNodes(Navigator& navigator, int nodeID, std::vector<SuccessorNodeInfo>& result) const
-			{
-				return m_env.getSuccessorNodesWithoutCheck(nodeID, result);
-			}
-			const GridEnv& m_env;
-		} envAdapter(env);
-		
+		GridEnvReachEverywhereAdapter envAdapter(env);
+
 		struct CompleteCondition
 			: public AStarCompleteCondition
 		{
@@ -295,6 +303,34 @@ namespace fdk { namespace game { namespace navi
 				return env.isNodeReachable(nodeID);
 			}
 		} completeCondition;
+
+		AStar astar(envAdapter, startNodeID, targetNodeID, &completeCondition);
+		if (astar.search() == AStar::SearchResult_PathUnexist)
+		{
+			return INVALID_NODEID;
+		}
+		return astar.getCompletedNodeID();
+	}
+
+	int getFirstSameColorNode(const GridEnv& env, int startNodeID, int targetNodeID)
+	{
+		GridEnvReachEverywhereAdapter envAdapter(env);
+
+		struct CompleteCondition
+			: public AStarCompleteCondition
+		{
+			CompleteCondition(const GridEnv& env, GridEnvColorComponent::ColorType targetColor)
+				: m_env(env)
+				, m_targetColor(targetColor)
+			{
+			}
+			virtual bool checkCondition(const Environment& l_env, int startNodeID, int targetNodeID, int nodeID) const
+			{
+				return getColor(m_env, nodeID) == m_targetColor;
+			}
+			const GridEnv& m_env;
+			GridEnvColorComponent::ColorType m_targetColor;
+		} completeCondition(env, getColor(env, targetNodeID));
 
 		AStar astar(envAdapter, startNodeID, targetNodeID, &completeCondition);
 		if (astar.search() == AStar::SearchResult_PathUnexist)

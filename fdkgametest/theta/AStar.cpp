@@ -208,20 +208,14 @@ bool AStar::search()
 		m_actor.forceLocation(util::vertexCoordToLocation(startVertexCoord));
 	}
 	
-	if (vertexMap.isBlock(targetVertexCoord) )
+	if (vertexMap.isBlock(targetVertexCoord) ||
+		vertexMap.getColorComponent()->getColor(targetVertexCoord) != vertexMap.getColorComponent()->getColor(startVertexCoord) )
 	{
-		util::output("target vertex(%d/%d) is block",
+		util::output("target vertex(%d/%d) is block or in different island",
 			targetVertexCoord.x, targetVertexCoord.y);
 
-		//int middleNodeID = getFirstDirectlyReachableNode(vertexMap, targetVertexID, startVertexID);
-		//VertexMapRangeByCenter vertexMapRange(vertexMap, targetVertexCoord);
-		int middleNodeID = getFirstReachableNode(vertexMap, targetVertexID, startVertexID);
-		if (middleNodeID == fdkgame::navi::INVALID_NODEID)
-		{
-			util::output("target vertex(%d/%d) is block & can't find a nonblock around",
-				targetVertexCoord.x, targetVertexCoord.y);
-			return false;
-		}
+		int middleNodeID = getFirstSameColorNode(vertexMap, targetVertexID, startVertexID);
+		FDK_ASSERT(middleNodeID != fdkgame::navi::INVALID_NODEID);
 
 		targetVertexID = middleNodeID;
 		targetVertexCoord = vertexMap.toNodeCoord(targetVertexID);
@@ -240,7 +234,8 @@ bool AStar::search()
 		return true;
 	}
 
-	if (isDirectlyReachable(vertexMap, startVertexID, targetVertexID))
+	// 重新寻路时不走直连（不安全）
+	if (!m_bRefind && isDirectlyReachable(vertexMap, startVertexID, targetVertexID))
 	{
 		util::output("start vertex(%d/%d) can directly reach to target vertex(%d/%d)",
 			startVertexCoord.x, startVertexCoord.y,
@@ -251,7 +246,6 @@ bool AStar::search()
 		m_locationPop = new LocationPop(vertexMap, m_bRefind, m_targetLocation);
 		return true;
 	}
-	
 	
 	if (g_Option.getNavigatorType() == Option::NavigatorType_AStar)
 	{

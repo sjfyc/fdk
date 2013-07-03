@@ -2,13 +2,15 @@
 #define __FDKGAME_NAVIBASE_H_INCLUDE__
 #include "Base.h"
 #include <vector>
+#include <fdk/Array2D.h>
 #include "Math.h"
-
 namespace fdk { namespace game { namespace navi
 {
 	class Environment;
-	class GridEnv;
 	class Navigator;
+	class GridEnv;
+	class GridEnvColorComponent;
+	typedef Vector2D<int> GridNodeCoord;
 
 	const int INVALID_NODEID = -1;	
 	const int COST_STRAIGHT = 100;
@@ -40,13 +42,12 @@ namespace fdk { namespace game { namespace navi
 		Navigator();
 		virtual ~Navigator();
 	};
-
+		
 	class FDKGAME_API GridEnv
 		: public Environment
 	{
 	public:
-		typedef Vector2D<int> NodeCoord;
-		virtual ~GridEnv() {}
+		typedef GridNodeCoord NodeCoord;
 		virtual int getSizeX() const = 0;
 		virtual int getSizeY() const = 0;
 		virtual bool isValidNodeCoord(const NodeCoord& nodeCoord) const;
@@ -56,6 +57,8 @@ namespace fdk { namespace game { namespace navi
 		NodeCoord toNodeCoord(int nodeID) const;
 		bool isNodeWithCoordReachable(const NodeCoord& nodeCoord) const;
 
+		GridEnvColorComponent* getColorComponent() const;
+
 		// Environment interfaces
 		virtual int getNodeSpaceSize() const;
 		virtual int getHeuristic(int startNodeID, int targetNodeID) const;
@@ -64,10 +67,13 @@ namespace fdk { namespace game { namespace navi
 		virtual GridEnv* toGridEnv();
 		void getSuccessorNodesWithoutCheck(int nodeID, std::vector<SuccessorNodeInfo>& result) const;
 	protected:
+		GridEnv();
+		virtual ~GridEnv();
 		int getHeuristicManhattan(int startNodeID, int targetNodeID) const;
 		int getHeuristicChebyshev(int startNodeID, int targetNodeID) const;
 		int getHeuristicEuclidean(int startNodeID, int targetNodeID) const;
 		void getSuccessorNodes(Navigator& navigator, int nodeID, std::vector<SuccessorNodeInfo>& result, bool bCutCorner) const;
+		GridEnvColorComponent* m_colorComponent;
 	private:
 		bool tryAddSuccessorNode(Navigator& navigator, std::vector<SuccessorNodeInfo>& result, const NodeCoord& nodeCoord, int cost, int parentNodeID) const;
 		bool tryAddSuccessorNodeWithoutCheck(std::vector<SuccessorNodeInfo>& result, const NodeCoord& nodeCoord, int cost, int parentNodeID) const;
@@ -89,6 +95,24 @@ namespace fdk { namespace game { namespace navi
 	private:
 		const GridEnv& m_outer;
 		Range m_range;
+	};
+
+	class FDKGAME_API GridEnvColorComponent
+	{
+	public:
+		typedef GridNodeCoord NodeCoord;
+		typedef int ColorType;
+		typedef Array2D<ColorType> ColorMap;		
+		static const ColorType UNCOLORED = -1;
+		GridEnvColorComponent(const GridEnv& outer);
+		~GridEnvColorComponent();
+		void refill();
+		const ColorMap& getColorMap() const;
+		ColorType getColor(const NodeCoord& nodeCoord) const;
+	private:
+		void floodFill(const NodeCoord& nodeCoord, ColorType color);
+		const GridEnv& m_outer;
+		ColorMap m_colors;
 	};
 		
 	inline bool Environment::isValidNodeID(int nodeID) const
@@ -121,6 +145,11 @@ namespace fdk { namespace game { namespace navi
 		return isNodeReachable(toNodeID(nodeCoord));
 	}
 
+	inline GridEnvColorComponent* GridEnv::getColorComponent() const
+	{
+		return m_colorComponent;
+	}
+
 	inline GridPartEnv::GridPartEnv(const GridEnv& outer, const Range& range)
 		: m_outer(outer)
 		, m_range(range)
@@ -136,6 +165,17 @@ namespace fdk { namespace game { namespace navi
 	{
 		return m_range;
 	}
+
+	inline const GridEnvColorComponent::ColorMap& GridEnvColorComponent::getColorMap() const
+	{
+		return m_colors;
+	}
+	
+	inline GridEnvColorComponent::ColorType GridEnvColorComponent::getColor(const NodeCoord& nodeCoord) const
+	{
+		return m_colors(nodeCoord.x, nodeCoord.y);
+	}
+
 }}}
 
 #endif
