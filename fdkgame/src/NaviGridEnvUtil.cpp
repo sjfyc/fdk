@@ -326,11 +326,14 @@ namespace fdk { namespace game { namespace navi
 			}
 			virtual bool checkCondition(const Environment& l_env, int startNodeID, int targetNodeID, int nodeID) const
 			{
-				return getColor(m_env, nodeID) == m_targetColor;
+				const GridEnv& env = static_cast<const GridEnv&>(l_env);
+				return env.isNodeReachable(nodeID) && getColor(m_env, nodeID) == m_targetColor;
 			}
 			const GridEnv& m_env;
 			GridEnvColorComponent::ColorType m_targetColor;
 		} completeCondition(env, getColor(env, targetNodeID));
+		
+		FDK_ASSERT(getColor(env, targetNodeID) != GridEnvColorComponent::UNCOLORED);
 
 		AStar astar(envAdapter, startNodeID, targetNodeID, &completeCondition);
 		if (astar.search() == AStar::SearchResult_PathUnexist)
