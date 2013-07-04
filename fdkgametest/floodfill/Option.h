@@ -15,6 +15,7 @@ public:
 		Toggle_ShowCellCoord,
 		Toggle_ShowCenterVertex,
 		Toggle_ShowConnectLine,
+		Toggle_ShowConnectors,
 	};
 	void start();
 	void stop();

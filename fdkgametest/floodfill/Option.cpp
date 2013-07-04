@@ -20,21 +20,26 @@ void Option::onEvent(int eventType, void* params)
 			toggle(Toggle_ShowCellColor);
 			util::output("%s cell color", isOn(Toggle_ShowCellColor) ? "show" : "hide");
 		}	
-		if (key == HGEK_1)
+		else if (key == HGEK_1)
 		{
 			toggle(Toggle_ShowCellCoord);
 			util::output("%s cell coord", isOn(Toggle_ShowCellCoord) ? "show" : "hide");
 		}	
-		if (key == HGEK_2)
+		else if (key == HGEK_2)
 		{
 			toggle(Toggle_ShowCenterVertex);
 			util::output("%s center vertex", isOn(Toggle_ShowCenterVertex) ? "show" : "hide");
 		}
-		if (key == HGEK_3)
+		else if (key == HGEK_3)
 		{
 			toggle(Toggle_ShowConnectLine);
 			util::output("%s connect line", isOn(Toggle_ShowConnectLine) ? "show" : "hide");
-		}	
+		}
+		else if (key == HGEK_4)
+		{
+			toggle(Toggle_ShowConnectors);
+			util::output("%s connectors", isOn(Toggle_ShowConnectors) ? "show" : "hide");
+		}
 	}
 }
 
@@ -60,7 +65,8 @@ void Option::outputUsage()
 	util::output("0: show/hide cell color");
 	util::output("1: show/hide cell coord");
 	util::output("2: show/hide center vertex");
-	util::output("2: show/hide connect line");
+	util::output("3: show/hide connect line");
+	util::output("3: show/hide connectors");
 }
 
 void Option::start()

@@ -124,27 +124,36 @@ namespace fdk { namespace game { namespace navi
 	{
 	public:	
 		typedef GridNodeCoord NodeCoord;
+		typedef GridEnvColorComponent::ColorType ColorType;
 		struct Connector
 		{
-			std::set<GridEnvColorComponent::ColorType> connectedColors;
+			std::set<ColorType> connectedColors;
 			std::set<NodeCoord> occupiedNodes;
-			bool isConnected(GridEnvColorComponent::ColorType a, GridEnvColorComponent::ColorType b) const;
 		};
 		typedef std::set<Connector*> Connectors;
 		explicit GridEnvConnectorComponent(const GridEnvColorComponent& colorComponent);
 		~GridEnvConnectorComponent();
 		// 注意墙体必须先移除才能再增加
-		void removeWall(const NodeCoord& nodeCoord);
-		void addWall(const NodeCoord& nodeCoord);
+		void removeWall(const NodeCoord& nodeCoord, bool autoUpdateConnecting=true);
+		void addWall(const NodeCoord& nodeCoord, bool autoUpdateConnecting=true);
+		void updateConnectingInfo();
 		bool isConnected(const NodeCoord& a, const NodeCoord& b) const;
 		const Connectors& getConnectors() const;
-	private:		
+		const Connector* getConnector(const NodeCoord& nodeCoord) const;
+		void clear();
+	private:
+		typedef std::map<NodeCoord, Connector*> Node2Connector;
 		void occupyNode(Connector& connector, const NodeCoord& nodeCoord);
 		void unoccupyNode(Connector& connector, const NodeCoord& nodeCoord);		
+		Connector* getConnectorForOperate(const NodeCoord& nodeCoord);		
+		bool isConnected(ColorType a, ColorType b) const;
+		bool isConnected(ColorType a, const Connector& b) const;
+		bool isConnected(const Connector& a, const Connector& b) const;
 		const GridEnv& m_env;
 		const GridEnvColorComponent& m_colorComponent;
 		Connectors m_connectors;
-		Array2D<Connector*> m_node2connector;
+		Node2Connector m_node2connector;
+		std::vector< std::set<ColorType> > m_connectingInfo;
 	};
 
 	inline bool Environment::isValidNodeID(int nodeID) const

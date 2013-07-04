@@ -6,6 +6,14 @@
 
 namespace fdk { namespace game { namespace navi
 {
+	template <class SetT>
+	bool isIntersect(const SetT& a, const SetT& b)
+	{
+		SetT c;
+		std::set_intersection(a.begin(), a.end(), b.begin(), b.end(), std::inserter(c, c.begin()) );
+		return !c.empty();
+	}
+
 	const GridEnv* Environment::toGridEnv() const
 	{
 		return 0;
@@ -229,12 +237,17 @@ namespace fdk { namespace game { namespace navi
 	}
 
 	GridEnvConnectorComponent::GridEnvConnectorComponent(const GridEnvColorComponent& colorComponent)
-		: m_env(m_colorComponent.getOuter())
+		: m_env(colorComponent.getOuter())
 		, m_colorComponent(colorComponent)
 	{
 	}
 
 	GridEnvConnectorComponent::~GridEnvConnectorComponent()
+	{
+		clear();
+	}
+
+	void GridEnvConnectorComponent::clear()
 	{
 		for (Connectors::iterator it = m_connectors.begin(); it != m_connectors.end(); ++it)
 		{
@@ -244,10 +257,10 @@ namespace fdk { namespace game { namespace navi
 		m_connectors.clear();
 	}
 
-	void GridEnvConnectorComponent::removeWall(const NodeCoord& nodeCoord)
+	void GridEnvConnectorComponent::removeWall(const NodeCoord& nodeCoord, bool autoUpdateConnecting)
 	{
 		FDK_ASSERT(m_colorComponent.getColor(nodeCoord) == GridEnvColorComponent::UNCOLORED);
-		FDK_ASSERT(!m_node2connector(nodeCoord.x, nodeCoord.y));
+		FDK_ASSERT(!getConnector(nodeCoord));
 
 		const NodeCoord neighbours[4] = 
 		{
@@ -257,7 +270,7 @@ namespace fdk { namespace game { namespace navi
 			NodeCoord(nodeCoord.x, nodeCoord.y+1),
 		};
 		
-		std::set<GridEnvColorComponent::ColorType> aroundColors;
+		std::set<ColorType> aroundColors;
 		std::set<Connector*> aroundConnectors;
 		for (size_t i = 0; i < FDK_DIM(neighbours); ++i)
 		{
@@ -266,13 +279,14 @@ namespace fdk { namespace game { namespace navi
 			{
 				continue;
 			}
-			if (m_node2connector(neighbour.x, neighbour.y))
+			Connector* aroundConnector = getConnectorForOperate(neighbour);
+			if (aroundConnector)
 			{// 存在连通器
-				aroundConnectors.insert(m_node2connector(neighbour.x, neighbour.y));
+				aroundConnectors.insert(aroundConnector);
 			}
 			else
 			{// 不是连通器				
-				GridEnvColorComponent::ColorType color = m_colorComponent.getColor(neighbour);
+				ColorType color = m_colorComponent.getColor(neighbour);
 				if (color == GridEnvColorComponent::UNCOLORED)
 				{// 是墙体
 					// DONOTHING
@@ -316,13 +330,18 @@ namespace fdk { namespace game { namespace navi
 			aroundConnector->connectedColors.insert(aroundColors.begin(), aroundColors.end());
 			occupyNode(*aroundConnector, nodeCoord);
 		}
+
+		if (autoUpdateConnecting)
+		{
+			updateConnectingInfo();
+		}		
 	}
 
-	void GridEnvConnectorComponent::addWall(const NodeCoord& nodeCoord)
+	void GridEnvConnectorComponent::addWall(const NodeCoord& nodeCoord, bool autoUpdateConnecting)
 	{
 		FDK_ASSERT(m_colorComponent.getColor(nodeCoord) == GridEnvColorComponent::UNCOLORED);
 
-		Connector* connector = m_node2connector(nodeCoord.x, nodeCoord.y);
+		Connector* connector = getConnectorForOperate(nodeCoord);
 		FDK_ASSERT(connector);
 
 		unoccupyNode(*connector, nodeCoord);
@@ -363,13 +382,13 @@ namespace fdk { namespace game { namespace navi
 					{
 						continue;
 					}
-					if (m_node2connector(neighbour.x, neighbour.y))
+					if (getConnector(neighbour))
 					{// 存在连通器
 						pending.push(neighbour);
 					}
 					else
 					{// 不是连通器				
-						GridEnvColorComponent::ColorType color = m_colorComponent.getColor(neighbour);
+						ColorType color = m_colorComponent.getColor(neighbour);
 						if (color == GridEnvColorComponent::UNCOLORED)
 						{// 是墙体
 							// DONOTHING
@@ -385,53 +404,101 @@ namespace fdk { namespace game { namespace navi
 		bool result = m_connectors.erase(connector) > 0;
 		FDK_ASSERT(result);
 		delete connector;
+
+		if (autoUpdateConnecting)
+		{
+			updateConnectingInfo();
+		}		
 	}
 
 	void GridEnvConnectorComponent::occupyNode(Connector& connector, const NodeCoord& nodeCoord)
 	{
-		FDK_ASSERT(!m_node2connector(nodeCoord.x, nodeCoord.y));
+		FDK_ASSERT(!getConnector(nodeCoord));
 		bool result = connector.occupiedNodes.insert(nodeCoord).second;
 		FDK_ASSERT(result);
-		m_node2connector(nodeCoord.x, nodeCoord.y) = &connector;
+		result = m_node2connector.insert(std::make_pair(nodeCoord, &connector)).second;
+		FDK_ASSERT(result);
 	}
 
 	void GridEnvConnectorComponent::unoccupyNode(Connector& connector, const NodeCoord& nodeCoord)
 	{
-		FDK_ASSERT(m_node2connector(nodeCoord.x, nodeCoord.y) == &connector);
+		FDK_ASSERT(getConnector(nodeCoord) == &connector);
 		bool result = connector.occupiedNodes.erase(nodeCoord) > 0;
 		FDK_ASSERT(result);
-		m_node2connector(nodeCoord.x, nodeCoord.y) = 0;
+		result = m_node2connector.erase(nodeCoord) > 0;
+		FDK_ASSERT(result);
+	}
+
+	void GridEnvConnectorComponent::updateConnectingInfo()
+	{
+		m_connectingInfo.clear();
+
+		std::vector<Connector*> left(m_connectors.begin(), m_connectors.end());
+		std::vector<Connector*> pending;
+
+		std::set<ColorType> singleConnecting;
+		bool resetConnecting = true;
+
+		while (1)
+		{
+			if (left.empty())
+			{
+				break;
+			}
+			for (size_t i = 0; i < left.size(); ++i)
+			{
+				Connector* connector = left[i];
+				if (i == 0 && resetConnecting)
+				{
+					singleConnecting.insert(connector->connectedColors.begin(), connector->connectedColors.end());
+					resetConnecting = false;
+					continue;
+				}
+				if (isIntersect(singleConnecting, connector->connectedColors))
+				{
+					singleConnecting.insert(connector->connectedColors.begin(), connector->connectedColors.end());
+				}
+				else
+				{
+					pending.push_back(connector);
+				}
+			}
+			if (pending.empty())
+			{
+				m_connectingInfo.push_back(singleConnecting);
+				break;
+			}
+			if (pending.size() == left.size())
+			{
+				m_connectingInfo.push_back(singleConnecting);
+				singleConnecting.clear();
+				resetConnecting = true;
+				pending.clear();
+				continue;
+			}
+			left.swap(pending);
+			pending.clear();
+		}
+
 	}
 
 	bool GridEnvConnectorComponent::isConnected(const NodeCoord& a, const NodeCoord& b) const
 	{
-		GridEnvColorComponent::ColorType aColor = m_colorComponent.getColor(a);
-		GridEnvColorComponent::ColorType bColor = m_colorComponent.getColor(b);
-		Connector* aConnector = m_node2connector(a.x, a.y);
-		Connector* bConnector = m_node2connector(b.x, b.y);
+		ColorType aColor = m_colorComponent.getColor(a);
+		ColorType bColor = m_colorComponent.getColor(b);
+		const Connector* aConnector = getConnector(a);
+		const Connector* bConnector = getConnector(b);
 		if (aColor != GridEnvColorComponent::UNCOLORED)
 		{
 			if (bColor != GridEnvColorComponent::UNCOLORED)
 			{
-				if (aColor == bColor)
-				{
-					return true;
-				}
-				for (Connectors::iterator it = m_connectors.begin(); it != m_connectors.end(); ++it)
-				{
-					Connector* connector = *it;
-					if (connector->isConnected(aColor, bColor))
-					{
-						return true;
-					}
-				}
-				return false;
+				return isConnected(aColor, bColor);
 			}
 			else
 			{
 				if (bConnector)
 				{
-					return bConnector->connectedColors.find(aColor) != bConnector->connectedColors.end();
+					return isConnected(aColor, *bConnector);
 				}
 				else
 				{
@@ -445,7 +512,7 @@ namespace fdk { namespace game { namespace navi
 			{
 				if (aConnector)
 				{
-					return aConnector->connectedColors.find(bColor) != aConnector->connectedColors.end();
+					return isConnected(bColor, *aConnector);
 				}
 				else
 				{
@@ -456,19 +523,73 @@ namespace fdk { namespace game { namespace navi
 			{
 				if (aConnector && bConnector)
 				{
-					std::set<GridEnvColorComponent::ColorType> commonColors;
-					std::set_intersection(aConnector->connectedColors.begin(), aConnector->connectedColors.end(),
-						bConnector->connectedColors.begin(), bConnector->connectedColors.end(), std::inserter(commonColors, commonColors.begin()) );
-					return !commonColors.empty();
+					return isConnected(*aConnector, *bConnector);
 				}
 				return false;
 			}
 		}	
 	}
 
-	bool GridEnvConnectorComponent::Connector::isConnected(GridEnvColorComponent::ColorType a, GridEnvColorComponent::ColorType b) const
+	bool GridEnvConnectorComponent::isConnected(ColorType a, ColorType b) const
 	{
-		return connectedColors.find(a) != connectedColors.end()
-			&& connectedColors.find(b) != connectedColors.end();
+		FDK_ASSERT(a != GridEnvColorComponent::UNCOLORED);
+		FDK_ASSERT(b != GridEnvColorComponent::UNCOLORED);
+		if (a == b)
+		{
+			return true;
+		}
+		for (size_t i = 0; i < m_connectingInfo.size(); ++i)
+		{
+			const std::set<ColorType>& singleConnecting = m_connectingInfo[i];
+			if (singleConnecting.find(a) != singleConnecting.end() &&
+				singleConnecting.find(b) != singleConnecting.end())
+			{
+				return true;
+			}
+		}
+		return false;
+	}
+
+	bool GridEnvConnectorComponent::isConnected(ColorType a, const Connector& b) const
+	{
+		for (std::set<ColorType>::const_iterator it = b.connectedColors.begin(); 
+			it != b.connectedColors.end(); ++it)
+		{
+			if (isConnected(a, *it))
+			{
+				return true;
+			}
+		}
+		return false;
+	}
+
+	bool GridEnvConnectorComponent::isConnected(const Connector& a, const Connector& b) const
+	{
+		for (std::set<ColorType>::const_iterator it = a.connectedColors.begin(); 
+			it != a.connectedColors.end(); ++it)
+		{
+			if (isConnected(*it, b))
+			{
+				return true;
+			}
+		}
+		return false;
+	}
+
+	const GridEnvConnectorComponent::Connector* GridEnvConnectorComponent::getConnector(const NodeCoord& nodeCoord) const
+	{
+		Node2Connector::const_iterator it = m_node2connector.find(nodeCoord);
+		if (it == m_node2connector.end())
+		{
+			return 0;
+		}
+		return it->second;
+	}
+
+	GridEnvConnectorComponent::Connector* GridEnvConnectorComponent::getConnectorForOperate(const NodeCoord& nodeCoord)
+	{
+		return const_cast<Connector*>(
+			static_cast<const GridEnvConnectorComponent*>(this)->getConnector(nodeCoord)
+			);
 	}
 }}}

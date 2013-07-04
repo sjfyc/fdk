@@ -56,6 +56,10 @@ void Game::render()
 	{
 		g_Board.drawCellColor();
 	}
+	if (g_Option.isOn(Option::Toggle_ShowConnectors))
+	{
+		g_Board.drawConnectors();
+	}
 	if (g_Option.isOn(Option::Toggle_ShowCellCoord))
 	{
 		g_Board.drawCellCoord();
@@ -112,12 +116,50 @@ void Game::onEvent(int eventType, void* params)
 		{
 			IsRunning = false;
 		}
-	}
+		else if (key == HGEK_T)
+		{
+			m_mode->leave(*this);
+			if (m_mode == &g_GameModeMapEdit)
+			{
+				m_mode = &g_GameModeGame;
+			}
+			else
+			{
+				m_mode = &g_GameModeMapEdit;
+			}
+			m_mode->enter(*this);
+		}
+	}	
 	m_mode->handleEvent(*this, eventType, params);
 }
 
 void Game::outputUsage()
 {
+}
+
+void GameModeGame::handleEvent(Game& game, int eventType, void* params)
+{
+	Location mouseLocation;
+	g_HGE->Input_GetMousePos(&mouseLocation.x, &mouseLocation.y);
+	CellCoord mouseCoord = util::locationToCellCoord(mouseLocation);
+
+	if (eventType == GAME_SYSTEM_EVENT_KEYDOWN)
+	{
+		int key = (int)params;
+		if (key == HGEK_LBUTTON)
+		{
+
+			if (!g_Board.getConnectorComponent()->getConnector(mouseCoord))
+			{
+				g_Board.getConnectorComponent()->removeWall(mouseCoord);
+			}
+			else
+			{
+				g_Board.getConnectorComponent()->addWall(mouseCoord);
+			}
+		}
+		
+	}
 }
 
 GameModeMapEdit::GameModeMapEdit()
@@ -135,6 +177,7 @@ void GameModeMapEdit::leave(Game& game)
 {
 	g_Board.annotateMap();
 	g_Board.getColorComponent()->refill();
+	g_Board.getConnectorComponent()->clear();
 }
 
 void GameModeMapEdit::handleEvent(Game& game, int eventType, void* params)
@@ -196,8 +239,9 @@ void GameModeMapEdit::handleEvent(Game& game, int eventType, void* params)
 		{
 			g_Board.annotateMap();
 			g_Board.getColorComponent()->refill();
+			g_Board.getConnectorComponent()->clear();
 		}
-	}
+	}	
 }
 
 void GameModeMapEdit::update(Game& game, float delta)
@@ -225,6 +269,7 @@ void GameModeMapEdit::update(Game& game, float delta)
 		else
 		{
 			g_Board.setBlock(mouseCoord, true);
+
 		}
 	}
 	else if (m_brush == Brush_Erase)

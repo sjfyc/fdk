@@ -19,6 +19,7 @@ public:
 	void drawCellCoord();
 	void drawCenterVertex();
 	void drawCellClearanceValue();
+	void drawConnectors();
 private:
 	Board();
 	~Board();

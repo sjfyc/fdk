@@ -1,6 +1,7 @@
 #include "Board.h"
 #include "Util.h"
 #include "Font.h"
+#include "Game.h"
 #pragma warning(disable:4244)
 
 Board::Board()
@@ -9,10 +10,14 @@ Board::Board()
 	annotateMap();
 	m_colorComponent = new fdkgame::navi::GridEnvColorComponent(*this);
 	m_colorComponent->refill();
+	m_connectorComponent = new fdkgame::navi::GridEnvConnectorComponent(*m_colorComponent);
+	m_connectorComponent->clear();
 }
 
 Board::~Board()
 {
+	delete m_connectorComponent;
+	m_connectorComponent = 0;
 	delete m_colorComponent;
 	m_colorComponent = 0;
 }
@@ -106,4 +111,21 @@ void Board::drawCenterVertex()
 			util::fillRectByCenter( util::cellCoordToLocationInCenter(CellCoord(x, y)), Location(2, 2), ARGB(255,122,143,177));
 		}
 	}
+}
+
+void Board::drawConnectors()
+{
+	for (fdkgame::navi::GridEnvConnectorComponent::Connectors::iterator it = m_connectorComponent->getConnectors().begin();
+		it != m_connectorComponent->getConnectors().end(); ++it)
+	{
+		fdkgame::navi::GridEnvConnectorComponent::Connector* connector = *it;
+		std::set<fdkgame::navi::GridEnvConnectorComponent::NodeCoord>::iterator itNode = connector->occupiedNodes.begin();
+		for (; itNode != connector->occupiedNodes.end(); ++itNode)
+		{
+			const fdkgame::navi::GridEnvConnectorComponent::NodeCoord& coord = *itNode;
+			util::fillCell(coord, ARGB(255, 255, 0, 255));
+		}
+	}
+	g_Font.printf(CELL_SIZE_X, CELL_SIZE_Y, HGETEXT_LEFT, "connected=%d", 
+		m_connectorComponent->isConnected(g_Game.getStartCoord(), g_Game.getTargetCoord()) ? 1 : 0);
 }

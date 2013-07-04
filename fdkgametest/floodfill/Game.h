@@ -10,6 +10,7 @@ class Game
 	, public fdk::EventHook
 {
 	friend class fdk::Singleton<Game>;
+	friend class GameModeGame;
 	friend class GameModeMapEdit;
 public:
 	bool start();
@@ -38,6 +39,19 @@ public:
 	virtual void update(Game& game, float delta) {}
 	virtual void render(Game& game) {}
 	virtual void handleEvent(Game& game, int eventType, void* params) {}
+};
+
+class GameModeGame
+	: public GameMode
+	, public fdk::Singleton<GameModeGame>
+{
+	friend class fdk::Singleton<GameModeGame>;
+public:
+	virtual void enter(Game& game) {}
+	virtual void leave(Game& game) {}
+	virtual void update(Game& game, float delta) {}
+	virtual void render(Game& game) {}
+	virtual void handleEvent(Game& game, int eventType, void* params);
 };
 
 class GameModeMapEdit
@@ -75,5 +89,6 @@ inline const CellCoord& Game::getTargetCoord() const
 }
 
 #define g_Game (Game::instance())
+#define g_GameModeGame (GameModeGame::instance())
 #define g_GameModeMapEdit (GameModeMapEdit::instance())
 #endif
