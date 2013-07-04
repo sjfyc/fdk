@@ -10,7 +10,7 @@ namespace fdk { namespace game { namespace navi
 		FDK_ASSERT(unitSize >= 1);
 
 		m_colorComponent = new GridEnvColorComponent(*this);
-		m_connectorComponent = new GridEnvConnectorComponent(*this);
+		m_connectorComponent = new GridEnvConnectorComponent(*m_colorComponent);
 	}
 
 	VertexMap::~VertexMap()

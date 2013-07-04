@@ -107,7 +107,7 @@ namespace fdk { namespace game { namespace navi
 		typedef int ColorType;
 		typedef Array2D<ColorType> ColorMap;		
 		static const ColorType UNCOLORED = -1;
-		GridEnvColorComponent(const GridEnv& outer);
+		explicit GridEnvColorComponent(const GridEnv& outer);
 		~GridEnvColorComponent();
 		void refill();
 		const GridEnv& getOuter() const;
@@ -131,7 +131,7 @@ namespace fdk { namespace game { namespace navi
 			bool isConnected(GridEnvColorComponent::ColorType a, GridEnvColorComponent::ColorType b) const;
 		};
 		typedef std::set<Connector*> Connectors;
-		GridEnvConnectorComponent(const GridEnvColorComponent& colorComponent);
+		explicit GridEnvConnectorComponent(const GridEnvColorComponent& colorComponent);
 		~GridEnvConnectorComponent();
 		// 注意墙体必须先移除才能再增加
 		void removeWall(const NodeCoord& nodeCoord);
