@@ -176,7 +176,10 @@ void GameModeMapEdit::enter(Game& game)
 void GameModeMapEdit::leave(Game& game)
 {
 	g_Board.annotateMap();
+	double startSecs = util::getSeconds();
 	g_Board.getColorComponent()->refill();
+	double endSecs = util::getSeconds();
+	util::output("cost %lf", (endSecs-startSecs)*(512*512.f)/(CELL_COUNT_X*CELL_COUNT_Y));
 	g_Board.getConnectorComponent()->clear();
 }
 
@@ -238,7 +241,10 @@ void GameModeMapEdit::handleEvent(Game& game, int eventType, void* params)
 		else if (key == HGEK_SPACE)
 		{
 			g_Board.annotateMap();
+			double startSecs = util::getSeconds();
 			g_Board.getColorComponent()->refill();
+			double endSecs = util::getSeconds();
+			util::output("cost %lf", (endSecs-startSecs)*(512*512.f)/(CELL_COUNT_X*CELL_COUNT_Y));			
 			g_Board.getConnectorComponent()->clear();
 		}
 	}	

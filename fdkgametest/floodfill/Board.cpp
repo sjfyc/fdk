@@ -9,7 +9,10 @@ Board::Board()
 	_Base::resetMap(CELL_COUNT_X, CELL_COUNT_Y);
 	annotateMap();
 	m_colorComponent = new fdkgame::navi::GridEnvColorComponent(*this);
+	double startSecs = util::getSeconds();
 	m_colorComponent->refill();
+	double endSecs = util::getSeconds();
+	util::output("cost %lf", (endSecs-startSecs)*(512*512.f)/(CELL_COUNT_X*CELL_COUNT_Y));
 	m_connectorComponent = new fdkgame::navi::GridEnvConnectorComponent(*m_colorComponent);
 	m_connectorComponent->clear();
 }

@@ -11,6 +11,7 @@ namespace util
 	CellCoord locationToCellCoord(const Location& location);
 	Location cellCoordToLocation(const CellCoord& cellCoord);
 	Location cellCoordToLocationInCenter(const CellCoord& cellCoord);
+	double getSeconds();
 }
 
 #endif

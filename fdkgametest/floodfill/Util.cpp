@@ -49,4 +49,20 @@ namespace util
 		return cellCoordToLocation(cellCoord)+Location(HALF_CELL_SIZE_X, HALF_CELL_SIZE_Y);
 	}
 
+	static double getSecondsPerCycle()
+	{
+		LARGE_INTEGER frequency;
+		BOOL result = QueryPerformanceFrequency(&frequency);
+		FDK_ASSERT(result);
+		return 1.0 / frequency.QuadPart;
+	}
+
+	double getSeconds()
+	{
+		static double secondsPerCycle = getSecondsPerCycle();
+		LARGE_INTEGER cycles;
+		QueryPerformanceCounter(&cycles);
+		// Add big number to make bugs apparent where return value is being passed to FLOAT
+		return cycles.QuadPart * secondsPerCycle + 16777216.0;
+	}
 }
