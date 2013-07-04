@@ -2,6 +2,8 @@
 #define __FDKGAME_NAVIBASE_H_INCLUDE__
 #include "Base.h"
 #include <vector>
+#include <set>
+#include <map>
 #include <fdk/Array2D.h>
 #include "Math.h"
 namespace fdk { namespace game { namespace navi
@@ -10,6 +12,7 @@ namespace fdk { namespace game { namespace navi
 	class Navigator;
 	class GridEnv;
 	class GridEnvColorComponent;
+	class GridEnvConnectorComponent;
 	typedef Vector2D<int> GridNodeCoord;
 
 	const int INVALID_NODEID = -1;	
@@ -58,6 +61,7 @@ namespace fdk { namespace game { namespace navi
 		bool isNodeWithCoordReachable(const NodeCoord& nodeCoord) const;
 
 		GridEnvColorComponent* getColorComponent() const;
+		GridEnvConnectorComponent* getConnectorComponent() const;
 
 		// Environment interfaces
 		virtual int getNodeSpaceSize() const;
@@ -73,6 +77,7 @@ namespace fdk { namespace game { namespace navi
 		int getHeuristicEuclidean(int startNodeID, int targetNodeID) const;
 		void getSuccessorNodes(Navigator& navigator, int nodeID, std::vector<SuccessorNodeInfo>& result, bool bCutCorner) const;
 		GridEnvColorComponent* m_colorComponent;
+		GridEnvConnectorComponent* m_connectorComponent;
 	private:
 		bool tryAddSuccessorNode(Navigator& navigator, std::vector<SuccessorNodeInfo>& result, const NodeCoord& nodeCoord, int cost, int parentNodeID) const;
 	};
@@ -105,6 +110,7 @@ namespace fdk { namespace game { namespace navi
 		GridEnvColorComponent(const GridEnv& outer);
 		~GridEnvColorComponent();
 		void refill();
+		const GridEnv& getOuter() const;
 		const ColorMap& getColorMap() const;
 		ColorType getColor(const NodeCoord& nodeCoord) const;
 	private:
@@ -112,7 +118,35 @@ namespace fdk { namespace game { namespace navi
 		const GridEnv& m_outer;
 		ColorMap m_colors;
 	};
-		
+	
+	// 对于已经着色的地图,墙体部分可以动态增删
+	class FDKGAME_API GridEnvConnectorComponent
+	{
+	public:	
+		typedef GridNodeCoord NodeCoord;
+		struct Connector
+		{
+			std::set<GridEnvColorComponent::ColorType> connectedColors;
+			std::set<NodeCoord> occupiedNodes;
+			bool isConnected(GridEnvColorComponent::ColorType a, GridEnvColorComponent::ColorType b) const;
+		};
+		typedef std::set<Connector*> Connectors;
+		GridEnvConnectorComponent(const GridEnvColorComponent& colorComponent);
+		~GridEnvConnectorComponent();
+		// 注意墙体必须先移除才能再增加
+		void removeWall(const NodeCoord& nodeCoord);
+		void addWall(const NodeCoord& nodeCoord);
+		bool isConnected(const NodeCoord& a, const NodeCoord& b) const;
+		const Connectors& getConnectors() const;
+	private:		
+		void occupyNode(Connector& connector, const NodeCoord& nodeCoord);
+		void unoccupyNode(Connector& connector, const NodeCoord& nodeCoord);		
+		const GridEnv& m_env;
+		const GridEnvColorComponent& m_colorComponent;
+		Connectors m_connectors;
+		Array2D<Connector*> m_node2connector;
+	};
+
 	inline bool Environment::isValidNodeID(int nodeID) const
 	{
 		return nodeID >= 0 && nodeID < getNodeSpaceSize();
@@ -148,6 +182,11 @@ namespace fdk { namespace game { namespace navi
 		return m_colorComponent;
 	}
 
+	inline GridEnvConnectorComponent* GridEnv::getConnectorComponent() const
+	{
+		return m_connectorComponent;
+	}
+
 	inline GridPartEnv::GridPartEnv(const GridEnv& outer, const Range& range)
 		: m_outer(outer)
 		, m_range(range)
@@ -164,6 +203,11 @@ namespace fdk { namespace game { namespace navi
 		return m_range;
 	}
 
+	inline const GridEnv& GridEnvColorComponent::getOuter() const
+	{
+		return m_outer;
+	}
+
 	inline const GridEnvColorComponent::ColorMap& GridEnvColorComponent::getColorMap() const
 	{
 		return m_colors;
@@ -174,6 +218,10 @@ namespace fdk { namespace game { namespace navi
 		return m_colors(nodeCoord.x, nodeCoord.y);
 	}
 
+	inline const GridEnvConnectorComponent::Connectors& GridEnvConnectorComponent::getConnectors() const
+	{
+		return m_connectors;
+	}
 }}}
 
 #endif
