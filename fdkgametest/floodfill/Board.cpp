@@ -74,10 +74,14 @@ void Board::drawCellColor()
 			if (color != ColorComponent::UNCOLORED)
 			{
 				util::fillCell(CellCoord(x, y), ARGB(255, color * 40, 0, 0));
-				g_Font.printf(x*CELL_SIZE_X+2, y*CELL_SIZE_Y+2, HGETEXT_LEFT, "%d", color);
+				g_Font.printf(x*CELL_SIZE_X+2, y*CELL_SIZE_Y+2, HGETEXT_LEFT, "%d", color);				
 			}
 		}
 	}
+	g_Font.printf(CELL_SIZE_X, CELL_SIZE_Y, HGETEXT_LEFT, "main color is %d, with %d nodes", 
+		m_colorComponent->getMainColor(), 
+		m_colorComponent->getNodeCountWithColor(m_colorComponent->getMainColor())
+		);
 }
 
 void Board::drawCellCoord()

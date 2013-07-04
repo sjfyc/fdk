@@ -112,11 +112,16 @@ namespace fdk { namespace game { namespace navi
 		void refill();
 		const GridEnv& getOuter() const;
 		const ColorMap& getColorMap() const;
-		ColorType getColor(const NodeCoord& nodeCoord) const;
+		ColorType getColor(const NodeCoord& nodeCoord) const;		
+		ColorType getMainColor() const;
+		int getNodeCountWithColor(ColorType color) const;
 	private:
 		void floodFill(const NodeCoord& nodeCoord, ColorType color);
+		void updateMainColor();
 		const GridEnv& m_outer;
 		ColorMap m_colors;
+		std::map<ColorType, int> m_nodeCountWithColor;
+		ColorType m_mainColor;
 	};
 	
 	// 对于已经着色的地图,墙体部分可以动态增删
@@ -225,6 +230,11 @@ namespace fdk { namespace game { namespace navi
 	inline GridEnvColorComponent::ColorType GridEnvColorComponent::getColor(const NodeCoord& nodeCoord) const
 	{
 		return m_colors(nodeCoord.x, nodeCoord.y);
+	}
+
+	inline GridEnvColorComponent::ColorType GridEnvColorComponent::getMainColor() const
+	{
+		return m_mainColor;
 	}
 
 	inline const GridEnvConnectorComponent::Connectors& GridEnvConnectorComponent::getConnectors() const

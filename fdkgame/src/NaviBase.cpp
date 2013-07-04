@@ -172,6 +172,7 @@ namespace fdk { namespace game { namespace navi
 
 	GridEnvColorComponent::GridEnvColorComponent(const GridEnv& outer)
 		: m_outer(outer)
+		, m_mainColor(UNCOLORED)
 	{
 	}
 
@@ -184,6 +185,8 @@ namespace fdk { namespace game { namespace navi
 		const int sizeX = m_outer.getSizeX();
 		const int sizeY = m_outer.getSizeY();
 		m_colors.reset(sizeX, sizeY, UNCOLORED);
+		m_nodeCountWithColor.clear();
+		m_mainColor = UNCOLORED;
 		
 		ColorType color = 0;
 		for (int y = 0; y < sizeY; ++y)
@@ -198,6 +201,7 @@ namespace fdk { namespace game { namespace navi
 				}
 			}
 		}
+		updateMainColor();
 	}
 
 	void GridEnvColorComponent::floodFill(const NodeCoord& nodeCoord, ColorType color)
@@ -214,6 +218,7 @@ namespace fdk { namespace game { namespace navi
 			}
 			
 			m_colors(cur.x, cur.y) = color;
+			++m_nodeCountWithColor[color];
 
 			const NodeCoord neighbours[] =
 			{
@@ -231,6 +236,40 @@ namespace fdk { namespace game { namespace navi
 					m_colors(neighbour.x, neighbour.y) == UNCOLORED)
 				{
 					pending.push(neighbour); // 斜角的节点可能被重复添加
+				}
+			}
+		}
+	}
+
+	int GridEnvColorComponent::getNodeCountWithColor(ColorType color) const
+	{
+		std::map<ColorType, int>::const_iterator it = m_nodeCountWithColor.find(color);
+		if (it == m_nodeCountWithColor.end())
+		{
+			return 0;
+		}
+		return it->second;
+	}
+
+	void GridEnvColorComponent::updateMainColor()
+	{
+		int maxNodeCount = 0;
+		for (std::map<ColorType, int>::iterator it = m_nodeCountWithColor.begin();
+			it != m_nodeCountWithColor.end(); ++it)
+		{
+			const ColorType color = it->first;
+			const int nodeCount = it->second;
+			if (it == m_nodeCountWithColor.begin()) 
+			{
+				m_mainColor = color;
+				maxNodeCount = nodeCount;
+			}
+			else
+			{
+				if (nodeCount > maxNodeCount)
+				{
+					maxNodeCount = nodeCount;
+					m_mainColor = color;
 				}
 			}
 		}
