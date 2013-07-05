@@ -66,12 +66,13 @@ public:
 	LocationPop(
 		const Map& map,
 		bool bRefind,// refind时使用安全路线
-		const Location& targetLocation
+		const Location* targetLocation
 		)
 		: m_map(map)
 		, m_bRefind(bRefind)
-		, m_targetLocation(targetLocation)
+		, m_targetLocation(targetLocation?*targetLocation:Location())
 		, m_bTargetLocationUsed(false)
+		, m_bEnableTargetLocation(targetLocation?true:false)
 		, m_pop(0)
 	{
 	}
@@ -89,7 +90,7 @@ public:
 			m_pop->pop(); // 忽略起点
 		}
 	}
-	bool empty() const { return m_bTargetLocationUsed; }
+	bool empty() const { return m_bEnableTargetLocation ? m_bTargetLocationUsed : m_pop->empty(); }
 	Location pop()
 	{
 		FDK_ASSERT(!empty());
@@ -101,7 +102,10 @@ public:
 		int nodeID = m_pop->pop();
 		if (!m_bRefind && m_pop->empty()) // 忽略终点
 		{
-			return pop();
+			if (m_bEnableTargetLocation)
+			{
+				return pop();
+			}
 		}
 		return util::vertexCoordToLocation(m_map.toNodeCoord(nodeID));
 	}
@@ -111,6 +115,7 @@ private:
 	bool m_bRefind;	
 	Location m_targetLocation;
 	bool m_bTargetLocationUsed;
+	bool m_bEnableTargetLocation;
 	Poper* m_pop;
 };
 
@@ -166,7 +171,7 @@ void AStar::render()
 
 bool AStar::search()
 {
-	util::output("start path finding..");
+	util::output("start path %sfinding..", m_bRefind?"re":"");
 
 	const fdkgame::navi::VertexMap& vertexMap = getVertexMap();
 
@@ -228,7 +233,7 @@ bool AStar::search()
 			}
 			else
 			{// 起点处于封闭区域
-				// 直接用A*寻出一个最近点
+				//不必调整目标
 			}
 		}
 	}
@@ -266,7 +271,7 @@ bool AStar::search()
 		m_vertexCoordPath.push_back(startVertexCoord);
 		m_vertexCoordPath.push_back(targetVertexCoord);
 		m_locationPath.push_back(m_targetLocation);
-		m_locationPop = new LocationPop(vertexMap, m_bRefind, m_targetLocation);		
+		m_locationPop = new LocationPop(vertexMap, m_bRefind, &m_targetLocation);		
 		return true;
 	}
 
@@ -279,7 +284,7 @@ bool AStar::search()
 		m_vertexCoordPath.push_back(startVertexCoord);
 		m_vertexCoordPath.push_back(targetVertexCoord);
 		m_locationPath.push_back(m_targetLocation);
-		m_locationPop = new LocationPop(vertexMap, m_bRefind, m_targetLocation);
+		m_locationPop = new LocationPop(vertexMap, m_bRefind, &m_targetLocation);
 		return true;
 	}
 	
@@ -306,7 +311,6 @@ bool AStar::search()
 	if (searchResult == Navigator::SearchResult_PathUnexist)
 	{
 		util::output("search failed, use closest target");
-		return false;
 	}
 	std::list<int> roughPath;
 	m_navigator->getPath(roughPath, !m_bRefind ? true : false);
@@ -337,8 +341,12 @@ bool AStar::search()
 				m_locationPath.push_back(location);	
 			}
 		}
-		
-		m_locationPath.push_back(m_targetLocation);
+
+		if (searchResult != Navigator::SearchResult_PathUnexist)
+		{
+			m_locationPath.push_back(m_targetLocation);
+		}
+	
 	}
 		
 	{// 精化为每个路点
@@ -355,7 +363,8 @@ bool AStar::search()
 		m_vertexCoordPath.push_back(targetVertexCoord);
 	}
 
-	m_locationPop = new LocationPop(vertexMap, m_bRefind, m_targetLocation);
+	m_locationPop = new LocationPop(vertexMap, m_bRefind, 
+		(searchResult != Navigator::SearchResult_PathUnexist) ? &m_targetLocation : 0);
 	m_navigator->getPath(m_locationPop->getRoughPathToInit(), !m_bRefind ? true : false);
 	m_locationPop->afterRoughPathInited();
 

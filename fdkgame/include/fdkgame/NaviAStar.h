@@ -76,6 +76,8 @@ namespace fdk { namespace game { namespace navi
 		SearchResult m_searchResult;
 		OpenListItem m_currentClosed;
 		bool m_bInitedInspect;
+		int m_minHValue;
+		OpenListItem m_closedWithMinHValue;
 	};
 
 	inline int AStar::NodeData::fValue() const
@@ -122,12 +124,7 @@ namespace fdk { namespace game { namespace navi
 
 	inline int AStar::getCompletedNodeID() const
 	{
-		return m_currentClosed.nodeID;
-	}
-
-	inline int AStar::getPathCost() const
-	{
-		return m_currentClosed.fValue;
+		return (m_searchResult == SearchResult_Completed) ? m_currentClosed.nodeID : INVALID_NODEID;
 	}
 }}}
 

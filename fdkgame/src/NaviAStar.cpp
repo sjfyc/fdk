@@ -37,6 +37,8 @@ namespace fdk { namespace game { namespace navi
 		, m_searchResult(SearchResult_Proceeding)
 		, m_currentClosed()
 		, m_bInitedInspect(false)
+		, m_minHValue(INT_MAX)
+		, m_closedWithMinHValue()
 	{
 		FDK_ASSERT(m_env.isValidNodeID(startNodeID));
 		FDK_ASSERT(m_env.isValidNodeID(targetNodeID));
@@ -85,6 +87,12 @@ namespace fdk { namespace game { namespace navi
 			if (recorder)
 			{
 				recorder->onCloseNode(m_env, current.nodeID);
+			}
+
+			if (m_nodeDatas[current.nodeID].hValue < m_minHValue)
+			{
+				m_minHValue = m_nodeDatas[current.nodeID].hValue;
+				m_closedWithMinHValue = current;
 			}
 
 			bool bComplete = false;
@@ -167,7 +175,9 @@ namespace fdk { namespace game { namespace navi
 		//	const int width = pGridEnv->getSizeX();
 		//	
 		//	int finishNodeID = bWithStartTarget ? INVALID_NODEID : m_startNodeID;
-		//	int portNodeID = bWithStartTarget ? m_currentClosed.nodeID : m_nodeDatas[m_currentClosed.nodeID].parentNodeID;
+		//	const int endNodeID = (m_searchResult == SearchResult_PathUnexist) ? m_closedWithMinHValue.nodeID : m_currentClosed.nodeID;
+		// 
+		//	int portNodeID = bWithStartTarget ? endNodeID : m_nodeDatas[endNodeID].parentNodeID;
 		//	if (portNodeID == finishNodeID)
 		//	{
 		//		return;
@@ -197,20 +207,33 @@ namespace fdk { namespace game { namespace navi
 		//}
 		//else
 		//{
-			int nodeID = m_nodeDatas[m_currentClosed.nodeID].parentNodeID;
-			while (nodeID != m_startNodeID)
+			const int endNodeID = (m_searchResult == SearchResult_PathUnexist) ? m_closedWithMinHValue.nodeID : m_currentClosed.nodeID;
+
+			if (endNodeID != m_startNodeID)
 			{
-				output.push_front(nodeID);
-				nodeID = m_nodeDatas[nodeID].parentNodeID;
+				int nodeID = m_nodeDatas[endNodeID].parentNodeID;
+				while (nodeID != m_startNodeID)
+				{
+					output.push_front(nodeID);
+					nodeID = m_nodeDatas[nodeID].parentNodeID;
+				}
 			}
 			if (bWithStartTarget)
 			{
 				output.push_front(m_startNodeID);
-				output.push_back(m_currentClosed.nodeID);
+				if (endNodeID != m_startNodeID)
+				{
+					output.push_back(endNodeID);
+				}				
 			}
 		//}
 	}
 	
+	int AStar::getPathCost() const
+	{
+		return (m_searchResult == SearchResult_PathUnexist) ? m_closedWithMinHValue.fValue : m_currentClosed.fValue;
+	}
+
 	void AStar::getSuccessorNodes(const Environment& env, int nodeID, int parentNodeID, std::vector<SuccessorNodeInfo>& result)
 	{
 		env.getSuccessorNodes(*this, nodeID, result);
