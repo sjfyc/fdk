@@ -1,3 +1,6 @@
+#ifndef __PROFSQRT_H
+#define __PROFSQRT_H
+
 #include <math.h>
 #include "util.h"
 
@@ -96,3 +99,5 @@ void profSqrt()
 	std::cout << "invSqrt_hge(" << fixValue << ")=" << invSqrt_hge(fixValue) << std::endl;
 	std::cout << "invSqrt_unreal3(" << fixValue << ")=" << invSqrt_unreal3(fixValue) << std::endl;
 }
+
+#endif

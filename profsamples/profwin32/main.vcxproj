@@ -93,6 +93,7 @@
     <ClCompile Include="main.cpp" />
   </ItemGroup>
   <ItemGroup>
+    <ClInclude Include="profMemset.h" />
     <ClInclude Include="profSqrt.h" />
     <ClInclude Include="util.h" />
   </ItemGroup>

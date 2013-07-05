@@ -1,3 +1,5 @@
+#ifndef __UTIL_H
+#define __UTIL_H
 #include <Windows.h>
 
 namespace util
@@ -32,3 +34,5 @@ namespace util
 	};
 #define UTIL_SCOPE_PROF	::util::ScopeProfileRecorder __scopeProfileRecorder;
 }
+
+#endif
