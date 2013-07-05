@@ -187,8 +187,9 @@ namespace fdk { namespace game { namespace navi
 		m_colors.reset(sizeX, sizeY, UNCOLORED);
 		m_nodeCountWithColor.clear();
 		m_mainColor = UNCOLORED;
+		m_tempColors.reset(sizeX, sizeY, UNCOLORED);
 		
-		ColorType color = 0;
+		ColorType color = UNCOLORED;
 		for (int y = 0; y < sizeY; ++y)
 		{
 			for (int x = 0; x < sizeX; ++x)
@@ -197,7 +198,8 @@ namespace fdk { namespace game { namespace navi
 				if (m_outer.isNodeWithCoordReachable(cur) &&
 					m_colors(x, y) == UNCOLORED)
 				{
-					floodFill(cur, color++);
+					FDK_ASSERT(color <= MAX_COLOR_COUNT-1);
+					floodFill(cur, ++color);					
 				}
 			}
 		}
@@ -273,6 +275,24 @@ namespace fdk { namespace game { namespace navi
 				}
 			}
 		}
+	}
+	
+	GridEnvColorComponent::ColorType GridEnvColorComponent::getColor(const NodeCoord& nodeCoord, bool bConsiderTempColor) const
+	{
+		if (bConsiderTempColor)
+		{
+			const ColorType tempColor = m_tempColors(nodeCoord.x, nodeCoord.y);
+			if (tempColor != UNCOLORED)
+			{
+				return tempColor;
+			}
+		}		
+		return m_colors(nodeCoord.x, nodeCoord.y);
+	}
+
+	void GridEnvColorComponent::clearTempColors()
+	{
+		memset(m_tempColors.raw_data(), UNCOLORED, m_tempColors.count()*sizeof(ColorType));
 	}
 
 	GridEnvConnectorComponent::GridEnvConnectorComponent(const GridEnvColorComponent& colorComponent)
@@ -523,6 +543,10 @@ namespace fdk { namespace game { namespace navi
 
 	bool GridEnvConnectorComponent::isConnected(const NodeCoord& a, const NodeCoord& b) const
 	{
+		if (a == b)
+		{
+			return true;
+		}
 		ColorType aColor = m_colorComponent.getColor(a);
 		ColorType bColor = m_colorComponent.getColor(b);
 		const Connector* aConnector = getConnector(a);
@@ -631,4 +655,41 @@ namespace fdk { namespace game { namespace navi
 			static_cast<const GridEnvConnectorComponent*>(this)->getConnector(nodeCoord)
 			);
 	}
+
+	int GridEnvConnectorComponent::getConnectedNodeCount(const NodeCoord& nodeCoord) const
+	{
+		ColorType color = m_colorComponent.getColor(nodeCoord);				
+		if (color != GridEnvColorComponent::UNCOLORED)
+		{
+			return getConnectedNodeCount(color);
+		}
+		const Connector* connector = getConnector(nodeCoord);
+		if (connector && !connector->connectedColors.empty())
+		{
+			return getConnectedNodeCount(*connector->connectedColors.begin());
+		}
+		return 0;
+	}
+
+	int GridEnvConnectorComponent::getConnectedNodeCount(ColorType color) const
+	{	
+		for (size_t i = 0; i < m_connectingInfo.size(); ++i)
+		{
+			const std::set<ColorType>& colors = m_connectingInfo[i];
+			if (colors.find(color) == colors.end())
+			{
+				continue;
+			}
+			int result = 0;
+			for (std::set<ColorType>::const_iterator it = colors.begin(); it != colors.end(); ++it)
+			{
+				ColorType c = *it;
+				result += m_colorComponent.getNodeCountWithColor(c);
+				// 不包括连通器所占的节点
+			}
+			return result;
+		}
+		return m_colorComponent.getNodeCountWithColor(color);
+	}
+
 }}}

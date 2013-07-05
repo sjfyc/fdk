@@ -2,6 +2,7 @@
 #include "Util.h"
 #include "Font.h"
 #include "Game.h"
+#include <fdkgame/NaviGridEnvUtil.h>
 #pragma warning(disable:4244)
 
 Board::Board()
@@ -135,4 +136,16 @@ void Board::drawConnectors()
 	}
 	g_Font.printf(CELL_SIZE_X, CELL_SIZE_Y, HGETEXT_LEFT, "connected=%d", 
 		m_connectorComponent->isConnected(g_Game.getStartCoord(), g_Game.getTargetCoord()) ? 1 : 0);
+
+	g_Font.printf(CELL_SIZE_X, 2 * CELL_SIZE_Y, HGETEXT_LEFT, "start connect %d node",
+		m_connectorComponent->getConnectedNodeCount(g_Game.getStartCoord()) );
+
+	g_Font.printf(CELL_SIZE_X, 3 * CELL_SIZE_Y, HGETEXT_LEFT, "target connect %d node",
+		m_connectorComponent->getConnectedNodeCount(g_Game.getTargetCoord()) );
+
+	int firstConnectToTargetNodeFromStart = getFirstConnectedNode(*this, 
+		toNodeID(g_Game.getStartCoord()),
+		toNodeID(g_Game.getTargetCoord())
+		);
+	util::fillCell(toNodeCoord(firstConnectToTargetNodeFromStart), ARGB(255, 0, 0, 150) );
 }

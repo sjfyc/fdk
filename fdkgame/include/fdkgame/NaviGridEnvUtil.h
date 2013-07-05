@@ -9,6 +9,9 @@ namespace fdk { namespace game { namespace navi
 	int getFirstDirectlyReachableNode(const GridEnv& env, int startNodeID, int targetNodeID);
 	int getFirstReachableNode(const GridEnv& env, int startNodeID, int targetNodeID);
 	int getFirstSameColorReachableNode(const GridEnv& env, int startNodeID, int targetNodeID);
+	int getFirstConnectedNode(const GridEnv& env, int startNodeID, int targetNodeID);
+	bool isInClosedArea(const GridEnv& env, int nodeID, const GridNodeRange& range); // 在指定范围内检测节点是否位于封闭区域
+	bool fillTempColorInClosedArea(const GridEnv& env, int nodeID, const GridNodeRange& range);
 
 	class GridEnvOctPathPop
 	{

@@ -192,7 +192,8 @@ bool AStar::search()
 	fdkgame::navi::MapManager::AutoPlotUnits _AutoPlotUnits(g_MapManager, 
 		fdkgame::navi::VertexMapType(m_actor.getMoveCapability(), m_actor.getUnitSize()),
 		plotArounds);
-
+	
+	// 起点是障碍，则将起点修正为距离终点较近的可站立点
 	if (vertexMap.isBlock(startVertexCoord))
 	{
 		int middleNodeID = getFirstReachableNode(vertexMap, startVertexID, targetVertexID);
@@ -208,20 +209,55 @@ bool AStar::search()
 		m_actor.forceLocation(util::vertexCoordToLocation(startVertexCoord));
 	}
 	
-	if (vertexMap.isBlock(targetVertexCoord) ||
-		vertexMap.getColorComponent()->getColor(targetVertexCoord) != vertexMap.getColorComponent()->getColor(startVertexCoord) )
-	{
-		util::output("target vertex(%d/%d) is block or in different island",
-			targetVertexCoord.x, targetVertexCoord.y);
+	if (plotArounds.empty())
+	{// 没有任何动态障碍时，那么只考虑起点和目标点是否静态联通，如果不联通，则进行目标点修正
+		if (!vertexMap.getConnectorComponent()->isConnected(startVertexCoord, targetVertexCoord))
+		{
+			util::output("target vertex(%d/%d) is in different static island",
+				targetVertexCoord.x, targetVertexCoord.y);
 
-		int middleNodeID = getFirstSameColorReachableNode(vertexMap, targetVertexID, startVertexID);
-		FDK_ASSERT(middleNodeID != fdkgame::navi::INVALID_NODEID);
+			if (vertexMap.getConnectorComponent()->getConnectedNodeCount(startVertexCoord) > 
+				vertexMap.getConnectorComponent()->getConnectedNodeCount(targetVertexCoord) )
+			{// 终点处于封闭区域
+				int middleNodeID = getFirstConnectedNode(vertexMap, targetVertexID, startVertexID);
+				FDK_ASSERT(middleNodeID != fdkgame::navi::INVALID_NODEID);
 
-		targetVertexID = middleNodeID;
-		targetVertexCoord = vertexMap.toNodeCoord(targetVertexID);
-		m_targetLocation = util::vertexCoordToLocation(targetVertexCoord);
+				targetVertexID = middleNodeID;
+				targetVertexCoord = vertexMap.toNodeCoord(targetVertexID);
+				m_targetLocation = util::vertexCoordToLocation(targetVertexCoord);
+			}
+			else
+			{// 起点处于封闭区域
+				// 直接用A*寻出一个最近点
+			}
+		}
 	}
-	
+	else
+	{// 需要考虑动态障碍
+		bool bInCloseArea = fillTempColorInClosedArea(vertexMap, targetVertexID, 
+			fdkgame::navi::GridNodeRange::makeRectFromCenter(targetVertexCoord, VertexCoord(40,40)));
+		
+		if (!vertexMap.getConnectorComponent()->isConnected(startVertexCoord, targetVertexCoord))
+		{
+			util::output("target vertex(%d/%d) is in different dynamic island",
+				targetVertexCoord.x, targetVertexCoord.y);
+
+			{// 考虑动态障碍的环境中，必然是终点处于封闭区域
+				int middleNodeID = getFirstConnectedNode(vertexMap, targetVertexID, startVertexID);
+				FDK_ASSERT(middleNodeID != fdkgame::navi::INVALID_NODEID);
+
+				targetVertexID = middleNodeID;
+				targetVertexCoord = vertexMap.toNodeCoord(targetVertexID);
+				m_targetLocation = util::vertexCoordToLocation(targetVertexCoord);
+			}
+		}
+
+		if (bInCloseArea)
+		{
+			vertexMap.getColorComponent()->clearTempColors();
+		}
+	}
+		
 	if (startVertexID == targetVertexID)
 	{
 		util::output("start vertex(%d/%d) equal to target vertex(%d/%d)",
@@ -269,13 +305,9 @@ bool AStar::search()
 	util::output("search cost %lf seconds", searchEndTime - searchStartTime);
 	if (searchResult == Navigator::SearchResult_PathUnexist)
 	{
-		util::output("no path between start vertex(%d/%d) and target vertex(%d/%d)",
-			startVertexCoord.x, startVertexCoord.y,
-			targetVertexCoord.x, targetVertexCoord.y);
+		util::output("search failed, use closest target");
 		return false;
 	}
-
-	FDK_ASSERT(searchResult == Navigator::SearchResult_Completed);
 	std::list<int> roughPath;
 	m_navigator->getPath(roughPath, !m_bRefind ? true : false);
 

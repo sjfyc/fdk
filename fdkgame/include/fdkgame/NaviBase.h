@@ -14,6 +14,7 @@ namespace fdk { namespace game { namespace navi
 	class GridEnvColorComponent;
 	class GridEnvConnectorComponent;
 	typedef Vector2D<int> GridNodeCoord;
+	typedef Rect<int> GridNodeRange;
 
 	const int INVALID_NODEID = -1;	
 	const int COST_STRAIGHT = 100;
@@ -86,7 +87,7 @@ namespace fdk { namespace game { namespace navi
 		: public GridEnv
 	{		
 	public:
-		typedef Rect<NodeCoord::ValueType> Range;
+		typedef GridNodeRange Range;
 		GridPartEnv(const GridEnv& outer, const Range& range);
 		const GridEnv& getOuter() const;
 		const Range& getRange() const;
@@ -104,22 +105,27 @@ namespace fdk { namespace game { namespace navi
 	{
 	public:
 		typedef GridNodeCoord NodeCoord;
-		typedef int ColorType;
-		typedef Array2D<ColorType> ColorMap;		
-		static const ColorType UNCOLORED = -1;
+		typedef unsigned short ColorType;
+		typedef Array2D<ColorType> ColorMap;
+		static const ColorType UNCOLORED = 0;
+		static const ColorType TEMP_COLOR = 65535;
+		static const ColorType MAX_COLOR_COUNT = 65535;
 		explicit GridEnvColorComponent(const GridEnv& outer);
 		~GridEnvColorComponent();
 		void refill();
 		const GridEnv& getOuter() const;
 		const ColorMap& getColorMap() const;
-		ColorType getColor(const NodeCoord& nodeCoord) const;		
+		ColorType getColor(const NodeCoord& nodeCoord, bool bConsiderTempColor=true) const;
 		ColorType getMainColor() const;
 		int getNodeCountWithColor(ColorType color) const;
+		void setTempColor(const NodeCoord& nodeCoord);
+		void clearTempColors();
 	private:
 		void floodFill(const NodeCoord& nodeCoord, ColorType color);
 		void updateMainColor();
 		const GridEnv& m_outer;
 		ColorMap m_colors;
+		ColorMap m_tempColors;
 		std::map<ColorType, int> m_nodeCountWithColor;
 		ColorType m_mainColor;
 	};
@@ -138,6 +144,7 @@ namespace fdk { namespace game { namespace navi
 		typedef std::set<Connector*> Connectors;
 		explicit GridEnvConnectorComponent(const GridEnvColorComponent& colorComponent);
 		~GridEnvConnectorComponent();
+		void clear();
 		// 注意墙体必须先移除才能再增加
 		void removeWall(const NodeCoord& nodeCoord, bool autoUpdateConnecting=true);
 		void addWall(const NodeCoord& nodeCoord, bool autoUpdateConnecting=true);
@@ -145,7 +152,7 @@ namespace fdk { namespace game { namespace navi
 		bool isConnected(const NodeCoord& a, const NodeCoord& b) const;
 		const Connectors& getConnectors() const;
 		const Connector* getConnector(const NodeCoord& nodeCoord) const;
-		void clear();
+		int getConnectedNodeCount(const NodeCoord& nodeCoord) const;
 	private:
 		typedef std::map<NodeCoord, Connector*> Node2Connector;
 		void occupyNode(Connector& connector, const NodeCoord& nodeCoord);
@@ -154,6 +161,7 @@ namespace fdk { namespace game { namespace navi
 		bool isConnected(ColorType a, ColorType b) const;
 		bool isConnected(ColorType a, const Connector& b) const;
 		bool isConnected(const Connector& a, const Connector& b) const;
+		int getConnectedNodeCount(ColorType color) const;
 		const GridEnv& m_env;
 		const GridEnvColorComponent& m_colorComponent;
 		Connectors m_connectors;
@@ -227,14 +235,15 @@ namespace fdk { namespace game { namespace navi
 		return m_colors;
 	}
 	
-	inline GridEnvColorComponent::ColorType GridEnvColorComponent::getColor(const NodeCoord& nodeCoord) const
-	{
-		return m_colors(nodeCoord.x, nodeCoord.y);
-	}
-
 	inline GridEnvColorComponent::ColorType GridEnvColorComponent::getMainColor() const
 	{
 		return m_mainColor;
+	}
+
+	inline void GridEnvColorComponent::setTempColor(const NodeCoord& nodeCoord)
+	{
+		FDK_ASSERT(m_tempColors(nodeCoord.x, nodeCoord.y) == UNCOLORED);
+		m_tempColors(nodeCoord.x, nodeCoord.y) = TEMP_COLOR;
 	}
 
 	inline const GridEnvConnectorComponent::Connectors& GridEnvConnectorComponent::getConnectors() const

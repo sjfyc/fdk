@@ -1,4 +1,5 @@
 #include <fdkgame/NaviGridEnvUtil.h>
+#include <stack>
 #include <fdkgame/NaviAStar.h>
 
 namespace fdk { namespace game { namespace navi
@@ -472,6 +473,139 @@ namespace fdk { namespace game { namespace navi
 			return INVALID_NODEID;
 		}
 		return astar.getCompletedNodeID();
+	}
+	
+	int getFirstConnectedNode(const GridEnv& env, int startNodeID, int targetNodeID)
+	{
+		GridEnvReachEverywhereAdapter envAdapter(env, env.toNodeCoord(targetNodeID)-env.toNodeCoord(startNodeID));
+
+		struct CompleteCondition
+			: public AStarCompleteCondition
+		{
+			CompleteCondition(const GridEnv& env, const GridNodeCoord& targetNodeCoord)
+				: m_env(env)
+				, m_targetNodeCoord(targetNodeCoord)
+			{
+			}
+			virtual bool checkCondition(const Environment& env, int startNodeID, int targetNodeID, int nodeID) const
+			{
+				return m_env.isNodeReachable(nodeID) 
+					&& m_env.getConnectorComponent()->isConnected(m_env.toNodeCoord(nodeID), m_targetNodeCoord);
+			}
+			const GridEnv& m_env;
+			GridNodeCoord m_targetNodeCoord;
+		} completeCondition(env, env.toNodeCoord(targetNodeID));
+
+		FDK_ASSERT(env.getConnectorComponent());
+		FDK_ASSERT(env.getColorComponent());
+		GridNodeCoord targetNodeCoord = env.toNodeCoord(targetNodeID);
+		FDK_ASSERT(env.getColorComponent()->getColor(targetNodeCoord) != GridEnvColorComponent::UNCOLORED || env.getConnectorComponent()->getConnector(targetNodeCoord));
+
+		AStar astar(envAdapter, startNodeID, targetNodeID, &completeCondition);
+		if (astar.search() == AStar::SearchResult_PathUnexist)
+		{
+			return INVALID_NODEID;
+		}
+		return astar.getCompletedNodeID();
+	}
+
+	bool isInClosedArea(const GridEnv& env, int nodeID, const GridNodeRange& range)
+	{
+		typedef GridNodeCoord NodeCoord;
+
+		const NodeCoord nodeCoord = env.toNodeCoord(nodeID);
+		FDK_ASSERT(range.contain(nodeCoord));
+		
+		std::stack<NodeCoord> pending;
+		pending.push(nodeCoord);
+		std::set<NodeCoord> handled;
+		while (!pending.empty())
+		{
+			NodeCoord cur = pending.top();
+			pending.pop();
+
+			if (!handled.insert(cur).second)
+			{
+				continue;
+			}
+
+			const NodeCoord neighbours[] =
+			{
+				NodeCoord(cur.x-1, cur.y),
+				NodeCoord(cur.x+1, cur.y),
+				NodeCoord(cur.x, cur.y-1),
+				NodeCoord(cur.x, cur.y+1),
+			};
+
+			for (size_t i = 0; i < FDK_DIM(neighbours); ++i)
+			{
+				const NodeCoord& neighbour = neighbours[i];
+				if (!env.isValidNodeCoord(neighbour) || !range.contain(neighbour))
+				{// 越界了
+					return false;
+				}
+				if (env.isNodeWithCoordReachable(neighbour) &&
+					handled.find(neighbour) == handled.end())
+				{
+					pending.push(neighbour); // 斜角的节点可能被重复添加
+				}
+			}
+		}
+
+		return true;
+	}
+
+
+	bool fillTempColorInClosedArea(const GridEnv& env, int nodeID, const GridNodeRange& range)
+	{
+		typedef GridNodeCoord NodeCoord;
+
+		const NodeCoord nodeCoord = env.toNodeCoord(nodeID);
+		FDK_ASSERT(range.contain(nodeCoord));
+
+		GridEnvColorComponent* colorComponent = env.getColorComponent();
+		FDK_ASSERT(colorComponent);
+
+		std::stack<NodeCoord> pending;
+		pending.push(nodeCoord);
+		std::set<NodeCoord> handled;
+		while (!pending.empty())
+		{
+			NodeCoord cur = pending.top();
+			pending.pop();
+
+			if (!handled.insert(cur).second)
+			{
+				continue;
+			}
+			
+			colorComponent->setTempColor(cur);
+
+			const NodeCoord neighbours[] =
+			{
+				NodeCoord(cur.x-1, cur.y),
+				NodeCoord(cur.x+1, cur.y),
+				NodeCoord(cur.x, cur.y-1),
+				NodeCoord(cur.x, cur.y+1),
+			};
+
+			for (size_t i = 0; i < FDK_DIM(neighbours); ++i)
+			{
+				const NodeCoord& neighbour = neighbours[i];
+				if (!env.isValidNodeCoord(neighbour) || !range.contain(neighbour))
+				{// 越界了
+					colorComponent->clearTempColors();
+					return false;
+				}
+				if (env.isNodeWithCoordReachable(neighbour) &&
+					handled.find(neighbour) == handled.end())
+				{
+					pending.push(neighbour); // 斜角的节点可能被重复添加
+				}
+			}
+		}
+
+		return true;
 	}
 
 	GridEnvOctPathPop::GridEnvOctPathPop(const GridEnv& env, const std::list<int>& path, bool bCopy)
