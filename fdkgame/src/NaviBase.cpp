@@ -547,6 +547,10 @@ namespace fdk { namespace game { namespace navi
 		{
 			return true;
 		}
+		if (!m_env.isNodeWithCoordReachable(a) || !m_env.isNodeWithCoordReachable(b))
+		{
+			return false;
+		}
 		ColorType aColor = m_colorComponent.getColor(a);
 		ColorType bColor = m_colorComponent.getColor(b);
 		const Connector* aConnector = getConnector(a);

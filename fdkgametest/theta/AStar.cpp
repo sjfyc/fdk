@@ -239,8 +239,12 @@ bool AStar::search()
 	}
 	else
 	{// ÐèÒª¿¼ÂÇ¶¯Ì¬ÕÏ°­
-		bool bInCloseArea = fillTempColorInClosedArea(vertexMap, targetVertexID, 
-			fdkgame::navi::GridNodeRange::makeRectFromCenter(targetVertexCoord, VertexCoord(40,40)));
+		bool bFilledColor = false;
+		if (!vertexMap.isBlock(targetVertexCoord))
+		{
+			bFilledColor = fillTempColorInClosedArea(vertexMap, targetVertexID, 
+				fdkgame::navi::GridNodeRange::makeRectFromCenter(targetVertexCoord, VertexCoord(40,40)));
+		}
 		
 		if (!vertexMap.getConnectorComponent()->isConnected(startVertexCoord, targetVertexCoord))
 		{
@@ -257,7 +261,7 @@ bool AStar::search()
 			}
 		}
 
-		if (bInCloseArea)
+		if (bFilledColor)
 		{
 			vertexMap.getColorComponent()->clearTempColors();
 		}
