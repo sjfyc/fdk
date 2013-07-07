@@ -181,6 +181,15 @@ namespace fdk { namespace game { namespace navi
 		}
 	}
 
+	void MapManager::rebuildColors()
+	{
+		for (VertexMaps::iterator it = m_vertexMaps.begin(); it != m_vertexMaps.end(); ++it)
+		{
+			VertexMap* vertexMap = it->second;
+			vertexMap->getColorComponent()->refill();
+		}
+	}
+
 	MapManager::AutoPlotUnits::AutoPlotUnits(
 		MapManager& mapManager, 
 		const VertexMapType& vertexMapType, 
