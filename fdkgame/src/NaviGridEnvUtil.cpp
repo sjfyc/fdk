@@ -446,6 +446,11 @@ namespace fdk { namespace game { namespace navi
 
 	int getFirstSameColorReachableNode(const GridEnv& env, int startNodeID, int targetNodeID)
 	{
+		if (startNodeID == targetNodeID)
+		{
+			return targetNodeID;
+		}
+
 		GridEnvReachEverywhereAdapter envAdapter(env, env.toNodeCoord(targetNodeID)-env.toNodeCoord(startNodeID));
 
 		struct CompleteCondition
@@ -477,6 +482,11 @@ namespace fdk { namespace game { namespace navi
 	
 	int getFirstConnectedNode(const GridEnv& env, int startNodeID, int targetNodeID)
 	{
+		if (startNodeID == targetNodeID)
+		{
+			return targetNodeID;
+		}
+
 		GridEnvReachEverywhereAdapter envAdapter(env, env.toNodeCoord(targetNodeID)-env.toNodeCoord(startNodeID));
 
 		struct CompleteCondition

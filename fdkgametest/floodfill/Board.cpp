@@ -13,7 +13,7 @@ Board::Board()
 	double startSecs = util::getSeconds();
 	m_colorComponent->refill();
 	double endSecs = util::getSeconds();
-	util::output("cost %lf", (endSecs-startSecs)*(512*512.f)/(CELL_COUNT_X*CELL_COUNT_Y));
+	util::output("cost %lf", (endSecs-startSecs)*(1024*1024.f)/(CELL_COUNT_X*CELL_COUNT_Y));
 	m_connectorComponent = new fdkgame::navi::GridEnvConnectorComponent(*m_colorComponent);
 	m_connectorComponent->clear();
 }

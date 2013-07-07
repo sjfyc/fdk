@@ -179,7 +179,7 @@ void GameModeMapEdit::leave(Game& game)
 	double startSecs = util::getSeconds();
 	g_Board.getColorComponent()->refill();
 	double endSecs = util::getSeconds();
-	util::output("cost %lf", (endSecs-startSecs)*(512*512.f)/(CELL_COUNT_X*CELL_COUNT_Y));
+	util::output("cost %lf", (endSecs-startSecs)*(1024*1024.f)/(CELL_COUNT_X*CELL_COUNT_Y));
 	g_Board.getConnectorComponent()->clear();
 }
 
@@ -244,7 +244,7 @@ void GameModeMapEdit::handleEvent(Game& game, int eventType, void* params)
 			double startSecs = util::getSeconds();
 			g_Board.getColorComponent()->refill();
 			double endSecs = util::getSeconds();
-			util::output("cost %lf", (endSecs-startSecs)*(512*512.f)/(CELL_COUNT_X*CELL_COUNT_Y));			
+			util::output("cost %lf", (endSecs-startSecs)*(1024*1024.f)/(CELL_COUNT_X*CELL_COUNT_Y));	
 			g_Board.getConnectorComponent()->clear();
 		}
 	}	

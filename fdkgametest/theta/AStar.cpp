@@ -12,7 +12,7 @@
 void plotAroundActors(Actor& actor, std::vector<fdkgame::navi::MapManager::PlotUnitArgument>& plotArounds)
 {
 	std::vector<Actor*> aroundActors;
-	g_ActorBank.getActors(aroundActors, actor.getLocation(), (actor.getRadius()+(MAX_UNIT_SIZE+1)*HALF_CELL_SIZE_X)*1.5f, &actor);
+	g_ActorBank.getActors(aroundActors, actor.getLocation(), (actor.getRadius()+(MAX_UNIT_SIZE+1)*HALF_CELL_SIZE_X)*1.5f*6, &actor);
 	for (size_t i = 0; i < aroundActors.size(); ++i)
 	{
 		Actor* aroundActor = aroundActors[i];
@@ -239,13 +239,18 @@ bool AStar::search()
 	}
 	else
 	{// ÐèÒª¿¼ÂÇ¶¯Ì¬ÕÏ°­
-		bool bFilledColor = false;
-		if (!vertexMap.isBlock(targetVertexCoord))
+		if (vertexMap.isBlock(targetVertexCoord))
 		{
-			bFilledColor = fillTempColorInClosedArea(vertexMap, targetVertexID, 
-				fdkgame::navi::GridNodeRange::makeRectFromCenter(targetVertexCoord, VertexCoord(40,40)));
+			int middleNodeID = getFirstReachableNode(vertexMap, targetVertexID, startVertexID);
+			FDK_ASSERT(middleNodeID != fdkgame::navi::INVALID_NODEID);
+			targetVertexID = middleNodeID;
+			targetVertexCoord = vertexMap.toNodeCoord(targetVertexID);
+			m_targetLocation = util::vertexCoordToLocation(targetVertexCoord);
 		}
-		
+
+		bool bFilledColor = fillTempColorInClosedArea(vertexMap, targetVertexID, 
+			fdkgame::navi::GridNodeRange::makeRectFromCenter(targetVertexCoord, VertexCoord(40,40)));
+
 		if (!vertexMap.getConnectorComponent()->isConnected(startVertexCoord, targetVertexCoord))
 		{
 			util::output("target vertex(%d/%d) is in different dynamic island",
