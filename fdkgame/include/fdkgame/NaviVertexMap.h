@@ -20,7 +20,7 @@ namespace fdk { namespace game { namespace navi
 		
 		int getBlockValue(const VertexCoord& vertexCoord) const;
 		bool isBlock(const VertexCoord& vertexCoord) const;
-		void onSetBlock(const CellCoord& cellCoord, bool bSet);
+		void onSetBlock(const CellCoord& cellCoord, bool bSet, bool bModBuildedWall);
 
 		void onPlotUnit(const VertexCoord& vertexCoord, UnitSize unitSize, bool bPlot);
 		void allowModify(const VertexCoord& vertexCoord, UnitSize unitSize, bool bAllow);

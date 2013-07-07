@@ -175,7 +175,7 @@ void GameModeGame::handleEvent(Game& game, int eventType, void* params)
 		{
 			if (m_canDynamicChangeTile)
 			{
-				g_MapManager.changeTileType(mouseCoord, g_Option.getBrush());
+				g_MapManager.changeTileType(mouseCoord, g_Option.getBrush(), true);
 			}			
 		}
 	}

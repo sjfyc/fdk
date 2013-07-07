@@ -37,9 +37,9 @@ namespace fdk { namespace game { namespace navi
 		const VertexMap& getVertexMap(const VertexMapType& vertexMapType) const;
 		void rebuildAfterTileMapReset();
 		void rebuildColors();
-		void changeTileType(const CellCoord& cellCoord, TileType tileType);
-		void increExtraTileType(const CellCoord& cellCoord, TileType tileType, ExtraTileCountType count=1);
-		void decreExtraTileType(const CellCoord& cellCoord, TileType tileType, ExtraTileCountType count=1);
+		void changeTileType(const CellCoord& cellCoord, TileType tileType, bool bModBuildedWall=false);
+		void increExtraTileType(const CellCoord& cellCoord, TileType tileType, bool bModBuildedWall=false, ExtraTileCountType count=1);
+		void decreExtraTileType(const CellCoord& cellCoord, TileType tileType, bool bModBuildedWall=false, ExtraTileCountType count=1);
 		void plotUnit(const VertexMapType& vertexMapType, const VertexCoord& vertexCoord, UnitSize unitSize, bool bPlot);
 		void allowModify(const VertexCoord& vertexCoord, UnitSize unitSize, bool bAllow);
 	private:
@@ -53,7 +53,7 @@ namespace fdk { namespace game { namespace navi
 		VertexMap* findVertexMap(const VertexMapType& vertexMapType);
 		const VertexMap* findVertexMap(const VertexMapType& vertexMapType) const;
 		VertexMap& getVertexMapForOperate(const VertexMapType& vertexMapType);
-		void onTileChange(const CellCoord& cellCoord);
+		void onTileChange(const CellCoord& cellCoord, bool bModBuildedWall);
 		TileMap& m_tileMap;
 		BlockMaps m_blockMaps; // key by unit size
 		VertexMaps m_vertexMaps;

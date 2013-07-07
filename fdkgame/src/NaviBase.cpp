@@ -371,9 +371,9 @@ namespace fdk { namespace game { namespace navi
 				{
 					Connector* aroundConnector = *it;
 					newConnector->connectedColors.insert(aroundConnector->connectedColors.begin(), aroundConnector->connectedColors.end());
-					for (std::set<NodeCoord>::iterator itNode = aroundConnector->occupiedNodes.begin(); itNode != aroundConnector->occupiedNodes.end(); ++itNode)
+					while (!aroundConnector->occupiedNodes.empty())
 					{
-						const NodeCoord& occpiedNode = *itNode;
+						const NodeCoord occpiedNode = *aroundConnector->occupiedNodes.begin();
 						unoccupyNode(*aroundConnector, occpiedNode);
 						occupyNode(*newConnector, occpiedNode);
 					}
@@ -418,10 +418,14 @@ namespace fdk { namespace game { namespace navi
 			{
 				NodeCoord cur = pending.top();
 				pending.pop();
+
+				if (!handled.insert(cur).second)
+				{
+					continue;
+				}
+
 				unoccupyNode(*connector, cur);
 				occupyNode(*newConnector, cur);
-				bool result = handled.insert(cur).second;
-				FDK_ASSERT(result);
 
 				const NodeCoord neighbours[4] = 
 				{

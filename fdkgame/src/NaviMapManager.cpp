@@ -109,7 +109,7 @@ namespace fdk { namespace game { namespace navi
 			);
 	}
 
-	void MapManager::changeTileType(const CellCoord& cellCoord, TileType tileType)
+	void MapManager::changeTileType(const CellCoord& cellCoord, TileType tileType, bool bModBuildedWall)
 	{
 		if (m_tileMap.getTileType(cellCoord) == tileType)
 		{
@@ -117,19 +117,19 @@ namespace fdk { namespace game { namespace navi
 		}
 		m_tileMap.setTileType(cellCoord, tileType);
 		
-		onTileChange(cellCoord);
+		onTileChange(cellCoord, bModBuildedWall);
 	}
 
-	void MapManager::increExtraTileType(const CellCoord& cellCoord, TileType tileType, ExtraTileCountType count)
+	void MapManager::increExtraTileType(const CellCoord& cellCoord, TileType tileType, bool bModBuildedWall, ExtraTileCountType count)
 	{
 		m_tileMap.increExtraTileType(cellCoord, tileType, count);
-		onTileChange(cellCoord);
+		onTileChange(cellCoord, bModBuildedWall);
 	}
 
-	void MapManager::decreExtraTileType(const CellCoord& cellCoord, TileType tileType, ExtraTileCountType count)
+	void MapManager::decreExtraTileType(const CellCoord& cellCoord, TileType tileType, bool bModBuildedWall, ExtraTileCountType count)
 	{
 		m_tileMap.decreExtraTileType(cellCoord, tileType, count);
-		onTileChange(cellCoord);
+		onTileChange(cellCoord, bModBuildedWall);
 	}
 
 	void MapManager::plotUnit(const VertexMapType& vertexMapType, const VertexCoord& vertexCoord, UnitSize unitSize, bool bPlot)
@@ -146,7 +146,7 @@ namespace fdk { namespace game { namespace navi
 		}
 	}
 
-	void MapManager::onTileChange(const CellCoord& cellCoord)
+	void MapManager::onTileChange(const CellCoord& cellCoord, bool bModBuildedWall)
 	{
 		for (BlockMaps::iterator it = m_blockMaps.begin(); it != m_blockMaps.end(); ++it)
 		{
@@ -175,7 +175,7 @@ namespace fdk { namespace game { namespace navi
 					{
 						continue;
 					}
-					vertexMap->onSetBlock(cellCoord, bSet);
+					vertexMap->onSetBlock(cellCoord, bSet, bModBuildedWall);
 				}
 			}
 		}

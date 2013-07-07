@@ -30,27 +30,47 @@ namespace fdk { namespace game { namespace navi
 				CellCoord cellCoord = CellCoord(x, y);
 				if (m_blockMap.isBlock(cellCoord))
 				{
-					onSetBlock(cellCoord, true);
+					onSetBlock(cellCoord, true, false);
 				}
 			}
 		}
 		m_colorComponent->refill();
 	}
 
-	void VertexMap::onSetBlock(const CellCoord& cellCoord, bool bSet)
+	void VertexMap::onSetBlock(const CellCoord& cellCoord, bool bSet, bool bModBuildedWall)
 	{
+		bool bConnectingInfoChanged = false;
 		for (UnitSize y = -m_unitSize; y <= m_unitSize; ++y)
 		{
 			for (UnitSize x = -m_unitSize; x <= m_unitSize; ++x)
 			{				
 				VertexCoord vertexCoord(cellCoord.x*2+x, cellCoord.y*2+y);
-				if (isValidNodeCoord(vertexCoord))
+				if (!isValidNodeCoord(vertexCoord))
 				{
-					m_data(vertexCoord.x, vertexCoord.y) += (bSet ? 1 : -1);
-					FDK_ASSERT(m_data(vertexCoord.x, vertexCoord.y) >= 0);
+					continue;
+				}
+				m_data(vertexCoord.x, vertexCoord.y) += (bSet ? 1 : -1);
+				FDK_ASSERT(m_data(vertexCoord.x, vertexCoord.y) >= 0);
+
+				if (bModBuildedWall)
+				{
+					if (bSet && m_data(vertexCoord.x, vertexCoord.y) == 1)
+					{
+						getConnectorComponent()->addWall(vertexCoord, false);
+						bConnectingInfoChanged = true;
+					}
+					else if (!bSet && m_data(vertexCoord.x, vertexCoord.y) == 0)
+					{
+						getConnectorComponent()->removeWall(vertexCoord, false);
+						bConnectingInfoChanged = true;
+					}
 				}
 			}
-		}		
+		}
+		if (bConnectingInfoChanged)
+		{
+			getConnectorComponent()->updateConnectingInfo();
+		}
 	}
 
 	bool VertexMap::isNodeReachable(int nodeID) const
