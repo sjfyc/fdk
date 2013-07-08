@@ -195,12 +195,12 @@ namespace fdk { namespace game { namespace navi
 			for (int x = 0; x < sizeX; ++x)
 			{
 				CellCoord cur(x, y);
-				if (m_outer.isNodeWithCoordReachable(cur) &&
-					m_colors(x, y) == UNCOLORED)
+				if (isColorable(cur))
 				{
 					FDK_ASSERT(color <= MAX_COLOR_COUNT-1);
-					floodFill(cur, ++color);					
-				}
+					//floodFill(cur, ++color);
+					floodFillScanLine(cur, ++color);
+				}				
 			}
 		}
 		updateMainColor();
@@ -233,14 +233,64 @@ namespace fdk { namespace game { namespace navi
 			for (size_t i = 0; i < FDK_DIM(neighbours); ++i)
 			{
 				const NodeCoord& neighbour = neighbours[i];
-				if (m_outer.isValidNodeCoord(neighbour) &&
-					m_outer.isNodeWithCoordReachable(neighbour) &&
-					m_colors(neighbour.x, neighbour.y) == UNCOLORED)
+				if (isColorable(neighbour))
 				{
 					pending.push(neighbour); // 斜角的节点可能被重复添加
 				}
 			}
 		}
+	}
+
+	void GridEnvColorComponent::floodFillScanLine(const NodeCoord& nodeCoord, ColorType color)
+	{
+		m_colors(nodeCoord.x, nodeCoord.y) = color;
+		NodeCoord cur(nodeCoord);
+		int xMin = nodeCoord.x;
+		int xMax = nodeCoord.x;
+		while (1)
+		{
+			--cur.x;
+			if (!m_outer.isValidNodeCoord(cur) ||
+				!m_outer.isNodeWithCoordReachable(cur))
+			{
+				break;
+			}
+			m_colors(cur.x, cur.y) = color;
+			xMin = cur.x;
+		}
+		cur = nodeCoord;
+		while (1)
+		{
+			++cur.x;
+			if (!m_outer.isValidNodeCoord(cur) ||
+				!m_outer.isNodeWithCoordReachable(cur))
+			{
+				break;
+			}
+			m_colors(cur.x, cur.y) = color;
+			xMax = cur.x;
+		}
+		for (int x = xMin; x <= xMax; ++x)
+		{
+
+			NodeCoord newNodeCoord(x, nodeCoord.y-1);
+			if (isColorable(newNodeCoord))
+			{
+				floodFillScanLine(newNodeCoord, color);
+			}
+			newNodeCoord.reset(x, nodeCoord.y+1);
+			if (isColorable(newNodeCoord))
+			{
+				floodFillScanLine(newNodeCoord, color);
+			}
+		}
+	}
+
+	bool GridEnvColorComponent::isColorable(const NodeCoord& nodeCoord) const
+	{
+		return m_outer.isValidNodeCoord(nodeCoord) 
+			&& m_outer.isNodeWithCoordReachable(nodeCoord)
+			&& m_colors(nodeCoord.x, nodeCoord.y) == UNCOLORED;
 	}
 
 	int GridEnvColorComponent::getNodeCountWithColor(ColorType color) const

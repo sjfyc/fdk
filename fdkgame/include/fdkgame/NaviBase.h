@@ -122,7 +122,9 @@ namespace fdk { namespace game { namespace navi
 		void clearTempColors();
 	private:
 		void floodFill(const NodeCoord& nodeCoord, ColorType color);
-		void updateMainColor();
+		void floodFillScanLine(const NodeCoord& nodeCoord, ColorType color);
+		bool isColorable(const NodeCoord& nodeCoord) const;
+		void updateMainColor();		
 		const GridEnv& m_outer;
 		ColorMap m_colors;
 		ColorMap m_tempColors;
