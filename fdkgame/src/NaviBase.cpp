@@ -192,15 +192,20 @@ namespace fdk { namespace game { namespace navi
 		ColorType color = UNCOLORED;
 		for (int y = 0; y < sizeY; ++y)
 		{
-			for (int x = 0; x < sizeX; ++x)
+			for (int x = 0; x < sizeX;)
 			{
 				CellCoord cur(x, y);
 				if (isColorable(cur))
 				{
 					FDK_ASSERT(color <= MAX_COLOR_COUNT-1);
-					//floodFill(cur, ++color);
-					floodFillScanLine(cur, ++color);
+					int xMin, xMax;
+					floodFillScanLine(cur, ++color, xMin, xMax, 0, false);
+					x = xMax+1;
 				}				
+				else
+				{
+					++x;
+				}
 			}
 		}
 		updateMainColor();
@@ -241,12 +246,77 @@ namespace fdk { namespace game { namespace navi
 		}
 	}
 
-	void GridEnvColorComponent::floodFillScanLine(const NodeCoord& nodeCoord, ColorType color)
+	void GridEnvColorComponent::floodFillScanLine(const NodeCoord& nodeCoord, ColorType color, int& xMin, int& xMax, std::pair<int, int>* parentRange, bool parentIsDown)
+	{
+		_floodFillScanLine(nodeCoord, color, xMin, xMax);
+
+		bool bNeedScanDown = true;
+		bool bNeedScanUp = true;
+		if (parentRange)
+		{
+			if (parentIsDown)
+			{
+				if (xMin >= parentRange->first && xMax <= parentRange->second)
+				{
+					bNeedScanDown = false;
+				}
+			}
+			else
+			{
+				if (xMin >= parentRange->first && xMax <= parentRange->second)
+				{
+					bNeedScanUp = false;
+				}
+			}
+		}
+
+		std::pair<int, int> NewParentRange;
+		NewParentRange.first = xMin;
+		NewParentRange.second = xMax;
+
+		if (bNeedScanUp)
+		{
+			for (int x = xMin; x <= xMax;)
+			{
+				NodeCoord newNodeCoord(x, nodeCoord.y-1);
+				if (isColorable(newNodeCoord))
+				{
+					int newXMin, newXMax;
+					floodFillScanLine(newNodeCoord, color, newXMin, newXMax, &NewParentRange, true);
+					x = newXMax+1;
+				}
+				else
+				{
+					++x;
+				}
+			}
+		}
+
+		if (bNeedScanDown)
+		{
+			for (int x = xMin; x <= xMax;)
+			{
+				NodeCoord newNodeCoord(x, nodeCoord.y+1);
+				if (isColorable(newNodeCoord))
+				{
+					int newXMin, newXMax;
+					floodFillScanLine(newNodeCoord, color, newXMin, newXMax, &NewParentRange, false);
+					x = newXMax+1;
+				}
+				else
+				{
+					++x;
+				}
+			}
+		}
+	}
+
+	void GridEnvColorComponent::_floodFillScanLine(const NodeCoord& nodeCoord, ColorType color, int& xMin, int& xMax)
 	{
 		m_colors(nodeCoord.x, nodeCoord.y) = color;
 		NodeCoord cur(nodeCoord);
-		int xMin = nodeCoord.x;
-		int xMax = nodeCoord.x;
+		xMin = nodeCoord.x;
+		xMax = nodeCoord.x;
 		while (1)
 		{
 			--cur.x;
@@ -255,7 +325,9 @@ namespace fdk { namespace game { namespace navi
 			{
 				break;
 			}
-			m_colors(cur.x, cur.y) = color;
+			ColorType& refColor = m_colors(cur.x, cur.y);
+			FDK_ASSERT(refColor == UNCOLORED);
+			refColor = color;
 			xMin = cur.x;
 		}
 		cur = nodeCoord;
@@ -267,22 +339,10 @@ namespace fdk { namespace game { namespace navi
 			{
 				break;
 			}
-			m_colors(cur.x, cur.y) = color;
+			ColorType& refColor = m_colors(cur.x, cur.y);
+			FDK_ASSERT(refColor == UNCOLORED);
+			refColor = color;
 			xMax = cur.x;
-		}
-		for (int x = xMin; x <= xMax; ++x)
-		{
-
-			NodeCoord newNodeCoord(x, nodeCoord.y-1);
-			if (isColorable(newNodeCoord))
-			{
-				floodFillScanLine(newNodeCoord, color);
-			}
-			newNodeCoord.reset(x, nodeCoord.y+1);
-			if (isColorable(newNodeCoord))
-			{
-				floodFillScanLine(newNodeCoord, color);
-			}
 		}
 	}
 
