@@ -1,5 +1,6 @@
 #include <fdkgame/NaviBase.h>
 #include <stack>
+#include <queue>
 #include <algorithm>
 #include <iterator>
 #include <fdkgame/NaviTypes.h>
@@ -199,8 +200,8 @@ namespace fdk { namespace game { namespace navi
 				{
 					FDK_ASSERT(color <= MAX_COLOR_COUNT-1);
 					int xMin, xMax;
-					floodFillScanLine(cur, ++color, xMin, xMax, 0, false);
-					x = xMax+1;
+					floodFillScanLine(cur, ++color, xMin, xMax);
+					x = xMax+2;
 				}				
 				else
 				{
@@ -246,66 +247,88 @@ namespace fdk { namespace game { namespace navi
 		}
 	}
 
-	void GridEnvColorComponent::floodFillScanLine(const NodeCoord& nodeCoord, ColorType color, int& xMin, int& xMax, std::pair<int, int>* parentRange, bool parentIsDown)
+	void GridEnvColorComponent::floodFillScanLine(const NodeCoord& nodeCoord, ColorType color, int& xMin, int& xMax)
 	{
+		struct Range
+		{
+			int xMin;
+			int xMax;
+		};
+		struct Seed
+		{
+			NodeCoord coord;
+			Range range;
+			bool bExtendUp;
+			bool bExtendDown;
+		};
+
 		_floodFillScanLine(nodeCoord, color, xMin, xMax);
 
-		bool bNeedScanDown = true;
-		bool bNeedScanUp = true;
-		if (parentRange)
+		Seed seed;
+		seed.coord = nodeCoord;
+		seed.range.xMin = xMin;
+		seed.range.xMax = xMax;
+		seed.bExtendUp = true;
+		seed.bExtendDown = true;		
+		std::queue<Seed> pending;
+		pending.push(seed);
+
+		while (!pending.empty())
 		{
-			if (parentIsDown)
+			Seed seed = pending.front();
+			pending.pop();
+
+			if (seed.bExtendUp && seed.coord.y > 0)
 			{
-				if (xMin >= parentRange->first && xMax <= parentRange->second)
+				for (int x = seed.range.xMin; x <= seed.range.xMax;)
 				{
-					bNeedScanDown = false;
+					NodeCoord newNodeCoord(x, seed.coord.y-1);
+					if (isColorable(newNodeCoord))
+					{
+						int newXMin, newXMax;
+						_floodFillScanLine(newNodeCoord, color, newXMin, newXMax);						
+
+						Seed newSeed;
+						newSeed.coord = newNodeCoord;
+						newSeed.range.xMin = newXMin;
+						newSeed.range.xMax = newXMax;
+						newSeed.bExtendUp = true;
+						newSeed.bExtendDown = (newXMin < seed.range.xMin || newXMax > seed.range.xMax);
+						pending.push(newSeed);
+
+						x = newXMax+2;
+					}
+					else
+					{
+						++x;
+					}
 				}
 			}
-			else
-			{
-				if (xMin >= parentRange->first && xMax <= parentRange->second)
-				{
-					bNeedScanUp = false;
-				}
-			}
-		}
 
-		std::pair<int, int> NewParentRange;
-		NewParentRange.first = xMin;
-		NewParentRange.second = xMax;
-
-		if (bNeedScanUp)
-		{
-			for (int x = xMin; x <= xMax;)
+			if (seed.bExtendDown && seed.coord.y < m_outer.getSizeY()-1)
 			{
-				NodeCoord newNodeCoord(x, nodeCoord.y-1);
-				if (isColorable(newNodeCoord))
+				for (int x = seed.range.xMin; x <= seed.range.xMax;)
 				{
-					int newXMin, newXMax;
-					floodFillScanLine(newNodeCoord, color, newXMin, newXMax, &NewParentRange, true);
-					x = newXMax+1;
-				}
-				else
-				{
-					++x;
-				}
-			}
-		}
+					NodeCoord newNodeCoord(x, seed.coord.y+1);
+					if (isColorable(newNodeCoord))
+					{
+						int newXMin, newXMax;
+						_floodFillScanLine(newNodeCoord, color, newXMin, newXMax);						
 
-		if (bNeedScanDown)
-		{
-			for (int x = xMin; x <= xMax;)
-			{
-				NodeCoord newNodeCoord(x, nodeCoord.y+1);
-				if (isColorable(newNodeCoord))
-				{
-					int newXMin, newXMax;
-					floodFillScanLine(newNodeCoord, color, newXMin, newXMax, &NewParentRange, false);
-					x = newXMax+1;
-				}
-				else
-				{
-					++x;
+						Seed newSeed;
+						newSeed.coord = newNodeCoord;
+						newSeed.range.xMin = newXMin;
+						newSeed.range.xMax = newXMax;
+						newSeed.bExtendUp = (newXMin < seed.range.xMin || newXMax > seed.range.xMax);
+						newSeed.bExtendDown = true;
+						pending.push(newSeed);
+
+						x = newXMax+2;
+					}
+					else
+					{
+						++x;
+					}
 				}
 			}
 		}
@@ -313,6 +336,11 @@ namespace fdk { namespace game { namespace navi
 
 	void GridEnvColorComponent::_floodFillScanLine(const NodeCoord& nodeCoord, ColorType color, int& xMin, int& xMax)
 	{
+		if (m_colors(nodeCoord.x, nodeCoord.y) != UNCOLORED)
+		{
+			return;
+		}
+
 		m_colors(nodeCoord.x, nodeCoord.y) = color;
 		NodeCoord cur(nodeCoord);
 		xMin = nodeCoord.x;
