@@ -356,6 +356,7 @@ namespace fdk { namespace game { namespace navi
 			ColorType& refColor = m_colors(cur.x, cur.y);
 			FDK_ASSERT(refColor == UNCOLORED);
 			refColor = color;
+			++m_nodeCountWithColor[color];
 			xMin = cur.x;
 		}
 		cur = nodeCoord;
@@ -370,6 +371,7 @@ namespace fdk { namespace game { namespace navi
 			ColorType& refColor = m_colors(cur.x, cur.y);
 			FDK_ASSERT(refColor == UNCOLORED);
 			refColor = color;
+			++m_nodeCountWithColor[color];
 			xMax = cur.x;
 		}
 	}
