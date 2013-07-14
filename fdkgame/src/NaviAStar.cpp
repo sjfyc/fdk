@@ -44,7 +44,7 @@ namespace fdk { namespace game { namespace navi
 		FDK_ASSERT(m_env.isValidNodeID(targetNodeID));
 		FDK_ASSERT(startNodeID != targetNodeID);
 
-		const size_t NODE_SPACE_SIZE = 2048*2048;
+		const size_t NODE_SPACE_SIZE = 512*512;
 		static NodeState* s_nodeStates = new NodeState[NODE_SPACE_SIZE];
 		static NodeData* s_nodeDatas = new NodeData[NODE_SPACE_SIZE];
 
