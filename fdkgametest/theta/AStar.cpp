@@ -239,23 +239,26 @@ bool AStar::search()
 	else
 	{// ÐèÒª¿¼ÂÇ¶¯Ì¬ÕÏ°­
 		const fdkgame::navi::GridNodeRange considerRect(fdkgame::navi::GridNodeRange::makeRectFromCenter(
-			startVertexCoord, VertexCoord(getPlotActorRadiusInVertex()*1.2f, getPlotActorRadiusInVertex()*1.2f) ) );
+			startVertexCoord, VertexCoord(
+			int(getPlotActorRadiusInVertex()*1.2f), 
+			int(getPlotActorRadiusInVertex()*1.2f) )
+			));
 		
 		while (1)
 		{			
-			int middleNodeID = getFirstConnectedNode(vertexMap, targetVertexID, startVertexID);
-			FDK_ASSERT(middleNodeID != fdkgame::navi::INVALID_NODEID);
-			const VertexCoord middleVertexCoord = vertexMap.toNodeCoord(middleNodeID);
-			if (!considerRect.contain(vertexMap.toNodeCoord(middleNodeID)) ||
-				!fillTempColorInClosedArea(vertexMap, middleNodeID, considerRect) ||
+			int middleVertexID = getFirstConnectedNode(vertexMap, targetVertexID, startVertexID);
+			FDK_ASSERT(middleVertexID != fdkgame::navi::INVALID_NODEID);
+			const VertexCoord middleVertexCoord = vertexMap.toNodeCoord(middleVertexID);
+			util::output("consider dynamic island, middle vertex[%d/%d] found", middleVertexCoord.x, middleVertexCoord.y);
+			if (!considerRect.contain(vertexMap.toNodeCoord(middleVertexID)) ||
+				!fillTempColorInClosedArea(vertexMap, middleVertexID, considerRect) ||
 				vertexMap.getConnectorComponent()->isConnected(startVertexCoord, middleVertexCoord) )
 			{
-				targetVertexID = middleNodeID;
+				targetVertexID = middleVertexID;
 				targetVertexCoord = vertexMap.toNodeCoord(targetVertexID);
 				m_targetLocation = util::vertexCoordToLocation(targetVertexCoord);
 				break;
-			}			
-			util::output("consider dynamic connectivity, unconnected middle node [%d/%d] found", middleVertexCoord.x, middleVertexCoord.y);
+			}
 		}
 		vertexMap.getColorComponent()->clearTempColors();
 	}

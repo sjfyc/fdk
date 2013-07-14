@@ -604,7 +604,6 @@ namespace fdk { namespace game { namespace navi
 				const NodeCoord& neighbour = neighbours[i];
 				if (!env.isValidNodeCoord(neighbour) || !range.contain(neighbour))
 				{// Ô½½çÁË
-					colorComponent->clearTempColors();
 					return false;
 				}
 				if (env.isNodeWithCoordReachable(neighbour) &&
