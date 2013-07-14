@@ -313,7 +313,7 @@ bool AStar::search()
 		util::output("search failed, use closest target");
 	}
 	std::list<int> roughPath;
-	m_navigator->getPath(roughPath, !m_bRefind ? true : false);
+	m_navigator->getPath(roughPath, !m_bRefind ? Navigator::PathOption_WithStartTarget : 0);
 
 	{// 实际直连的行走路线
 		if (!m_bRefind)
@@ -365,7 +365,7 @@ bool AStar::search()
 
 	m_locationPop = new LocationPop(vertexMap, m_bRefind, 
 		(searchResult != Navigator::SearchResult_PathUnexist) ? &m_targetLocation : 0);
-	m_navigator->getPath(m_locationPop->getRoughPathToInit(), !m_bRefind ? true : false);
+	m_navigator->getPath(m_locationPop->getRoughPathToInit(), !m_bRefind ? Navigator::PathOption_WithStartTarget : 0);
 	m_locationPop->afterRoughPathInited();
 
 	return true;

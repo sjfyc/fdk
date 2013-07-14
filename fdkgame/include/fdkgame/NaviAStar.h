@@ -29,12 +29,16 @@ namespace fdk { namespace game { namespace navi
 			SearchResult_Proceeding,
 			SearchResult_Completed,
 			SearchResult_PathUnexist,
-		};		
+		};
+		enum PathOption
+		{
+			PathOption_WithStartTarget=(1<<0)
+		};
 		AStar(const Environment& env, int startNodeID, int targetNodeID, AStarCompleteCondition* completeCondition=0);
 		virtual ~AStar();
 		SearchResult search(int step=-1, AStarRecorder* recorder=0);
 		SearchResult getSearchResult() const;
-		void getPath(std::list<int>& output, bool bWithStartTarget=false) const;
+		void getPath(std::list<int>& output, int pathOptions=0) const;
 		int getPathCost() const;		
 		const Environment& getEnvironment() const;
 		int getStartNodeID() const;
@@ -73,11 +77,11 @@ namespace fdk { namespace game { namespace navi
 		NodeState* m_nodeStates;
 		NodeData* m_nodeDatas;
 		OpenList m_openList;
+		bool m_bInitedInspect;
 		SearchResult m_searchResult;
 		OpenListItem m_currentClosed;
-		bool m_bInitedInspect;
-		int m_minHValue;
 		OpenListItem m_closedWithMinHValue;
+		int m_minHValue;		
 	};
 
 	inline int AStar::NodeData::fValue() const
@@ -107,10 +111,15 @@ namespace fdk { namespace game { namespace navi
 		return m_searchResult;
 	}
 
+	inline int AStar::getPathCost() const
+	{
+		return (m_searchResult == SearchResult_PathUnexist) ? m_closedWithMinHValue.fValue : m_currentClosed.fValue;
+	}
+
 	inline const Environment& AStar::getEnvironment() const
 	{
 		return m_env;
-	}
+	}	
 
 	inline int AStar::getStartNodeID() const
 	{
@@ -125,7 +134,7 @@ namespace fdk { namespace game { namespace navi
 	inline int AStar::getCompletedNodeID() const
 	{
 		return (m_searchResult == SearchResult_Completed) ? m_currentClosed.nodeID : INVALID_NODEID;
-	}
+	}	
 }}}
 
 #endif

@@ -55,21 +55,18 @@ namespace fdk { namespace game { namespace navi
 
 	AStar::~AStar()
 	{
-		//FDK_DELETE_ARRAY(m_nodeStates);
-		//FDK_DELETE_ARRAY(m_nodeDatas);
 	}	
 
 	AStar::SearchResult AStar::search(int step, AStarRecorder* recorder)
 	{
+		FDK_ASSERT(m_searchResult == SearchResult_Proceeding);
+
 		if (!m_bInitedInspect)
 		{
 			inspectNode(m_startNodeID, INVALID_NODEID, 0, recorder);
 			m_bInitedInspect = true;
 		}
-		if (m_searchResult != SearchResult_Proceeding)
-		{
-			return m_searchResult;
-		}
+		
 		int proceededStep = 0;
 		std::vector<SuccessorNodeInfo> successors;
 		while (!m_openList.empty())
@@ -125,6 +122,7 @@ namespace fdk { namespace game { namespace navi
 				return SearchResult_Proceeding;
 			}
 		}
+
 		m_searchResult = SearchResult_PathUnexist;
 		return SearchResult_PathUnexist;
 	}
@@ -167,8 +165,9 @@ namespace fdk { namespace game { namespace navi
 		}
 	}
 	
-	void AStar::getPath(std::list<int>& output, bool bWithStartTarget) const
+	void AStar::getPath(std::list<int>& output, int pathOptions) const
 	{
+		const bool bWithStartTarget = (pathOptions & PathOption_WithStartTarget) ? true : false;
 		//const GridEnv* pGridEnv = m_env.toGridEnv();
 		//if (pGridEnv)
 		//{
@@ -229,11 +228,6 @@ namespace fdk { namespace game { namespace navi
 		//}
 	}
 	
-	int AStar::getPathCost() const
-	{
-		return (m_searchResult == SearchResult_PathUnexist) ? m_closedWithMinHValue.fValue : m_currentClosed.fValue;
-	}
-
 	void AStar::getSuccessorNodes(const Environment& env, int nodeID, int parentNodeID, std::vector<SuccessorNodeInfo>& result)
 	{
 		env.getSuccessorNodes(*this, nodeID, result);
