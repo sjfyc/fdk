@@ -2,30 +2,6 @@
 
 namespace fdk { namespace game { namespace navi
 {
-	static unsigned char getDirectionFromParent(int w, int start, int end)
-	{
-		if (start - w == end) {
-			return 0;
-		} else if (start - w + 1 == end) {
-			return 1;
-		} else if (start + 1 == end) {
-			return 2;
-		} else if (start + w + 1 == end) {
-			return 3;
-		} else if (start + w == end) {
-			return 4;
-		} else if (start + w - 1 == end) {
-			return 5;
-		} else if (start - 1 == end) {
-			return 6;
-		} else if (start - w - 1 == end) {
-			return 7;
-		} else {
-			FDK_ASSERT(0);
-			return 8;
-		}
-	}	
-
 	AStar::AStar(const Environment& env, int startNodeID, int targetNodeID, AStarCompleteCondition* completeCondition)
 		: m_env(env)
 		, m_startNodeID(startNodeID)
@@ -167,65 +143,25 @@ namespace fdk { namespace game { namespace navi
 	
 	void AStar::getPath(std::list<int>& output, int pathOptions) const
 	{
-		const bool bWithStartTarget = (pathOptions & PathOption_WithStartTarget) ? true : false;
-		//const GridEnv* pGridEnv = m_env.toGridEnv();
-		//if (pGridEnv)
-		//{
-		//	const int width = pGridEnv->getSizeX();
-		//	
-		//	int finishNodeID = bWithStartTarget ? INVALID_NODEID : m_startNodeID;
-		//	const int endNodeID = (m_searchResult == SearchResult_PathUnexist) ? m_closedWithMinHValue.nodeID : m_currentClosed.nodeID;
-		// 
-		//	int portNodeID = bWithStartTarget ? endNodeID : m_nodeDatas[endNodeID].parentNodeID;
-		//	if (portNodeID == finishNodeID)
-		//	{
-		//		return;
-		//	}
-		//	output.push_front(portNodeID);
+		const int endNodeID = (m_searchResult == SearchResult_PathUnexist) ? m_closedWithMinHValue.nodeID : m_currentClosed.nodeID;
 
-		//	while (1)
-		//	{
-		//		int nextNodeID = m_nodeDatas[portNodeID].parentNodeID;
-		//		if (nextNodeID == finishNodeID)
-		//		{
-		//			break;
-		//		}
-		//		const unsigned char dir = getDirectionFromParent(width, portNodeID, nextNodeID);
-		//		while (1)
-		//		{
-		//			portNodeID = nextNodeID;
-		//			nextNodeID = m_nodeDatas[portNodeID].parentNodeID;
-		//			if (nextNodeID == finishNodeID || 
-		//				getDirectionFromParent(width, portNodeID, nextNodeID) != dir)
-		//			{
-		//				break;
-		//			}
-		//		}
-		//		output.push_front(portNodeID);
-		//	}
-		//}
-		//else
-		//{
-			const int endNodeID = (m_searchResult == SearchResult_PathUnexist) ? m_closedWithMinHValue.nodeID : m_currentClosed.nodeID;
-
+		if (endNodeID != m_startNodeID)
+		{
+			int nodeID = m_nodeDatas[endNodeID].parentNodeID;
+			while (nodeID != m_startNodeID)
+			{
+				output.push_front(nodeID);
+				nodeID = m_nodeDatas[nodeID].parentNodeID;
+			}
+		}
+		if (pathOptions & PathOption_WithStartTarget)
+		{
+			output.push_front(m_startNodeID);
 			if (endNodeID != m_startNodeID)
 			{
-				int nodeID = m_nodeDatas[endNodeID].parentNodeID;
-				while (nodeID != m_startNodeID)
-				{
-					output.push_front(nodeID);
-					nodeID = m_nodeDatas[nodeID].parentNodeID;
-				}
-			}
-			if (bWithStartTarget)
-			{
-				output.push_front(m_startNodeID);
-				if (endNodeID != m_startNodeID)
-				{
-					output.push_back(endNodeID);
-				}				
-			}
-		//}
+				output.push_back(endNodeID);
+			}				
+		}
 	}
 	
 	void AStar::getSuccessorNodes(const Environment& env, int nodeID, int parentNodeID, std::vector<SuccessorNodeInfo>& result)
