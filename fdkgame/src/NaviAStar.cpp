@@ -10,11 +10,11 @@ namespace fdk { namespace game { namespace navi
 		, m_nodeStates(0)
 		, m_nodeDatas(0)
 		, m_openList()
+		, m_bInitedInspect(false)
 		, m_searchResult(SearchResult_Proceeding)
 		, m_currentClosed()
-		, m_bInitedInspect(false)
-		, m_minHValue(INT_MAX)
 		, m_closedWithMinHValue()
+		, m_minHValue(INT_MAX)		
 	{
 		FDK_ASSERT(m_env.isValidNodeID(startNodeID));
 		FDK_ASSERT(m_env.isValidNodeID(targetNodeID));
