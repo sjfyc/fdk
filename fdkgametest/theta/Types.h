@@ -106,4 +106,15 @@ inline const char* getTileName(TileType tile)
 	//return names[tile];
 }
 
+inline int getPlotActorRadiusInVertex()
+{
+	return 30*MAX_UNIT_SIZE*2;
+}
+
+inline int getPlotActorRadius()
+{
+	return getPlotActorRadiusInVertex()*HALF_CELL_SIZE_X;
+}
+
+
 #endif

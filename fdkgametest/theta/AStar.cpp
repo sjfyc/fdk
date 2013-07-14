@@ -12,7 +12,7 @@
 void plotAroundActors(Actor& actor, std::vector<fdkgame::navi::MapManager::PlotUnitArgument>& plotArounds)
 {
 	std::vector<Actor*> aroundActors;
-	g_ActorBank.getActors(aroundActors, actor.getLocation(), (actor.getRadius()+(MAX_UNIT_SIZE+1)*HALF_CELL_SIZE_X)*1.5f*6, &actor);
+	g_ActorBank.getActors(aroundActors, actor.getLocation(), getPlotActorRadius(), &actor);
 	for (size_t i = 0; i < aroundActors.size(); ++i)
 	{
 		Actor* aroundActor = aroundActors[i];
@@ -21,9 +21,6 @@ void plotAroundActors(Actor& actor, std::vector<fdkgame::navi::MapManager::PlotU
 		pua.unitSize = aroundActor->getUnitSize();
 		plotArounds.push_back(pua);
 	}
-	//fdkgame::navi::MapManager::PlotUnitArgument subtract;
-	//subtract.vertexCoord = util::locationToNearestVertexCoord(actor.getLocation());
-	//subtract.unitSize = actor.getUnitSize();	
 }
 
 VertexCoord simpleOffset(const VertexCoord& coord)
@@ -214,7 +211,9 @@ bool AStar::search()
 		m_actor.forceLocation(util::vertexCoordToLocation(startVertexCoord));
 	}
 	
-	if (plotArounds.empty())
+	if (plotArounds.empty() || 
+		(targetVertexCoord-startVertexCoord).lengthSquared() > getPlotActorRadiusInVertex()*getPlotActorRadiusInVertex()*1.44f
+		)
 	{// 没有任何动态障碍时，那么只考虑起点和目标点是否静态联通，如果不联通，则进行目标点修正
 		if (!vertexMap.getConnectorComponent()->isConnected(startVertexCoord, targetVertexCoord))
 		{
@@ -239,37 +238,26 @@ bool AStar::search()
 	}
 	else
 	{// 需要考虑动态障碍
-		if (vertexMap.isBlock(targetVertexCoord))
-		{
-			int middleNodeID = getFirstReachableNode(vertexMap, targetVertexID, startVertexID);
+		const fdkgame::navi::GridNodeRange considerRect(fdkgame::navi::GridNodeRange::makeRectFromCenter(
+			startVertexCoord, VertexCoord(getPlotActorRadiusInVertex()*1.2f, getPlotActorRadiusInVertex()*1.2f) ) );
+		
+		while (1)
+		{			
+			int middleNodeID = getFirstConnectedNode(vertexMap, targetVertexID, startVertexID);
 			FDK_ASSERT(middleNodeID != fdkgame::navi::INVALID_NODEID);
-			targetVertexID = middleNodeID;
-			targetVertexCoord = vertexMap.toNodeCoord(targetVertexID);
-			m_targetLocation = util::vertexCoordToLocation(targetVertexCoord);
-		}
-
-		bool bFilledColor = fillTempColorInClosedArea(vertexMap, targetVertexID, 
-			fdkgame::navi::GridNodeRange::makeRectFromCenter(targetVertexCoord, VertexCoord(40,40)));
-
-		if (!vertexMap.getConnectorComponent()->isConnected(startVertexCoord, targetVertexCoord))
-		{
-			util::output("target vertex(%d/%d) is in different dynamic island",
-				targetVertexCoord.x, targetVertexCoord.y);
-
-			{// 考虑动态障碍的环境中，必然是终点处于封闭区域
-				int middleNodeID = getFirstConnectedNode(vertexMap, targetVertexID, startVertexID);
-				FDK_ASSERT(middleNodeID != fdkgame::navi::INVALID_NODEID);
-
+			const VertexCoord middleVertexCoord = vertexMap.toNodeCoord(middleNodeID);
+			if (!considerRect.contain(vertexMap.toNodeCoord(middleNodeID)) ||
+				!fillTempColorInClosedArea(vertexMap, middleNodeID, considerRect) ||
+				vertexMap.getConnectorComponent()->isConnected(startVertexCoord, middleVertexCoord) )
+			{
 				targetVertexID = middleNodeID;
 				targetVertexCoord = vertexMap.toNodeCoord(targetVertexID);
 				m_targetLocation = util::vertexCoordToLocation(targetVertexCoord);
-			}
+				break;
+			}			
+			util::output("consider dynamic connectivity, unconnected middle node [%d/%d] found", middleVertexCoord.x, middleVertexCoord.y);
 		}
-
-		if (bFilledColor)
-		{
-			vertexMap.getColorComponent()->clearTempColors();
-		}
+		vertexMap.getColorComponent()->clearTempColors();
 	}
 		
 	if (startVertexID == targetVertexID)
