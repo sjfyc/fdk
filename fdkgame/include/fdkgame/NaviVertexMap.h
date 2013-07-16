@@ -33,7 +33,7 @@ namespace fdk { namespace game { namespace navi
 		virtual bool isNodeReachable(int nodeID) const;
 		virtual void getSuccessorNodes(Navigator& navigator, int nodeID, std::vector<SuccessorNodeInfo>& result) const;
 	private:
-		typedef Array2D<int> MapData;
+		typedef Array2D<short> MapData;
 		BlockMap& m_blockMap;
 		UnitSize m_unitSize;
 		MapData m_data;
