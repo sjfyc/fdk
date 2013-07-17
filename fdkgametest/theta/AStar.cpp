@@ -458,21 +458,21 @@ bool AStar::search()
 		startVertexID = middleNodeID;
 		startVertexCoord = vertexMap.toNodeCoord(startVertexID);
 		m_actor.forceLocation(util::vertexCoordToLocation(startVertexCoord));
-	}
 
-	if (startVertexID == targetVertexID)
-	{
-		util::output("start vertex(%d/%d) equal to target vertex(%d/%d)",
-			startVertexCoord.x, startVertexCoord.y,
-			targetVertexCoord.x, targetVertexCoord.y);
+		if (startVertexID == targetVertexID)
+		{
+			util::output("start vertex(%d/%d) after fix equal to target vertex(%d/%d)",
+				startVertexCoord.x, startVertexCoord.y,
+				targetVertexCoord.x, targetVertexCoord.y);
 
-		m_vertexCoordPath.push_back(startVertexCoord);
-		m_vertexCoordPath.push_back(targetVertexCoord);
-		m_locationPath.push_back(m_targetLocation);
+			m_vertexCoordPath.push_back(startVertexCoord);
+			m_vertexCoordPath.push_back(targetVertexCoord);
+			m_locationPath.push_back(m_targetLocation);
 
-		m_locationPop = new LocationPop(vertexMap, m_bRefind, &m_targetLocation);
-		return true;
-	}
+			m_locationPop = new LocationPop(vertexMap, m_bRefind, &m_targetLocation);
+			return true;
+		}
+	}	
 
 	doPartialFind(startVertexID);
 	return true;
