@@ -163,11 +163,11 @@ void GameModeGame::handleEvent(Game& game, int eventType, void* params)
 #include <time.h>
 void GameModeGame::search(AStar& astar)
 {
-	clock_t start, end;
-	start = clock();
-	AStar::Navigator::SearchResult result = astar.search(1);
-	end = clock();
-	//printf("The time was: %f\n", (double)(end - start) / CLK_TCK);
+	double start, end;
+	start = util::getSeconds();
+	AStar::Navigator::SearchResult result = astar.search(-1);
+	end = util::getSeconds();
+	printf("The time was: %lf\n", (double)(end - start));
 	if (result == AStar::Navigator::SearchResult_Completed)
 	{			
 		util::output("search completed");

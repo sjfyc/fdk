@@ -20,6 +20,7 @@ private:
 	Board();
 	~Board();
 	bool isValidCoord(const CellCoord& coord) const;
+	virtual int getHeuristic(int startNodeID, int targetNodeID) const;
 };
 
 #define g_Board (Board::instance())

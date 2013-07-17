@@ -9,6 +9,7 @@ namespace util
 	void fillCell(const CellCoord& coord, DWORD color);
 	CellCoord locationToCellCoord(const Location& location);
 	Location cellCoordToLocation(const CellCoord& cellCoord);
+	double getSeconds();
 }
 
 #endif

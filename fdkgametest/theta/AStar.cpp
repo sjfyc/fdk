@@ -503,7 +503,7 @@ void AStar::doPartialFind(int startVertexID)
 	// do find path using navigator
 	m_navigator = newNavigator(vertexMap, startVertexID, targetVertexID);
 	double searchStartTime = util::getSeconds();
-	Navigator::SearchResult searchResult = m_navigator->search(50);
+	Navigator::SearchResult searchResult = m_navigator->search(1500);
 	double searchEndTime = util::getSeconds();
 	util::output("search cost %lf seconds", searchEndTime - searchStartTime);
 

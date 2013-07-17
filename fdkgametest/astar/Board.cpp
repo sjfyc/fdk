@@ -76,3 +76,8 @@ void Board::drawCellClearanceValue()
 		}
 	}
 }
+
+int Board::getHeuristic(int startNodeID, int targetNodeID) const
+{
+	return _Base::getHeuristicEuclidean(startNodeID, targetNodeID);
+}
