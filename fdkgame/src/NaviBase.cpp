@@ -126,7 +126,8 @@ namespace fdk { namespace game { namespace navi
 		NodeCoord targetNodeCoord = toNodeCoord(targetNodeID);
 
 		NodeCoord startToTarget = targetNodeCoord - startNodeCoord;
-		return COST_STRAIGHT * startToTarget.length();
+		double length = (double)sqrt((double)startToTarget.lengthSquared());
+		return (int)(COST_STRAIGHT * length);
 	}
 	
 	const GridEnv* GridEnv::toGridEnv() const

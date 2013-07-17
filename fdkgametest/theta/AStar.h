@@ -20,16 +20,23 @@ public:
 	bool popNextPathLocation(Location& location);
 	void render();
 private:
+	bool _popNextPathLocation(Location& location);
+	void doPartialFind(int startVertexID);
 	const fdkgame::navi::VertexMap& getVertexMap() const;
+	fdkgame::navi::AStar* newNavigator(const fdkgame::navi::VertexMap& vertexMap, int startVertexID, int targetVertexID);
 	typedef fdkgame::navi::AStar Navigator;
 	typedef std::set<VertexCoord> Vertexs;
 	Actor& m_actor;
 	Location m_targetLocation;
+	
 	bool m_bRefind;
 	fdkgame::navi::AStar* m_navigator;
 	std::vector<VertexCoord> m_vertexCoordPath;
 	std::list<Location> m_locationPath;// 实际行走路线
 	LocationPop* m_locationPop;
+	
+	bool m_hasNextPartial;
+	int m_nextPartialStartID;
 };
 
 #endif

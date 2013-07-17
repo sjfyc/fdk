@@ -13,7 +13,7 @@ namespace fdk { namespace game { namespace navi
 		, m_bInitedInspect(false)
 		, m_searchResult(SearchResult_Proceeding)
 		, m_currentClosed()
-		, m_closedWithMinHValue()
+		, m_closest()
 		, m_minHValue(INT_MAX)		
 	{
 		FDK_ASSERT(m_env.isValidNodeID(startNodeID));
@@ -65,7 +65,7 @@ namespace fdk { namespace game { namespace navi
 			if (m_nodeDatas[current.nodeID].hValue < m_minHValue)
 			{
 				m_minHValue = m_nodeDatas[current.nodeID].hValue;
-				m_closedWithMinHValue = current;
+				m_closest = current;
 			}
 
 			bool bComplete = false;
@@ -143,7 +143,7 @@ namespace fdk { namespace game { namespace navi
 	
 	void AStar::getPath(std::list<int>& output, int pathOptions) const
 	{
-		const int endNodeID = (m_searchResult == SearchResult_PathUnexist) ? m_closedWithMinHValue.nodeID : m_currentClosed.nodeID;
+		const int endNodeID = (m_searchResult != SearchResult_Completed) ? m_closest.nodeID : m_currentClosed.nodeID;
 
 		if (endNodeID != m_startNodeID)
 		{
@@ -160,7 +160,15 @@ namespace fdk { namespace game { namespace navi
 			if (endNodeID != m_startNodeID)
 			{
 				output.push_back(endNodeID);
-			}				
+			}
+		}
+		else if (pathOptions & PathOption_WithStart)
+		{
+			output.push_front(m_startNodeID);
+		}
+		else if (pathOptions & PathOption_WithTarget)
+		{
+			output.push_back(endNodeID);
 		}
 	}
 	

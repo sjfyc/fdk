@@ -32,7 +32,9 @@ namespace fdk { namespace game { namespace navi
 		};
 		enum PathOption
 		{
-			PathOption_WithStartTarget=(1<<0)
+			PathOption_WithStart=(1<<0),
+			PathOption_WithTarget=(1<<1),
+			PathOption_WithStartTarget=(PathOption_WithStart|PathOption_WithTarget),
 		};
 		AStar(const Environment& env, int startNodeID, int targetNodeID, AStarCompleteCondition* completeCondition=0);
 		virtual ~AStar();
@@ -44,6 +46,7 @@ namespace fdk { namespace game { namespace navi
 		int getStartNodeID() const;
 		int getTargetNodeID() const;
 		int getCompletedNodeID() const;
+		int getClosestNodeID() const;
 		virtual void getSuccessorNodes(const Environment& env, int nodeID, int parentNodeID, std::vector<SuccessorNodeInfo>& result);
 	private:
 		enum NodeStateEnum
@@ -80,7 +83,7 @@ namespace fdk { namespace game { namespace navi
 		bool m_bInitedInspect;
 		SearchResult m_searchResult;
 		OpenListItem m_currentClosed;
-		OpenListItem m_closedWithMinHValue;
+		OpenListItem m_closest;
 		int m_minHValue;		
 	};
 
@@ -113,7 +116,7 @@ namespace fdk { namespace game { namespace navi
 
 	inline int AStar::getPathCost() const
 	{
-		return (m_searchResult == SearchResult_PathUnexist) ? m_closedWithMinHValue.fValue : m_currentClosed.fValue;
+		return (m_searchResult == SearchResult_PathUnexist) ? m_closest.fValue : m_currentClosed.fValue;
 	}
 
 	inline const Environment& AStar::getEnvironment() const
@@ -135,6 +138,11 @@ namespace fdk { namespace game { namespace navi
 	{
 		return (m_searchResult == SearchResult_Completed) ? m_currentClosed.nodeID : INVALID_NODEID;
 	}	
+
+	inline int AStar::getClosestNodeID() const
+	{
+		return m_closest.nodeID;
+	}
 }}}
 
 #endif
