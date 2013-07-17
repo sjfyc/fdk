@@ -443,8 +443,6 @@ bool AStar::search()
 		fdkgame::navi::VertexMapType(m_actor.getMoveCapability(), m_actor.getUnitSize()),
 		plotArounds);
 
-	// 起点和目标点几乎相同
-	// 起点是障碍，则将起点修正为距离终点较近的可站立点
 	if (vertexMap.isBlock(startVertexCoord))
 	{
 		int middleNodeID = getFirstReachableNode(vertexMap, startVertexID, targetVertexID);
@@ -457,22 +455,36 @@ bool AStar::search()
 
 		startVertexID = middleNodeID;
 		startVertexCoord = vertexMap.toNodeCoord(startVertexID);
-		m_actor.forceLocation(util::vertexCoordToLocation(startVertexCoord));
-
-		if (startVertexID == targetVertexID)
-		{
-			util::output("start vertex(%d/%d) after fix equal to target vertex(%d/%d)",
-				startVertexCoord.x, startVertexCoord.y,
-				targetVertexCoord.x, targetVertexCoord.y);
-
-			m_vertexCoordPath.push_back(startVertexCoord);
-			m_vertexCoordPath.push_back(targetVertexCoord);
-			m_locationPath.push_back(m_targetLocation);
-
-			m_locationPop = new LocationPop(vertexMap, m_bRefind, &m_targetLocation);
-			return true;
-		}
+		m_actor.forceLocation(util::vertexCoordToLocation(startVertexCoord));		
 	}	
+
+	if (vertexMap.isBlock(targetVertexCoord))
+	{
+		int middleNodeID = getFirstReachableNode(vertexMap, targetVertexID, startVertexID);
+		if (middleNodeID == fdkgame::navi::INVALID_NODEID)
+		{
+			util::output("target vertex(%d/%d) is block & can't find a nonblock around",
+				targetVertexCoord.x, targetVertexCoord.y);
+			return false;
+		}
+
+		targetVertexID = middleNodeID;
+		targetVertexCoord = vertexMap.toNodeCoord(targetVertexID);
+		m_targetLocation = util::vertexCoordToLocation(targetVertexCoord);
+	}
+
+	if (startVertexID == targetVertexID)
+	{
+		util::output("start vertex(%d/%d) equal to target after blocking-fix",
+			startVertexCoord.x, startVertexCoord.y);
+
+		m_vertexCoordPath.push_back(startVertexCoord);
+		m_vertexCoordPath.push_back(targetVertexCoord);
+		m_locationPath.push_back(m_targetLocation);
+
+		m_locationPop = new LocationPop(vertexMap, m_bRefind, &m_targetLocation);
+		return true;
+	}
 
 	doPartialFind(startVertexID);
 	return true;
@@ -498,6 +510,18 @@ void AStar::doPartialFind(int startVertexID)
 		//>>
 		m_locationPop = new LocationPop(vertexMap, m_bRefind, &m_targetLocation);
 		return;
+	}
+
+	int steps = 1500;
+
+	// 目标是障碍时，在很靠近目标点时减少步长
+	if (vertexMap.isBlock(targetVertexCoord))
+	{
+		VertexCoord vertexDiff = util::locationToNearestVertexCoord(m_actor.getLocation()) - targetVertexCoord;
+		if (vertexDiff.length() < 60) // 在
+		{
+			steps = steps/5;
+		}
 	}
 
 	// do find path using navigator
