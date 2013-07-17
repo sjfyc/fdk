@@ -6,6 +6,8 @@
 
 namespace fdk { namespace game 
 {
+	const float KINDA_SMALL_NUMBER = (float)(1.e-4);
+
 	FDKGAME_API float invSqrt(float x);
 
 	template <class T>
@@ -33,11 +35,12 @@ namespace fdk { namespace game
 		Vector2D& operator*=(float scale);
 		Vector2D& operator/=(float scale);
 		bool isZero() const;
+		bool isNearlyZero(float tolerance=KINDA_SMALL_NUMBER) const;
 		Vector2D& normalize(float scale=1.f);
 		T length() const;
 		T lengthSquared() const;
 		T dot(const Vector2D& other) const;
-		T cross(const Vector2D& other) const;
+		T cross(const Vector2D& other) const;		
 		T x;
 		T y;
 	};
@@ -202,6 +205,13 @@ namespace fdk { namespace game
 	inline bool Vector2D<T>::isZero() const
 	{
 		return x == T() && y == T();
+	}
+
+	template <class T>
+	inline bool Vector2D<T>::isNearlyZero(float tolerance) const
+	{
+		return abs(x) < tolerance
+			&& abs(y) < tolerance;
 	}
 
 	template <class T>
