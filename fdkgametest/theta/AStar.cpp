@@ -475,7 +475,7 @@ bool AStar::search()
 
 	if (startVertexID == targetVertexID)
 	{
-		util::output("start vertex(%d/%d) equal to target after blocking-fix",
+		util::output("start vertex(%d/%d) equal to target after blocking-fix, go directly",
 			startVertexCoord.x, startVertexCoord.y);
 
 		m_vertexCoordPath.push_back(startVertexCoord);
