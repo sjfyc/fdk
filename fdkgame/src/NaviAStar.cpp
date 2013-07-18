@@ -170,6 +170,13 @@ namespace fdk { namespace game { namespace navi
 		{
 			output.push_back(endNodeID);
 		}
+		else if (pathOptions & PathOption_WithTargetIfEmpty)
+		{
+			if (output.empty())
+			{
+				output.push_back(endNodeID);
+			}
+		}
 	}
 	
 	void AStar::getSuccessorNodes(const Environment& env, int nodeID, int parentNodeID, std::vector<SuccessorNodeInfo>& result)
