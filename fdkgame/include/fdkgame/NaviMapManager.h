@@ -36,7 +36,6 @@ namespace fdk { namespace game { namespace navi
 		const BlockMap& getBlockMap(MoveCapability moveCapability) const;
 		const VertexMap& getVertexMap(const VertexMapType& vertexMapType) const;
 		void rebuildAfterTileMapReset();
-		void rebuildColors();
 		void changeTileType(const CellCoord& cellCoord, TileType tileType, bool bModBuildedWall=false);
 		void increExtraTileType(const CellCoord& cellCoord, TileType tileType, bool bModBuildedWall=false, ExtraTileCountType count=1);
 		void decreExtraTileType(const CellCoord& cellCoord, TileType tileType, bool bModBuildedWall=false, ExtraTileCountType count=1);
