@@ -33,9 +33,9 @@ namespace fdk { namespace game { namespace navi
 		enum PathOption
 		{
 			PathOption_WithStart=(1<<0),
-			PathOption_WithTarget=(1<<1),
+			PathOption_WithTarget=(1<<1),			
+			PathOption_WithTargetIfEmpty=(1<<2),
 			PathOption_WithStartTarget=(PathOption_WithStart|PathOption_WithTarget),
-			PathOption_WithTargetIfEmpty,
 		};
 		AStar(const Environment& env, int startNodeID, int targetNodeID, AStarCompleteCondition* completeCondition=0);
 		virtual ~AStar();
