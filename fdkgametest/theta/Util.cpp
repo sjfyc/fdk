@@ -76,18 +76,26 @@ namespace util
 
 	VertexCoord locationToNearestVertexCoord(const Location& location)
 	{
-		VertexCoord topLeftVertexCoord = locationToVertexCoord(location);
-		Location topLeftLocation = vertexCoordToLocation(topLeftVertexCoord);
-		Location offset = location - topLeftLocation;
-		return VertexCoord(topLeftVertexCoord.x + (offset.x > QUATER_CELL_SIZE_X ? 1 : 0),
-			topLeftVertexCoord.y + (offset.y > QUATER_CELL_SIZE_Y ? 1 : 0) ); 
+		return VertexCoord(
+			(location.x-QUATER_CELL_SIZE_X)/HALF_CELL_SIZE_X,
+			(location.y-QUATER_CELL_SIZE_Y)/HALF_CELL_SIZE_Y
+			);
+		//VertexCoord topLeftVertexCoord = locationToVertexCoord(location);
+		//Location topLeftLocation = vertexCoordToLocation(topLeftVertexCoord);
+		//Location offset = location - topLeftLocation;
+		//return VertexCoord(topLeftVertexCoord.x + (offset.x > QUATER_CELL_SIZE_X ? 1 : 0),
+		//	topLeftVertexCoord.y + (offset.y > QUATER_CELL_SIZE_Y ? 1 : 0) ); 
 	}
 
 	Location vertexCoordToLocation(const VertexCoord& vertexCoord)
 	{
-		return Location(
+		/*return Location(
 			static_cast<Location::ValueType>(vertexCoord.x+1)*HALF_CELL_SIZE_X-1, 
 			static_cast<Location::ValueType>(vertexCoord.y+1)*HALF_CELL_SIZE_Y-1
+			);*/
+		return Location(
+			vertexCoord.x*HALF_CELL_SIZE_X+HALF_CELL_SIZE_X,
+			vertexCoord.y*HALF_CELL_SIZE_Y+HALF_CELL_SIZE_Y
 			);
 	}
 
