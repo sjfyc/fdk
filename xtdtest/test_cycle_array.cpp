@@ -56,4 +56,7 @@ void test_cycle_array()
 	array.push_back(6);
 	XTD_ASSERT(array[3] == 5);
 	XTD_ASSERT(array[4] == 6);
+	XTD_ASSERT(array.max_size() == 5);
+	XTD_ASSERT(array.size() == 5);
+	XTD_ASSERT(!array.empty());
 }
