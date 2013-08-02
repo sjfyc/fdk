@@ -3,20 +3,24 @@ from fdk.util import *
 class ForEachFileHandler:
 	def handle(self, fileName, filePath):
 		print "fileName: %s"%fileName
-		print "filePath: %s"%filePath
+		print "\t%s"%filePath
 
-def test():
-	print tabStr(2, "2 tab in front")
-	print "lower1stChar(AbC)=%s"%lower1stChar("AbC")
-	print "lower1stChar(abc)=%s"%lower1stChar("abc")
-	print "lower1stChar('')=%s|EOS"%lower1stChar('')
-	print "getFileNameFromPath(abc.txt)=%s"%getFileNameFromPath("abc.txt")
-	print "getFileNameFromPath(abc.txt,False)=%s"%getFileNameFromPath("abc.txt",False)
-	print "getFileNameFromPath(123\\abc.txt)=%s"%getFileNameFromPath("abc.txt")
-	print "getFileNameFromPath(123/abc.txt)=%s"%getFileNameFromPath("abc.txt")
-	s = "<node>\"1&&2 message\"</node>"
-	print "xmlEncode(%s)=%s"%(s,xmlEncode(s))
-	print "++++++++forEachFile++++++++"
+def test():	
+	assert tabStr(2, "abc") == "\t\tabc"
+	
+	assert lower1stChar("AbC") == "abC"
+	assert lower1stChar("abc") == "abc"
+	assert lower1stChar("") == ""
+	
+	assert getBaseName("123\\abc.txt") == "abc"
+	assert getBaseName("abc.txt") == "abc"
+	assert getBaseName("abc") == "abc"
+	
+	assert xmlEncode("<node>\"1&&2 message\"</node>") == "&lt;node&gt;&quot;1&amp;&amp;2 message&quot;&lt;/node&gt;"
+	
+	dir = r"C:\Windows\System32\drivers\etc"
+	print "--------forEachFile in dir %s" % dir
 	forEachFileHandler = ForEachFileHandler()
-	forEachFile("C:\\Windows\\System32\\drivers\\etc", forEachFileHandler, False)
-	print "--------forEachFile--------"
+	forEachFile(dir, forEachFileHandler, False)
+	
+	

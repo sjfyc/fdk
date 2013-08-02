@@ -15,18 +15,6 @@ def tabStr(tabnum,format,*args):
 def lower1stChar(s):
 	return s[0:1].lower() + s[1:]
 	
-# 从路径中获得文件名
-def getFileNameFromPath(path, hasExt=True):    
-	index1 = path.rfind("/")
-	index2 = path.rfind("\\")
-	index = index1
-	if index2 > index:
-		index = index2
-	if hasExt:
-		return path[index+1:]
-	else:
-		return path[index+1:-4]
-
 _XML_ENCODES = \
 {
 	"<"	:"&lt;",
@@ -66,9 +54,12 @@ def writeFile(filePath, s):
 # 遍历文件夹下所有文件
 def forEachFile(dir, handler, recursive=True):
 	for fileName in os.listdir(dir):
-		filePath = dir + '\\' + fileName
+		filePath = os.path.join(dir, fileName)
 		if os.path.isdir(filePath):
 			if recursive:
 				forEachFile(filePath, handler, recursive)
 		else:
 			handler.handle(fileName, filePath)
+
+def getBaseName(path):
+	return os.path.basename(os.path.splitext(path)[0])
